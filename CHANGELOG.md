@@ -2,6 +2,14 @@
 
 All notable changes to the X-Plore Universal Guide Viewer Spec will be documented in this file.
 
+## [0.0.6a] - 2026-04-05
+### Added
+- **Zygor-Inspired Dashboard**: Re-engineered the dashboard into a dynamic Lua-driven grid system with persistent widget scaling and pop-out support.
+- **Expanded Feature Roadmap**: Detailed the transition to a full "Zygo-clone" ecosystem including a dynamic Viewer, Guide Engine, and Quest Automation.
+
+### Fixed
+- **Templates.xml**: Fixed a critical UI bug where the `</OnEnter>` tag was used instead of `</OnLeave>`, causing persistent hover highlights.
+
 ## [0.0.5a] - 2026-04-02
 ### Added
 - **Widget Library Expansion**: Added 15+ new widget types across 6 categories (General, Dungeons, Dailies/Events, Covenants, PVP, Character).
