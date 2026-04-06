@@ -1,0 +1,26 @@
+## Interface: 110000, 11502, 30401, 40401
+## Title: X-Plore Universal Guide Viewer
+## Notes: Dynamic questing and navigation engine.
+## Author: AI Studio
+## Version: 1.0.0
+## SavedVariables: XPloreDB
+## SavedVariables: XPlore_Settings, XPlore_Progress
+
+# Core
+core\XPlore_Compat.lua
+core\XPlore_CMS.lua
+core\XPlore_Engine.lua
+core\XPlore_Waypoints.lua
+core\XPlore_Events.lua
+core\XPlore_Main.lua
+
+# UI
+ui\Templates.xml
+ui\XPlore_MainFrame.xml
+ui\XPlore_MainFrame.lua
+ui\XPlore_BrowserFrame.xml
+ui\XPlore_Options.xml
+ui\XPlore_Options.lua
+
+# Guides
+guides\guides.xml

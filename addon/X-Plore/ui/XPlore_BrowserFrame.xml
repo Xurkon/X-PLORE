@@ -1,0 +1,300 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Frame name="XPlore_BrowserFrame" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
+        <Size x="700" y="550"/>
+        <Anchors><Anchor point="CENTER"/></Anchors>
+        
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
+            <EdgeSize val="2"/><TileSize val="16"/><BackgroundInsets left="0" right="0" top="0" bottom="0"/>
+        </Backdrop>
+        
+        <Scripts>
+            <OnLoad>
+                self:SetBackdropColor(0.04, 0.07, 0.16, 0.96) -- #0a1128
+                self:SetBackdropBorderColor(0.0, 0.59, 0.65, 1.0) -- Gold/Cyan
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <OnDragStart>self:StartMoving()</OnDragStart>
+            <OnDragStop>self:StopMovingOrSizing()</OnDragStop>
+        </Scripts>
+
+        <Frames>
+            <!-- 1. TITLE BAR -->
+            <Frame name="$parentTitleBar" enableMouse="true">
+                <Size x="700" y="32"/>
+                <Anchors><Anchor point="TOPLEFT"/></Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture file="Interface\Buttons\WHITE8X8"><Color r="0.02" g="0.04" b="0.08" a="1.0"/></Texture>
+                    </Layer>
+                    <Layer level="ARTWORK">
+                        <!-- Icon -->
+                        <Texture name="$parentLogoIcon">
+                            <Size x="18" y="18"/>
+                            <Anchors><Anchor point="LEFT" x="12" y="0"/></Anchors>
+                            <Color r="0.0" g="0.90" b="1.0" a="1.0"/>
+                        </Texture>
+                        <FontString text="X-PLORE" inherits="GameFontNormal">
+                            <Anchors><Anchor point="LEFT" relativeTo="$parentLogoIcon" relativePoint="RIGHT" x="8" y="0"/></Anchors>
+                            <Color r="0.0" g="0.90" b="1.0" a="1.0"/>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Button name="$parentCloseBtn" inherits="XPlore_ModernButtonTemplate">
+                        <Size x="20" y="20"/>
+                        <Anchors><Anchor point="RIGHT" x="-12" y="0"/></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self:SetBackdropBorderColor(0.9, 0.2, 0.2, 0.6)
+                                self:SetText("x")
+                            </OnLoad>
+                            <OnClick>self:GetParent():GetParent():Hide()</OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+
+            <!-- TitleBar Bottom Border -->
+            <Frame name="$parentTitleBorder">
+                <Size x="700" y="1"/>
+                <Anchors><Anchor point="TOPLEFT" y="-32"/></Anchors>
+                <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.4"/></Texture></Layer></Layers>
+            </Frame>
+
+            <!-- 2. SIDEBAR -->
+            <Frame name="$parentSidebar">
+                <Size x="180" y="517"/>
+                <Anchors><Anchor point="TOPLEFT" y="-33"/></Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture file="Interface\Buttons\WHITE8X8"><Color r="0.03" g="0.05" b="0.10" a="0.95"/></Texture>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <!-- Search Input Box -->
+                    <EditBox name="$parentSearchBox" autoFocus="false" inherits="InputBoxTemplate">
+                        <Size x="150" y="24"/>
+                        <Anchors><Anchor point="TOPLEFT" x="15" y="-15"/></Anchors>
+                        <Scripts>
+                            <OnEscapePressed>self:ClearFocus()</OnEscapePressed>
+                        </Scripts>
+                    </EditBox>
+                    
+                    <Frame name="$parentSearchBorder">
+                        <Size x="180" y="1"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-55"/></Anchors>
+                        <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.2"/></Texture></Layer></Layers>
+                    </Frame>
+
+                    <!-- Navigation Items List Placeholder -->
+                    <Button name="$parentCatLeveling" inherits="XPlore_ModernButtonTemplate" text="Leveling">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-60"/></Anchors>
+                    </Button>
+                    <Button name="$parentCatDungeons" inherits="XPlore_ModernButtonTemplate" text="Dungeons">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-92"/></Anchors>
+                    </Button>
+                    <Button name="$parentCatDailies" inherits="XPlore_ModernButtonTemplate" text="Dailies">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-124"/></Anchors>
+                    </Button>
+                    <Button name="$parentCatPlugins" inherits="XPlore_ModernButtonTemplate" text="Plugins">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-156"/></Anchors>
+                    </Button>
+                    <Button name="$parentCatExport" inherits="XPlore_ModernButtonTemplate" text="Lua Export">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-188"/></Anchors>
+                    </Button>
+                    <!-- Options & About -->
+                    <Frame name="$parentOptBorder">
+                        <Size x="180" y="1"/>
+                        <Anchors><Anchor point="BOTTOMLEFT" y="70"/></Anchors>
+                        <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.2"/></Texture></Layer></Layers>
+                    </Frame>
+                    <Button name="$parentCatOptions" inherits="XPlore_ModernButtonTemplate" text="Options">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="BOTTOMLEFT" y="35"/></Anchors>
+                        <Scripts><OnClick>if XPlore_OptionsFrame then XPlore_OptionsFrame:Show() end</OnClick></Scripts>
+                    </Button>
+                    <Button name="$parentCatAbout" inherits="XPlore_ModernButtonTemplate" text="About">
+                        <Size x="180" y="32"/>
+                        <Anchors><Anchor point="BOTTOMLEFT" y="3"/></Anchors>
+                    </Button>
+                </Frames>
+            </Frame>
+
+            <Frame name="$parentSidebarBorder">
+                <Size x="1" y="517"/>
+                <Anchors><Anchor point="TOPLEFT" x="180" y="-33"/></Anchors>
+                <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.2"/></Texture></Layer></Layers>
+            </Frame>
+
+            <!-- 3. MAIN CONTENT VIEWPORT -->
+            <Frame name="$parentContent">
+                <Size x="519" y="517"/>
+                <Anchors><Anchor point="TOPLEFT" x="181" y="-33"/></Anchors>
+                <Frames>
+                    <!-- TABS AREA -->
+                    <Frame name="$parentTopTabs">
+                        <Size x="519" y="44"/>
+                        <Anchors><Anchor point="TOPLEFT"/></Anchors>
+                        <Frames>
+                            <Button name="$parentTabHome" inherits="XPlore_ModernButtonTemplate" text="HOME">
+                                <Size x="100" y="44"/>
+                                <Anchors><Anchor point="LEFT" x="15" y="0"/></Anchors>
+                                <Scripts>
+                                    <OnClick>
+                                        if XPlore_BrowserFrameContentHomePanel then XPlore_BrowserFrameContentHomePanel:Show() end
+                                        if XPlore_BrowserFrameContentFeaturedPanel then XPlore_BrowserFrameContentFeaturedPanel:Hide() end
+                                    </OnClick>
+                                </Scripts>
+                            </Button>
+                            <Button name="$parentTabFeatured" inherits="XPlore_ModernButtonTemplate" text="FEATURED">
+                                <Size x="100" y="44"/>
+                                <Anchors><Anchor point="LEFT" relativeTo="$parentTabHome" relativePoint="RIGHT" x="5" y="0"/></Anchors>
+                                <Scripts>
+                                    <OnClick>
+                                        if XPlore_BrowserFrameContentHomePanel then XPlore_BrowserFrameContentHomePanel:Hide() end
+                                        if XPlore_BrowserFrameContentFeaturedPanel then XPlore_BrowserFrameContentFeaturedPanel:Show() end
+                                    </OnClick>
+                                </Scripts>
+                            </Button>
+                        </Frames>
+                    </Frame>
+                    
+                    <Frame name="$parentTabsBorder">
+                        <Size x="519" y="1"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-44"/></Anchors>
+                        <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.90" b="1.0" a="1.0"/></Texture></Layer></Layers>
+                    </Frame>
+
+                    <!-- HOME PANEL -->
+                    <Frame name="$parentHomePanel" hidden="false">
+                        <Size x="519" y="472"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-45"/></Anchors>
+                        <Frames>
+                            <ScrollFrame name="$parentScroll" inherits="UIPanelScrollFrameTemplate">
+                                <Anchors><Anchor point="TOPLEFT" x="10" y="-10"/><Anchor point="BOTTOMRIGHT" x="-30" y="10"/></Anchors>
+                                <ScrollChild>
+                                    <Frame name="$parentChild" setAllPoints="true">
+                                        <Size x="470" y="450"/>
+                                    </Frame>
+                                </ScrollChild>
+                            </ScrollFrame>
+                        </Frames>
+                    </Frame>
+
+                    <!-- FEATURED PANEL -->
+                    <Frame name="$parentFeaturedPanel" hidden="true">
+                        <Size x="519" y="472"/>
+                        <Anchors><Anchor point="TOPLEFT" y="-45"/></Anchors>
+                        <Frames>
+                            <ScrollFrame name="$parentScroll" inherits="UIPanelScrollFrameTemplate">
+                                <Anchors><Anchor point="TOPLEFT" x="10" y="-10"/><Anchor point="BOTTOMRIGHT" x="-30" y="10"/></Anchors>
+                                <ScrollChild>
+                                    <Frame name="$parentChild" setAllPoints="true">
+                                        <Size x="470" y="450"/>
+                                    </Frame>
+                                </ScrollChild>
+                            </ScrollFrame>
+                        </Frames>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame>
+
+    <Frame name="XPlore_Widget_MythicPlus" parent="UIParent" movable="true" enableMouse="true" hidden="false" frameStrata="BACKGROUND">
+        <Size x="200" y="120"/>
+        <Anchors><Anchor point="TOPLEFT" x="20" y="-20"/></Anchors>
+        <Backdrop edgeFile="Interface\Buttons\WHITE8X8">
+            <EdgeSize val="1"/><BackgroundInsets left="0" right="0" top="0" bottom="0"/>
+        </Backdrop>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture file="Interface\Buttons\WHITE8X8" setAllPoints="true">
+                    <Gradient orientation="VERTICAL">
+                        <MinColor r="0.04" g="0.06" b="0.10" a="0.95"/>
+                        <MaxColor r="0.06" g="0.10" b="0.16" a="0.98"/>
+                    </Gradient>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <FontString text="MYTHIC+ AFFIXES" inherits="GameFontNormal"><Anchors><Anchor point="TOP" x="0" y="-10"/></Anchors><Color r="0.0" g="0.90" b="1.0" a="1.0"/></FontString>
+                <FontString text="Tyrannical | Storming" inherits="GameFontHighlightSmall"><Anchors><Anchor point="CENTER" x="0" y="-10"/></Anchors></FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentPopoutBtn">
+                <Size x="20" y="20"/>
+                <Anchors><Anchor point="TOPRIGHT" x="-5" y="-5"/></Anchors>
+                <NormalFontObject inherits="GameFontNormalSmall"/>
+                <NormalTexture file="Interface\Buttons\WHITE8X8">
+                    <Color r="0.2" g="0.2" b="0.2" a="0.5"/>
+                </NormalTexture>
+                <Scripts>
+                    <OnLoad>
+                        self:SetText("P") 
+                    </OnLoad>
+                    <OnClick>
+                        if XPlore and XPlore.ToggleWidgetPopout then
+                            XPlore:ToggleWidgetPopout(self:GetParent(), "mythic")
+                        end
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnLoad>self:SetBackdropBorderColor(0.0, 0.59, 0.65, 0.8); self:RegisterForDrag("LeftButton")</OnLoad>
+            <OnDragStart>self:StartMoving()</OnDragStart><OnDragStop>self:StopMovingOrSizing(); if XPlore and XPlore.SaveWidgetCoords then XPlore:SaveWidgetCoords(self, "mythic") end</OnDragStop>
+        </Scripts>
+    </Frame>
+
+    <Frame name="XPlore_Widget_Token" parent="UIParent" movable="true" enableMouse="true" hidden="false" frameStrata="BACKGROUND">
+        <Size x="200" y="120"/>
+        <Anchors><Anchor point="TOPLEFT" relativeTo="XPlore_Widget_MythicPlus" relativePoint="BOTTOMLEFT" x="0" y="-15"/></Anchors>
+        <Backdrop edgeFile="Interface\Buttons\WHITE8X8">
+            <EdgeSize val="1"/><BackgroundInsets left="0" right="0" top="0" bottom="0"/>
+        </Backdrop>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture file="Interface\Buttons\WHITE8X8" setAllPoints="true">
+                    <Gradient orientation="VERTICAL">
+                        <MinColor r="0.04" g="0.06" b="0.10" a="0.95"/>
+                        <MaxColor r="0.06" g="0.10" b="0.16" a="0.98"/>
+                    </Gradient>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <FontString text="WOW TOKEN" inherits="GameFontNormal"><Anchors><Anchor point="TOP" x="0" y="-10"/></Anchors><Color r="0.0" g="0.90" b="1.0" a="1.0"/></FontString>
+                <FontString text="324,500g (+2%)" inherits="GameFontHighlightSmall"><Anchors><Anchor point="CENTER" x="0" y="-10"/></Anchors><Color r="0.29" g="0.87" b="0.50" a="1.0" /></FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentPopoutBtn">
+                <Size x="20" y="20"/>
+                <Anchors><Anchor point="TOPRIGHT" x="-5" y="-5"/></Anchors>
+                <NormalFontObject inherits="GameFontNormalSmall"/>
+                <NormalTexture file="Interface\Buttons\WHITE8X8">
+                    <Color r="0.2" g="0.2" b="0.2" a="0.5"/>
+                </NormalTexture>
+                <Scripts>
+                    <OnLoad>
+                        self:SetText("P") 
+                    </OnLoad>
+                    <OnClick>
+                        if XPlore and XPlore.ToggleWidgetPopout then
+                            XPlore:ToggleWidgetPopout(self:GetParent(), "token")
+                        end
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnLoad>self:SetBackdropBorderColor(0.0, 0.59, 0.65, 0.8); self:RegisterForDrag("LeftButton")</OnLoad>
+            <OnDragStart>self:StartMoving()</OnDragStart><OnDragStop>self:StopMovingOrSizing(); if XPlore and XPlore.SaveWidgetCoords then XPlore:SaveWidgetCoords(self, "token") end</OnDragStop>
+        </Scripts>
+    </Frame>
+</Ui>

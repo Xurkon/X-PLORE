@@ -1,0 +1,164 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Frame name="XPlore_OptionsFrame" parent="UIParent" movable="true" enableMouse="true" hidden="true" frameStrata="DIALOG">
+        <Size x="450" y="550"/>
+        <Anchors><Anchor point="CENTER"/></Anchors>
+        
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
+            <EdgeSize val="2"/><TileSize val="16"/><BackgroundInsets left="0" right="0" top="0" bottom="0"/>
+        </Backdrop>
+        
+        <Scripts>
+            <OnLoad>
+                self:SetBackdropColor(0.04, 0.07, 0.16, 0.96) -- #0a1128
+                self:SetBackdropBorderColor(0.0, 0.59, 0.65, 1.0) -- Cyan
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <OnShow>if XPlore_Options and XPlore_Options.UpdateUI then XPlore_Options:UpdateUI() end</OnShow>
+            <OnDragStart>self:StartMoving()</OnDragStart>
+            <OnDragStop>self:StopMovingOrSizing()</OnDragStop>
+        </Scripts>
+
+        <Frames>
+            <!-- 1. TITLE BAR -->
+            <Frame name="$parentTitleBar" enableMouse="true">
+                <Size x="450" y="32"/>
+                <Anchors><Anchor point="TOPLEFT"/></Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture file="Interface\Buttons\WHITE8X8"><Color r="0.02" g="0.04" b="0.08" a="1.0"/></Texture>
+                    </Layer>
+                    <Layer level="ARTWORK">
+                        <FontString text="X-PLORE SETTINGS" inherits="GameFontNormal">
+                            <Anchors><Anchor point="LEFT" x="12" y="0"/></Anchors>
+                            <Color r="0.0" g="0.90" b="1.0" a="1.0"/>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Button name="$parentCloseBtn" inherits="XPlore_ModernButtonTemplate">
+                        <Size x="20" y="20"/>
+                        <Anchors><Anchor point="RIGHT" x="-12" y="0"/></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                self:SetBackdropBorderColor(0.9, 0.2, 0.2, 0.6)
+                                self:SetText("x")
+                            </OnLoad>
+                            <OnClick>self:GetParent():GetParent():Hide()</OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+
+            <Frame name="$parentTitleBorder">
+                <Size x="450" y="1"/>
+                <Anchors><Anchor point="TOPLEFT" y="-32"/></Anchors>
+                <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.4"/></Texture></Layer></Layers>
+            </Frame>
+
+            <!-- 2. NAVIGATION TABS (Top Header styled Settings) -->
+            <Frame name="$parentTabs">
+                <Size x="450" y="32"/>
+                <Anchors><Anchor point="TOPLEFT" y="-33"/></Anchors>
+                <Frames>
+                    <Button name="$parentTab1" inherits="XPlore_ModernButtonTemplate" text="Display" id="1">
+                        <Size x="110" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" x="0" y="0"/></Anchors>
+                        <Scripts><OnClick>XPlore_Options:SelectTab(1)</OnClick></Scripts>
+                    </Button>
+                    <Button name="$parentTab2" inherits="XPlore_ModernButtonTemplate" text="Steps" id="2">
+                        <Size x="110" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentTab1" relativePoint="TOPRIGHT" x="2" y="0"/></Anchors>
+                        <Scripts><OnClick>XPlore_Options:SelectTab(2)</OnClick></Scripts>
+                    </Button>
+                    <Button name="$parentTab3" inherits="XPlore_ModernButtonTemplate" text="Arrow" id="3">
+                        <Size x="110" y="32"/>
+                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentTab2" relativePoint="TOPRIGHT" x="2" y="0"/></Anchors>
+                        <Scripts><OnClick>XPlore_Options:SelectTab(3)</OnClick></Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+
+            <Frame name="$parentTabsBorder">
+                <Size x="450" y="1"/>
+                <Anchors><Anchor point="TOPLEFT" y="-65"/></Anchors>
+                <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.6"/></Texture></Layer></Layers>
+            </Frame>
+
+            <!-- 3. CONTENT AREA -->
+            <Frame name="$parentContent">
+                <Size x="450" y="440"/>
+                <Anchors><Anchor point="TOPLEFT" y="-66"/></Anchors>
+                <Frames>
+                    <!-- Display Settings Subpanel -->
+                    <Frame name="$parentDisplay" hidden="false">
+                        <Size x="450" y="440"/>
+                        <Anchors><Anchor point="TOPLEFT"/></Anchors>
+                        <Layers>
+                            <Layer level="ARTWORK">
+                                <FontString text="VIEWER APPEARANCE" inherits="GameFontNormalSmall" justifyH="LEFT">
+                                    <Anchors><Anchor point="TOPLEFT" x="20" y="-20"/></Anchors>
+                                    <Color r="0.0" g="0.59" b="0.65" a="1.0"/>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Frames>
+                            <!-- Custom Glassmorphism Checkbox implementation -->
+                            <CheckButton name="$parentLockViewer">
+                                <Size x="20" y="20"/>
+                                <Anchors><Anchor point="TOPLEFT" x="20" y="-45"/></Anchors>
+                                <NormalTexture file="Interface\Buttons\WHITE8X8"><Color r="0.05" g="0.08" b="0.15" a="0.8"/></NormalTexture>
+                                <CheckedTexture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.90" b="1.0" a="0.4"/></CheckedTexture>
+                                <HighlightTexture file="Interface\Buttons\WHITE8X8" alphaMode="ADD"><Color r="0.0" g="0.90" b="1.0" a="0.2"/></HighlightTexture>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <!-- Border line -->
+                                        <Texture file="Interface\Buttons\WHITE8X8"><Size y="1"/><Anchors><Anchor point="TOPLEFT"/><Anchor point="TOPRIGHT"/></Anchors><Color r="0.0" g="0.59" b="0.65" a="0.8"/></Texture>
+                                        <Texture file="Interface\Buttons\WHITE8X8"><Size y="1"/><Anchors><Anchor point="BOTTOMLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors><Color r="0.0" g="0.59" b="0.65" a="0.8"/></Texture>
+                                        <Texture file="Interface\Buttons\WHITE8X8"><Size x="1"/><Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMLEFT"/></Anchors><Color r="0.0" g="0.59" b="0.65" a="0.8"/></Texture>
+                                        <Texture file="Interface\Buttons\WHITE8X8"><Size x="1"/><Anchors><Anchor point="TOPRIGHT"/><Anchor point="BOTTOMRIGHT"/></Anchors><Color r="0.0" g="0.59" b="0.65" a="0.8"/></Texture>
+                                        
+                                        <FontString name="$parentText" text="Lock Guide Viewer Position" inherits="GameFontHighlightSmall" justifyH="LEFT">
+                                            <Anchors><Anchor point="LEFT" relativePoint="RIGHT" x="12" y="0"/></Anchors>
+                                            <Color r="0.58" g="0.72" b="0.83" a="1.0"/>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnClick>
+                                        XPlore_Settings.lockViewer = self:GetChecked()
+                                        if XPlore_MainFrame.UpdateUI then XPlore_MainFrame:UpdateUI() end
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
+                        </Frames>
+                    </Frame>
+                    
+                    <Frame name="$parentArrow" hidden="true"><Size x="450" y="440"/><Anchors><Anchor point="TOPLEFT"/></Anchors></Frame>
+                </Frames>
+            </Frame>
+            
+            <Frame name="$parentFooterBorder">
+                <Size x="450" y="1"/>
+                <Anchors><Anchor point="BOTTOMLEFT" y="44"/></Anchors>
+                <Layers><Layer level="BACKGROUND"><Texture file="Interface\Buttons\WHITE8X8"><Color r="0.0" g="0.59" b="0.65" a="0.3"/></Texture></Layer></Layers>
+            </Frame>
+
+            <Frame name="$parentFooter">
+                <Size x="450" y="44"/>
+                <Anchors><Anchor point="BOTTOMLEFT"/></Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture file="Interface\Buttons\WHITE8X8"><Color r="0.02" g="0.04" b="0.08" a="0.8"/></Texture>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Button name="$parentSaveButton" inherits="XPlore_ModernButtonTemplate" text="SAVE &amp; CLOSE">
+                        <Size x="140" y="28"/>
+                        <Anchors><Anchor point="RIGHT" x="-16" y="0"/></Anchors>
+                        <Scripts><OnClick>XPlore_Options:Toggle()</OnClick></Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame>
+</Ui>
