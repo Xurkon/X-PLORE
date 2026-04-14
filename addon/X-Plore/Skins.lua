@@ -17,7 +17,10 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 -- Skin Registry
 -----------------------------------------------------------------------
-local skins = {}
+local styles = {}
+
+-- Expose to XP namespace so other files (Viewer, GuideMenu, etc.) can call XP:Size(), XP:SD(), etc.
+XP.Skins = styles
 local activeSkin  = nil
 local activeStyle = nil
 
