@@ -60,11 +60,11 @@ function XP:CreateViewerFrame()
     titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
     frame.TitleBar = titleBar
 
-    -- Logo icon (simple colored square for now)
+    -- Logo icon
     local logoIcon = titleBar:CreateTexture(nil, "ARTWORK")
     logoIcon:SetSize(16, 16)
     logoIcon:SetPoint("LEFT", titleBar, "LEFT", 8, 0)
-    XP.SetTexColor(logoIcon, XP:ColorRGBA("cyan"))
+    logoIcon:SetTexture("Interface\\AddOns\\X-Plore\\textures\\logo")
     frame.LogoIcon = logoIcon
 
     -- Title text
@@ -83,7 +83,7 @@ function XP:CreateViewerFrame()
     closeBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
     closeBtn:SetScript("OnEnter", function(self_btn)
-        self_btn:GetFontString():SetTextColor(1, 0.5, 0.5, 1)
+        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("red_light"))
     end)
     closeBtn:SetScript("OnLeave", function(self_btn)
         self_btn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
@@ -223,12 +223,18 @@ function XP:CreateViewerFrame()
 
     local sbTrack = scrollBar:CreateTexture(nil, "BACKGROUND")
     sbTrack:SetAllPoints()
-    XP.SetTexColor(sbTrack, 0, 0, 0, 0.3)
+    local sbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+    XP.SetTexColor(sbTrack, sbtc[1], sbtc[2], sbtc[3], sbtc[4])
+    frame.ScrollTrack = sbTrack
 
     local sbThumb = scrollBar:CreateTexture(nil, "OVERLAY")
     sbThumb:SetWidth(scrollbarW - 2)
-    XP.SetTexColor(sbThumb, XP:ColorRGBA("border"))
+    local sbTex = XP:SD("ScrollBarTexture")
+    if sbTex then sbThumb:SetTexture(sbTex) end
+    local sbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+    XP.SetTexColor(sbThumb, sbcc[1], sbcc[2], sbcc[3], sbcc[4])
     scrollBar:SetThumbTexture(sbThumb)
+    frame.ScrollThumb = sbThumb
 
     -- Wire scrollbar drag → scroll frame
     scrollBar:SetScript("OnValueChanged", function(sb, val)
@@ -300,8 +306,18 @@ function XP:CreateViewerFrame()
     progressBar:SetHeight(4)
     progressBar:SetPoint("LEFT", syncText, "RIGHT", 10, 0)
     progressBar:SetPoint("RIGHT", pctText, "LEFT", -10, 0)
-    progressBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
-    progressBar:SetStatusBarColor(XP:ColorRGBA("cyan"))
+    local pbarTex = XP:SD("ProgressBarTextureFile")
+    if pbarTex then
+        progressBar:SetStatusBarTexture(pbarTex)
+    else
+        progressBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    end
+    local pbarColor = XP:SD("ProgressBarTextureColor")
+    if pbarColor then
+        progressBar:SetStatusBarColor(pbarColor[1], pbarColor[2], pbarColor[3], pbarColor[4])
+    else
+        progressBar:SetStatusBarColor(XP:ColorRGBA("cyan"))
+    end
     progressBar:SetMinMaxValues(0, 100)
     progressBar:SetValue(0)
     frame.ProgressBar = progressBar
@@ -309,7 +325,9 @@ function XP:CreateViewerFrame()
     -- Progress bar background
     local pbarBg = progressBar:CreateTexture(nil, "BACKGROUND")
     pbarBg:SetAllPoints()
-    XP.SetTexColor(pbarBg, 0, 0, 0, 0.4)
+    local pbarBgColor = XP:SD("ProgressBarBackdropColor") or {0, 0, 0, 0.4}
+    XP.SetTexColor(pbarBg, pbarBgColor[1], pbarBgColor[2], pbarBgColor[3], pbarBgColor[4])
+    frame.ProgressBarBg = pbarBg
 
     ---------------------------------------------------------------
     -- Apply saved settings
@@ -349,7 +367,7 @@ function XP:CreateViewerFrame()
 
         -- Title bar elements
         if f.LogoIcon then
-            XP.SetTexColor(f.LogoIcon, XP:ColorRGBA("cyan"))
+            -- Logo uses TGA directly — no tint needed
         end
         if f.TitleText then
             XP:ApplyFont(f.TitleText, "bold", "cyan")
@@ -375,12 +393,16 @@ function XP:CreateViewerFrame()
             XP:ApplyFont(f.GuideName, "small", "cyan_dark")
         end
 
-        -- Scrollbar thumb
-        if f.ScrollBar then
-            local thumb = f.ScrollBar:GetThumbTexture()
-            if thumb then
-                XP.SetTexColor(thumb, XP:ColorRGBA("border"))
-            end
+        -- Scrollbar track + thumb
+        if f.ScrollTrack then
+            local sbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+            XP.SetTexColor(f.ScrollTrack, sbtc[1], sbtc[2], sbtc[3], sbtc[4])
+        end
+        if f.ScrollThumb then
+            local sbTex = XP:SD("ScrollBarTexture")
+            if sbTex then f.ScrollThumb:SetTexture(sbTex) end
+            local sbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+            XP.SetTexColor(f.ScrollThumb, sbcc[1], sbcc[2], sbcc[3], sbcc[4])
         end
 
         -- Footer elements
@@ -394,7 +416,20 @@ function XP:CreateViewerFrame()
             XP:ApplyFont(f.ProgressPercent, "small", "cyan_dark")
         end
         if f.ProgressBar then
-            f.ProgressBar:SetStatusBarColor(XP:ColorRGBA("cyan"))
+            local pbarTex = XP:SD("ProgressBarTextureFile")
+            if pbarTex then
+                f.ProgressBar:SetStatusBarTexture(pbarTex)
+            end
+            local pbarColor = XP:SD("ProgressBarTextureColor")
+            if pbarColor then
+                f.ProgressBar:SetStatusBarColor(pbarColor[1], pbarColor[2], pbarColor[3], pbarColor[4])
+            else
+                f.ProgressBar:SetStatusBarColor(XP:ColorRGBA("cyan"))
+            end
+        end
+        if f.ProgressBarBg then
+            local pbarBgColor = XP:SD("ProgressBarBackdropColor") or {0, 0, 0, 0.4}
+            XP.SetTexColor(f.ProgressBarBg, pbarBgColor[1], pbarBgColor[2], pbarBgColor[3], pbarBgColor[4])
         end
 
         -- Redraw current step lines with new skin colors

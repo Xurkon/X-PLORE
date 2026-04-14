@@ -272,6 +272,7 @@ STARLIGHT.Colors = {
     purple        = HTML("#9B30FFFF"),
     green         = HTML("#00CC01FF"),
     red           = HTML("#FF3300FF"),
+    red_light     = HTML("#FF8080FF"),
     yellow        = HTML("#FFD000FF"),
     orange        = HTML("#FE6100FF"),
 
@@ -537,6 +538,7 @@ MIDNIGHT.Colors = {
     purple        = HTML("#9B30FFFF"),
     green         = HTML("#00CC01FF"),
     red           = HTML("#FF3300FF"),
+    red_light     = HTML("#FF8080FF"),
     yellow        = HTML("#FFD000FF"),
     orange        = HTML("#E5661AFF"),
 
@@ -733,6 +735,7 @@ STEALTH.Colors = {
     purple        = HTML("#9B30FFFF"),
     green         = HTML("#00CC01FF"),
     red           = HTML("#FF3300FF"),
+    red_light     = HTML("#FF9070FF"),
     yellow        = HTML("#FFD000FF"),
     orange        = HTML("#C47A33FF"),
 

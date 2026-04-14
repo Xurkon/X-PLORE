@@ -89,12 +89,14 @@ function XP:CreateGuideMenu()
     local logoIcon = header:CreateTexture(nil, "ARTWORK")
     logoIcon:SetSize(20, 20)
     logoIcon:SetPoint("LEFT", header, "LEFT", 12, 0)
-    XP.SetTexColor(logoIcon, XP:ColorRGBA("cyan"))
+    logoIcon:SetTexture("Interface\\AddOns\\X-Plore\\textures\\logo")
+    frame.LogoIcon = logoIcon
 
     local logoText = header:CreateFontString(nil, "OVERLAY")
     logoText:SetPoint("LEFT", logoIcon, "RIGHT", 8, 0)
     self:ApplyFont(logoText, "bold", "cyan")
     logoText:SetText("X-PLORE")
+    frame.LogoText = logoText
 
     -- Header close button
     local closeBtn = CreateFrame("Button", nil, header)
@@ -104,8 +106,9 @@ function XP:CreateGuideMenu()
     closeBtn:SetText("x")
     closeBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
-    closeBtn:SetScript("OnEnter", function(btn) btn:GetFontString():SetTextColor(1, 0.5, 0.5) end)
+    closeBtn:SetScript("OnEnter", function(btn) btn:GetFontString():SetTextColor(XP:ColorRGBA("red_light")) end)
     closeBtn:SetScript("OnLeave", function(btn) btn:GetFontString():SetTextColor(XP:ColorRGBA("red")) end)
+    frame.CloseBtn = closeBtn
 
     -- Header Tab Buttons (Options lives in sidebar, not here)
     local tabNames = { "Home", "Current", "Recent" }
@@ -184,12 +187,26 @@ function XP:CreateGuideMenu()
         local t = searchBox[texName] or _G["XPlore_GuideMenuSearch" .. texName]
         if t and t.Hide then t:Hide() end
     end
+
+    -- Search background texture from skin
+    local searchBgTex = sidebar:CreateTexture(nil, "BACKGROUND")
+    searchBgTex:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  4, -4)
+    searchBgTex:SetPoint("BOTTOMRIGHT", sidebar, "TOPLEFT", sideW - 8, -38)
+    local sBgPath = XP:SD("GuideMenuSearchTexture")
+    if sBgPath then searchBgTex:SetTexture(sBgPath) end
+    local sBgColor = XP:SD("GuideMenuSearchEdit")
+    if sBgColor then
+        XP.SetTexColor(searchBgTex, sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
+    end
+    frame.SearchBg = searchBgTex
+
     -- Also handle the search box border via a custom thin line instead
     local sbBorder = sidebar:CreateTexture(nil, "ARTWORK")
     sbBorder:SetHeight(1)
     sbBorder:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  4, -34)
     sbBorder:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", -4, -34)
     XP.SetTexColor(sbBorder, XP:ColorRGBA("border_dim"))
+    frame.SearchBorder = sbBorder
 
     -- Search divider
     local searchDivider = sidebar:CreateTexture(nil, "ARTWORK")
@@ -297,15 +314,21 @@ function XP:CreateGuideMenu()
     listScrollBar:SetValue(0)
     local lsbTrack = listScrollBar:CreateTexture(nil, "BACKGROUND")
     lsbTrack:SetAllPoints()
-    XP.SetTexColor(lsbTrack, 0, 0, 0, 0.3)
+    local lsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+    XP.SetTexColor(lsbTrack, lsbtc[1], lsbtc[2], lsbtc[3], lsbtc[4])
     local lsbThumb = listScrollBar:CreateTexture(nil, "OVERLAY")
     lsbThumb:SetWidth(listScrollbarW - 2)
-    XP.SetTexColor(lsbThumb, XP:ColorRGBA("border"))
+    local lsbTex = XP:SD("ScrollBarTexture")
+    if lsbTex then lsbThumb:SetTexture(lsbTex) end
+    local lsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+    XP.SetTexColor(lsbThumb, lsbcc[1], lsbcc[2], lsbcc[3], lsbcc[4])
     listScrollBar:SetThumbTexture(lsbThumb)
     listScrollBar:SetScript("OnValueChanged", function(sb, val)
         listArea:SetVerticalScroll(val)
     end)
     listArea.ScrollBar = listScrollBar
+    frame.ListScrollTrack = lsbTrack
+    frame.ListScrollThumb = lsbThumb
     frame.ListScrollBar = listScrollBar
     listArea:SetScript("OnScrollRangeChanged", function(sf, xRange, yRange)
         local maxScroll = yRange or sf:GetVerticalScrollRange()
@@ -405,7 +428,30 @@ function XP:CreateGuideMenu()
             XP.SetTexColor(f.CenterBg, XP:ColorRGBA("bg_deep"))
         end
 
-        -- Header: logo, close button, tab indicators
+        -- Logo (TGA — no tint needed, just update text color)
+        if f.LogoText then
+            XP:ApplyFont(f.LogoText, "bold", "cyan")
+        end
+
+        -- Close button
+        if f.CloseBtn and f.CloseBtn:GetFontString() then
+            f.CloseBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
+        end
+
+        -- Search background
+        if f.SearchBg then
+            local sBgPath = XP:SD("GuideMenuSearchTexture")
+            if sBgPath then f.SearchBg:SetTexture(sBgPath) end
+            local sBgColor = XP:SD("GuideMenuSearchEdit")
+            if sBgColor then
+                XP.SetTexColor(f.SearchBg, sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
+            end
+        end
+        if f.SearchBorder then
+            XP.SetTexColor(f.SearchBorder, XP:ColorRGBA("border_dim"))
+        end
+
+        -- Header: tab indicators
         if f.HeaderTabs then
             for _, tab in pairs(f.HeaderTabs) do
                 if tab and tab:GetFontString() then
@@ -430,11 +476,30 @@ function XP:CreateGuideMenu()
             XP:ApplyFont(f.GuideCount, "small", "text_dim")
         end
 
-        -- List scrollbar thumb
-        if f.ListScroll and f.ListScroll.ScrollBar then
-            local thumb = f.ListScroll.ScrollBar:GetThumbTexture()
-            if thumb then
-                XP.SetTexColor(thumb, XP:ColorRGBA("border"))
+        -- List scrollbar track + thumb
+        if f.ListScrollTrack then
+            local lsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+            XP.SetTexColor(f.ListScrollTrack, lsbtc[1], lsbtc[2], lsbtc[3], lsbtc[4])
+        end
+        if f.ListScrollThumb then
+            local lsbTex = XP:SD("ScrollBarTexture")
+            if lsbTex then f.ListScrollThumb:SetTexture(lsbTex) end
+            local lsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+            XP.SetTexColor(f.ListScrollThumb, lsbcc[1], lsbcc[2], lsbcc[3], lsbcc[4])
+        end
+
+        -- Detail column scrollbar track + thumb
+        local dc = f.DetailColumn
+        if dc then
+            if dc.DetailScrollTrack then
+                local dsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+                XP.SetTexColor(dc.DetailScrollTrack, dsbtc[1], dsbtc[2], dsbtc[3], dsbtc[4])
+            end
+            if dc.DetailScrollThumb then
+                local dsbTex = XP:SD("ScrollBarTexture")
+                if dsbTex then dc.DetailScrollThumb:SetTexture(dsbTex) end
+                local dsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+                XP.SetTexColor(dc.DetailScrollThumb, dsbcc[1], dsbcc[2], dsbcc[3], dsbcc[4])
             end
         end
 
@@ -991,12 +1056,18 @@ function XP:CreateDetailPanel(parent)
     detailScrollBar:SetValue(0)
     local dsbTrack = detailScrollBar:CreateTexture(nil, "BACKGROUND")
     dsbTrack:SetAllPoints()
-    XP.SetTexColor(dsbTrack, 0, 0, 0, 0.3)
+    local dsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+    XP.SetTexColor(dsbTrack, dsbtc[1], dsbtc[2], dsbtc[3], dsbtc[4])
     local dsbThumb = detailScrollBar:CreateTexture(nil, "OVERLAY")
     dsbThumb:SetWidth(sbW - 2)
-    XP.SetTexColor(dsbThumb, XP:ColorRGBA("border"))
+    local dsbTex = XP:SD("ScrollBarTexture")
+    if dsbTex then dsbThumb:SetTexture(dsbTex) end
+    local dsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+    XP.SetTexColor(dsbThumb, dsbcc[1], dsbcc[2], dsbcc[3], dsbcc[4])
     detailScrollBar:SetThumbTexture(dsbThumb)
     detailScrollBar:Hide()
+    parent.DetailScrollTrack = dsbTrack
+    parent.DetailScrollThumb = dsbThumb
     detailScrollBar:SetScript("OnValueChanged", function(sb, val)
         scroll:SetVerticalScroll(val)
     end)
