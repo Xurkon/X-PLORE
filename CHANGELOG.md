@@ -2,6 +2,20 @@
 
 All notable changes to the X-Plore Universal Guide Viewer Spec will be documented in this file.
 
+## [0.0.7a] - 2026-04-13
+### Added
+- **XPV Framework**: New core addon framework (XPV_Main.lua, XPV_Guide.lua, XPV_Sorting.lua) implementing Zygor-style guide viewer architecture for WotLK 3.3.5a
+- **XPV.Guide Prototype**: Full guide object with step/goal parsing, activation, navigation (NextStep, PrevStep, GoToStep)
+- **XPV.Step Prototype**: Step object with goals array and completion tracking
+- **XPV.Goal Prototype**: Goal object supporting action types (accept, turnin, talk, kill, collect, buy, goto, fly, equip) with quest/item completion detection
+- **Guide Category System**: 16 categories registered (Leveling, Dungeons, Gear, Quests, Dailies, Events, Reputations, Gold, Professions, Pets & Mounts, Titles, Achievements, Macros, Shared, Alliance, Horde)
+- **Menu System**: Integrated menu system wired into existing XPlore_BrowserFrame with sidebar button wiring and guide card creation
+- **IconSets**: TabsIcons and GuideIconsSmall icon set definitions with texcoord calculation
+
+### Changed
+- **TOC Load Order**: Reorganized X-Plore.toc to load XPV framework files first, then legacy modules
+- **Integration**: XPV.Menu now uses existing XPlore_BrowserFrame instead of creating new frame, eliminating duplicate UI
+
 ## [0.0.6a] - 2026-04-05
 ### Added
 - **Zygor-Inspired Dashboard**: Re-engineered the dashboard into a dynamic Lua-driven grid system with persistent widget scaling and pop-out support.

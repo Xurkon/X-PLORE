@@ -1,0 +1,138 @@
+-----------------------------------------------------------------------
+-- X-Plore: GuideLoader.lua
+-- Handles loading guide data files from various sources.
+-- Provides the bridge between external guide formats and X-PLORE.
+--
+-- Loading strategies:
+--   1. Native X-PLORE format: files call XP:RegisterGuide() directly
+--   2. Zygor adapter: intercepts ZygorGuidesViewer:RegisterGuide()
+--   3. Manual registration: other addons call the API at runtime
+--
+-- Guide data files are loaded via Guides/Autoload.xml in the TOC.
+-----------------------------------------------------------------------
+local ADDON_NAME, ADDON_TABLE = ...
+local XP = ADDON_TABLE.XP
+
+-----------------------------------------------------------------------
+-- GuideLoader namespace
+-----------------------------------------------------------------------
+XP.GuideLoader = XP.GuideLoader or {}
+local Loader = XP.GuideLoader
+
+-- Tracking
+Loader.loadedFiles  = 0
+Loader.loadedGuides = 0
+Loader.errors       = {}
+
+-----------------------------------------------------------------------
+-- Zygor Compatibility Shim
+-- Many guide data files are written for Zygor and call:
+--   ZygorGuidesViewer:RegisterGuide(title, header, data)
+--   ZygorGuidesViewer:RegisterInclude(name, text)
+--   ZygorGuidesViewer:RegisterGuidePlaceholder(title, header)
+--
+-- We create a fake ZygorGuidesViewer global that redirects to XP.
+-- This allows loading unmodified Zygor guide data files.
+-----------------------------------------------------------------------
+function Loader:InstallZygorShim()
+    -- Only install if ZygorGuidesViewer doesn't already exist
+    -- (i.e., the real Zygor addon isn't loaded)
+    if _G.ZygorGuidesViewer then return end
+
+    local shim = {}
+
+    shim.RegisterGuide = function(self_or_title, titleOrHeader, headerOrData, dataOrNil)
+        -- Handle both ZygorGuidesViewer:RegisterGuide(t,h,d) and
+        -- ZygorGuidesViewer.RegisterGuide(self,t,h,d) calling conventions
+        local title, header, data
+
+        if type(self_or_title) == "string" then
+            -- Called as ZGV:RegisterGuide(title, header, data) — self was consumed
+            title = self_or_title
+            header = titleOrHeader
+            data = headerOrData
+        elseif type(self_or_title) == "table" then
+            -- Called with explicit self: ZGV.RegisterGuide(self, title, header, data)
+            title = titleOrHeader
+            header = headerOrData
+            data = dataOrNil
+        end
+
+        if title then
+            local guide = XP:RegisterGuide(title, header, data)
+            if guide then
+                Loader.loadedGuides = Loader.loadedGuides + 1
+            end
+            return guide
+        end
+    end
+
+    shim.RegisterInclude = function(self_or_name, nameOrText, textOrNil)
+        local name, text
+        if type(self_or_name) == "string" then
+            name = self_or_name
+            text = nameOrText
+        elseif type(self_or_name) == "table" then
+            name = nameOrText
+            text = textOrNil
+        end
+        if name then
+            XP:RegisterInclude(name, text)
+        end
+    end
+
+    shim.RegisterGuidePlaceholder = function(self_or_title, titleOrHeader, headerOrNil)
+        local title, header
+        if type(self_or_title) == "string" then
+            title = self_or_title
+            header = titleOrHeader
+        elseif type(self_or_title) == "table" then
+            title = titleOrHeader
+            header = headerOrNil
+        end
+        if title then
+            return XP:RegisterGuidePlaceholder(title, header)
+        end
+    end
+
+    _G.ZygorGuidesViewer = shim
+
+    -- Also alias common short names
+    _G.ZGV = shim
+end
+
+-----------------------------------------------------------------------
+-- Guide Data Statistics
+-----------------------------------------------------------------------
+function Loader:GetStats()
+    return {
+        files   = self.loadedFiles,
+        guides  = self.loadedGuides,
+        errors  = #self.errors,
+    }
+end
+
+function Loader:PrintStats()
+    local stats = self:GetStats()
+    if XP.Print then
+        XP:Print(string.format(
+            "Loaded |cff00e5ff%d|r guides from |cff00e5ff%d|r files. %s",
+            stats.guides,
+            stats.files,
+            stats.errors > 0 and ("|cffff0000" .. stats.errors .. " errors|r") or ""
+        ))
+    end
+end
+
+-----------------------------------------------------------------------
+-- Initialize: call during addon load
+-----------------------------------------------------------------------
+function Loader:Init()
+    -- Install the Zygor compatibility shim FIRST, before any guide
+    -- data files execute. This is called from Init.lua or very early
+    -- in the load order.
+    self:InstallZygorShim()
+end
+
+-- Auto-initialize when this file loads
+Loader:Init()

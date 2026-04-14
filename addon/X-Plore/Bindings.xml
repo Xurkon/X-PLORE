@@ -1,0 +1,30 @@
+<Bindings>
+    <!-- Toggle the step viewer frame -->
+    <Binding name="XPLORE_TOGGLE_VIEWER"
+             description="X-Plore: Toggle Guide Viewer"
+             runOnUp="false"
+             header="X-PLORE">
+        XPLORE_BINDING_ToggleViewer()
+    </Binding>
+
+    <!-- Open / close the guide menu browser -->
+    <Binding name="XPLORE_TOGGLE_MENU"
+             description="X-Plore: Toggle Guide Browser"
+             runOnUp="false">
+        XPLORE_BINDING_ToggleMenu()
+    </Binding>
+
+    <!-- Advance to the next step -->
+    <Binding name="XPLORE_NEXT_STEP"
+             description="X-Plore: Next Step"
+             runOnUp="false">
+        XPLORE_BINDING_NextStep()
+    </Binding>
+
+    <!-- Go back to the previous step -->
+    <Binding name="XPLORE_PREV_STEP"
+             description="X-Plore: Previous Step"
+             runOnUp="false">
+        XPLORE_BINDING_PrevStep()
+    </Binding>
+</Bindings>
