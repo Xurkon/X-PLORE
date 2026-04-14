@@ -23,15 +23,22 @@ local guideRows       = {}         -- reusable row frames
 local categoryButtons = {}         -- sidebar category buttons
 local MAX_GUIDE_ROWS  = 20
 
--- Resolve a category icon to a full texture path.
--- If cat.iconFull is true, the icon is already a full WoW path (no prefix/suffix needed).
--- Otherwise prefix with ICON_PATH and append .tga.
+-- Resolve icon name to full texture path (local or WoW built-in).
+local function ResolveIconPath(iconName)
+    if not iconName then return nil end
+    if iconName:match("Interface") then
+        return iconName
+    end
+    return "Interface\\AddOns\\X-Plore\\textures\\icons\\" .. iconName .. ".tga"
+end
+
+-- Resolve a category's icon to a full texture path.
 local function GetCategoryIconPath(cat)
-    if not cat then return XP.ICON_PATH .. "default.tga" end
+    if not cat then return nil end
     if cat.iconFull then
         return cat.icon
     end
-    return XP.ICON_PATH .. (cat.icon or "default") .. ".tga"
+    return ResolveIconPath(cat.icon)
 end
 
 -----------------------------------------------------------------------
@@ -493,10 +500,17 @@ function XP:CreateCategoryButtons(sidebar)
     aboutBtn:SetSize(self:Size("sidebar_width"), self:Size("category_height"))
     aboutBtn:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY)
     self:ApplyBackdrop(aboutBtn, "none", "bg_deep")
+    local aboutIcon = aboutBtn:CreateTexture(nil, "ARTWORK")
+    aboutIcon:SetSize(16, 16)
+    aboutIcon:SetPoint("LEFT", aboutBtn, "LEFT", 12, 0)
+    aboutIcon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
+    XP.SetTexColor(aboutIcon, XP:ColorRGBA("text_dim"))
     local aboutText = aboutBtn:CreateFontString(nil, "OVERLAY")
-    aboutText:SetPoint("LEFT", aboutBtn, "LEFT", 12, 0)
+    aboutText:SetPoint("LEFT", aboutIcon, "RIGHT", 8, 0)
     self:ApplyFont(aboutText, "small", "text_dim")
     aboutText:SetText("About")
+    aboutBtn:SetScript("OnEnter", function(btn) aboutText:SetTextColor(XP:ColorRGBA("cyan_light")) end)
+    aboutBtn:SetScript("OnLeave", function(btn) aboutText:SetTextColor(XP:ColorRGBA("text_dim")) end)
     aboutBtn:SetScript("OnClick", function()
         XP:MenuNavigate("about")
     end)
@@ -1059,7 +1073,7 @@ function XP:ShowGuideDetail(guideID)
     local cat = self:GetCategory(guide.category)
     local iconPath
     if cat then
-        iconPath = cat.iconFull and cat.icon or (XP.ICON_PATH .. (cat.icon or "default") .. ".tga")
+        iconPath = GetCategoryIconPath(cat)
     end
     if panel.DetailIcon and iconPath then
         panel.DetailIcon:SetTexture(iconPath)
