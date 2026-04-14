@@ -415,15 +415,12 @@ function XP:CreateGuideMenu()
         -- Guide rows (live in guideRows table)
         for _, row in pairs(guideRows) do
             if row then
-                XP:ApplyBackdrop(row, "panel", "bg_medium", "border_dim")
+                XP:ApplyBackdrop(row, "none", "bg_deep")
                 if row.Title then
-                    XP:ApplyFont(row.Title, "small", "text_bright")
+                    XP:ApplyFont(row.Title, "normal", "text_bright")
                 end
-                if row.Sub then
-                    XP:ApplyFont(row.Sub, "tiny", "text_dim")
-                end
-                if row.LevelRange then
-                    XP:ApplyFont(row.LevelRange, "tiny", "cyan_dark")
+                if row.Subtitle then
+                    XP:ApplyFont(row.Subtitle, "small", "text_dim")
                 end
             end
         end

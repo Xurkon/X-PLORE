@@ -289,6 +289,7 @@ STARLIGHT.Fonts = {
     title   = { STARLIGHT.FontFace,       12, ""  },
     normal  = { STARLIGHT.FontFace,       12, ""  },
     small   = { STARLIGHT.FontFace,       10, ""  },
+    tiny    = { STARLIGHT.FontFace,        9, ""  },
     header  = { STARLIGHT.FontFaceHeader, 16, ""  },
     bold    = { STARLIGHT.FontFaceBold,   12, ""  },
 }
@@ -553,6 +554,7 @@ MIDNIGHT.Fonts = {
     title   = { MIDNIGHT.FontFace,       12, ""  },
     normal  = { MIDNIGHT.FontFace,       12, ""  },
     small   = { MIDNIGHT.FontFace,       10, ""  },
+    tiny    = { MIDNIGHT.FontFace,        9, ""  },
     header  = { MIDNIGHT.FontFaceHeader, 16, ""  },
     bold    = { MIDNIGHT.FontFace,       12, "OUTLINE" },
 }
@@ -748,6 +750,7 @@ STEALTH.Fonts = {
     title   = { STEALTH.FontFace,       12, ""  },
     normal  = { STEALTH.FontFace,       12, ""  },
     small   = { STEALTH.FontFace,       10, ""  },
+    tiny    = { STEALTH.FontFace,        9, ""  },
     header  = { STEALTH.FontFaceHeader, 16, ""  },
     bold    = { STEALTH.FontFaceBold,   12, ""  },
 }
