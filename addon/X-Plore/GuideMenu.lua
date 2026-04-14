@@ -149,7 +149,7 @@ function XP:CreateGuideMenu()
     frame.HeaderTabs = headerTabs
 
     -- Header divider
-    self:CreateDivider(frame, -40, "border_bright")
+    frame.HeaderDivider = self:CreateDivider(frame, -40, "border_bright")
 
     ---------------------------------------------------------------
     -- Sidebar (left panel with categories)
@@ -162,7 +162,8 @@ function XP:CreateGuideMenu()
 
     frame.SidebarBg = sidebar:CreateTexture(nil, "BACKGROUND")
     frame.SidebarBg:SetAllPoints()
-    XP.SetTexColor(frame.SidebarBg, XP:ColorRGBA("bg_deep"))
+    local _sBgC = XP:SD("GuideMenuMenuBackground") or {XP:ColorRGBA("bg_deep")}
+    XP.SetTexColor(frame.SidebarBg, _sBgC[1], _sBgC[2], _sBgC[3], _sBgC[4])
 
     -- Search box
     local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", sidebar, "InputBoxTemplate")
@@ -249,6 +250,7 @@ function XP:CreateGuideMenu()
     local sectionBg = sectionHeader:CreateTexture(nil, "BACKGROUND")
     sectionBg:SetAllPoints()
     XP.SetTexColor(sectionBg, XP:ColorRGBA("bg_medium"))
+    frame.SectionHeaderBg = sectionBg
 
     -- Back button
     local backBtn = CreateFrame("Button", nil, sectionHeader)
@@ -280,6 +282,7 @@ function XP:CreateGuideMenu()
     sectionDiv:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, -36)
     sectionDiv:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, -36)
     XP.SetTexColor(sectionDiv, XP:ColorRGBA("border_dim"))
+    frame.SectionDivider = sectionDiv
 
     ---------------------------------------------------------------
     -- Guide List Scroll Frame
@@ -362,6 +365,7 @@ function XP:CreateGuideMenu()
     local homeViewBg = homeView:CreateTexture(nil, "BACKGROUND")
     homeViewBg:SetAllPoints()
     XP.SetTexColor(homeViewBg, XP:ColorRGBA("bg_deep"))
+    homeView.HomeViewBg = homeViewBg
     frame.HomeView = homeView
 
     self:CreateHomeView(homeView)
@@ -390,10 +394,12 @@ function XP:CreateGuideMenu()
     detailBorderL:SetPoint("TOPLEFT", detailCol, "TOPLEFT", 0, 0)
     detailBorderL:SetPoint("BOTTOMLEFT", detailCol, "BOTTOMLEFT", 0, 0)
     XP.SetTexColor(detailBorderL, XP:ColorRGBA("border_dim"))
+    detailCol.DetailBorderL = detailBorderL
 
     local detailBg = detailCol:CreateTexture(nil, "BACKGROUND")
     detailBg:SetAllPoints()
     XP.SetTexColor(detailBg, XP:ColorRGBA("bg_medium"))
+    detailCol.DetailBg = detailBg
 
     self:CreateDetailPanel(detailCol)
 
@@ -418,9 +424,15 @@ function XP:CreateGuideMenu()
             XP.SetTexColor(f.HeaderBg, XP:ColorRGBA("bg_deep"))
         end
 
+        -- Header divider
+        if f.HeaderDivider then
+            XP.SetTexColor(f.HeaderDivider, XP:ColorRGBA("border_bright"))
+        end
+
         -- Sidebar background
         if f.SidebarBg then
-            XP.SetTexColor(f.SidebarBg, XP:ColorRGBA("bg_deep"))
+            local sBgC = XP:SD("GuideMenuMenuBackground") or {XP:ColorRGBA("bg_deep")}
+            XP.SetTexColor(f.SidebarBg, sBgC[1], sBgC[2], sBgC[3], sBgC[4])
         end
 
         -- Center column background
@@ -428,7 +440,46 @@ function XP:CreateGuideMenu()
             XP.SetTexColor(f.CenterBg, XP:ColorRGBA("bg_deep"))
         end
 
-        -- Logo (TGA — no tint needed, just update text color)
+        -- Home view background
+        if f.HomeView and f.HomeView.HomeViewBg then
+            XP.SetTexColor(f.HomeView.HomeViewBg, XP:ColorRGBA("bg_deep"))
+        end
+
+        -- Detail column border, background, scrollbar, and panel elements
+        local dc = f.DetailColumn
+        if dc then
+            if dc.DetailBorderL then
+                XP.SetTexColor(dc.DetailBorderL, XP:ColorRGBA("border_dim"))
+            end
+            if dc.DetailBg then
+                XP.SetTexColor(dc.DetailBg, XP:ColorRGBA("bg_medium"))
+            end
+            if dc.DetailScrollTrack then
+                local dsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
+                XP.SetTexColor(dc.DetailScrollTrack, dsbtc[1], dsbtc[2], dsbtc[3], dsbtc[4])
+            end
+            if dc.DetailScrollThumb then
+                local dsbTex = XP:SD("ScrollBarTexture")
+                if dsbTex then dc.DetailScrollThumb:SetTexture(dsbTex) end
+                local dsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
+                XP.SetTexColor(dc.DetailScrollThumb, dsbcc[1], dsbcc[2], dsbcc[3], dsbcc[4])
+            end
+            if dc.EmptyMsg        then XP:ApplyFont(dc.EmptyMsg,      "small", "text_dim")    end
+            if dc.DetailTitle     then XP:ApplyFont(dc.DetailTitle,   "bold",  "text_bright") end
+            if dc.DetailInfo      then XP:ApplyFont(dc.DetailInfo,    "small", "cyan")        end
+            if dc.DetailDesc      then XP:ApplyFont(dc.DetailDesc,    "small", "text_muted")  end
+            if dc.DetailSteps     then XP:ApplyFont(dc.DetailSteps,   "small", "text_dim")    end
+            if dc.DetailExpansion then XP:ApplyFont(dc.DetailExpansion, "small", "text_dim")  end
+            if dc.DetailLoadBtn   then
+                if dc.DetailLoadBtn.SetBackdropColor then
+                    dc.DetailLoadBtn:SetBackdropColor(XP:ColorRGBA("bg_light"))
+                    dc.DetailLoadBtn:SetBackdropBorderColor(XP:ColorRGBA("border"))
+                end
+                if dc.DetailLoadBtn.Label then
+                    XP:ApplyFont(dc.DetailLoadBtn.Label, "bold", "cyan")
+                end
+            end
+        end
         if f.LogoText then
             XP:ApplyFont(f.LogoText, "bold", "cyan")
         end
@@ -476,6 +527,14 @@ function XP:CreateGuideMenu()
             XP:ApplyFont(f.GuideCount, "small", "text_dim")
         end
 
+        -- Section header background + divider
+        if f.SectionHeaderBg then
+            XP.SetTexColor(f.SectionHeaderBg, XP:ColorRGBA("bg_medium"))
+        end
+        if f.SectionDivider then
+            XP.SetTexColor(f.SectionDivider, XP:ColorRGBA("border_dim"))
+        end
+
         -- List scrollbar track + thumb
         if f.ListScrollTrack then
             local lsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
@@ -488,25 +547,14 @@ function XP:CreateGuideMenu()
             XP.SetTexColor(f.ListScrollThumb, lsbcc[1], lsbcc[2], lsbcc[3], lsbcc[4])
         end
 
-        -- Detail column scrollbar track + thumb
-        local dc = f.DetailColumn
-        if dc then
-            if dc.DetailScrollTrack then
-                local dsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
-                XP.SetTexColor(dc.DetailScrollTrack, dsbtc[1], dsbtc[2], dsbtc[3], dsbtc[4])
-            end
-            if dc.DetailScrollThumb then
-                local dsbTex = XP:SD("ScrollBarTexture")
-                if dsbTex then dc.DetailScrollThumb:SetTexture(dsbTex) end
-                local dsbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
-                XP.SetTexColor(dc.DetailScrollThumb, dsbcc[1], dsbcc[2], dsbcc[3], dsbcc[4])
-            end
-        end
-
         -- Category buttons (live in categoryButtons table)
         for _, btn in pairs(categoryButtons) do
             if btn then
                 XP:ApplyBackdrop(btn, "none", "bg_deep")
+                if btn.SelectionHighlight then
+                    btn.SelectionHighlight:SetTexture(XP:SD("SelectionTexture"))
+                    btn.SelectionHighlight:Hide()
+                end
                 if btn.Text then
                     XP:ApplyFont(btn.Text, "small", "text_normal")
                 end
@@ -520,6 +568,10 @@ function XP:CreateGuideMenu()
         for _, row in pairs(guideRows) do
             if row then
                 XP:ApplyBackdrop(row, "none", "bg_deep")
+                if row.SelectionHighlight then
+                    row.SelectionHighlight:SetTexture(XP:SD("SelectionTexture"))
+                    row.SelectionHighlight:Hide()
+                end
                 if row.Title then
                     XP:ApplyFont(row.Title, "normal", "text_bright")
                 end
@@ -549,6 +601,13 @@ function XP:CreateCategoryButtons(sidebar)
         -- Background (transparent by default)
         self:ApplyBackdrop(btn, "none", "bg_deep")
 
+        -- Selection/hover highlight texture (shown on hover or when active)
+        local selHl = btn:CreateTexture(nil, "OVERLAY")
+        selHl:SetAllPoints()
+        selHl:SetTexture(XP:SD("SelectionTexture"))
+        selHl:Hide()
+        btn.SelectionHighlight = selHl
+
         -- Category icon
         local icon = btn:CreateTexture(nil, "ARTWORK")
         icon:SetSize(16, 16)
@@ -572,13 +631,13 @@ function XP:CreateCategoryButtons(sidebar)
         -- Hover highlight
         btn:SetScript("OnEnter", function(self_btn)
             if currentCategory ~= cat.id then
-                self_btn:SetBackdropColor(XP:ColorRGBA("bg_hover"))
+                self_btn.SelectionHighlight:Show()
                 self_btn.Text:SetTextColor(XP:ColorRGBA("cyan_light"))
             end
         end)
         btn:SetScript("OnLeave", function(self_btn)
             if currentCategory ~= cat.id then
-                self_btn:SetBackdropColor(XP:ColorRGBA("bg_deep"))
+                self_btn.SelectionHighlight:Hide()
                 self_btn.Text:SetTextColor(XP:ColorRGBA("text_normal"))
             end
         end)
@@ -653,6 +712,13 @@ function XP:CreateGuideRows(parent)
 
         self:ApplyBackdrop(row, "none", "bg_deep")
 
+        -- Selection/hover highlight texture
+        local selHl = row:CreateTexture(nil, "OVERLAY")
+        selHl:SetAllPoints()
+        selHl:SetTexture(XP:SD("SelectionTexture"))
+        selHl:Hide()
+        row.SelectionHighlight = selHl
+
         -- Icon
         local icon = row:CreateTexture(nil, "ARTWORK")
         icon:SetSize(20, 20)
@@ -691,10 +757,10 @@ function XP:CreateGuideRows(parent)
 
         -- Hover
         row:SetScript("OnEnter", function(self_row)
-            self_row:SetBackdropColor(XP:ColorRGBA("bg_hover"))
+            if self_row.SelectionHighlight then self_row.SelectionHighlight:Show() end
         end)
         row:SetScript("OnLeave", function(self_row)
-            self_row:SetBackdropColor(XP:ColorRGBA("bg_deep"))
+            if self_row.SelectionHighlight then self_row.SelectionHighlight:Hide() end
         end)
 
         -- Divider
@@ -1309,13 +1375,13 @@ function XP:MenuNavigate(view, param)
     if frame.OptionsView   then frame.OptionsView:Hide()   end
     if frame.AboutView     then frame.AboutView:Hide()     end
 
-    -- Update sidebar highlight
+    -- Update sidebar highlight (selection texture for active, hide for inactive)
     for id, btn in pairs(categoryButtons) do
         if id == param then
-            btn:SetBackdropColor(XP:ColorRGBA("bg_hover"))
+            if btn.SelectionHighlight then btn.SelectionHighlight:Show() end
             btn.Text:SetTextColor(XP:ColorRGBA("cyan"))
         else
-            btn:SetBackdropColor(XP:ColorRGBA("bg_deep"))
+            if btn.SelectionHighlight then btn.SelectionHighlight:Hide() end
             btn.Text:SetTextColor(XP:ColorRGBA("text_normal"))
         end
     end

@@ -106,7 +106,7 @@ function XP:CreateViewerFrame()
     frame.MenuBtn = menuBtn
 
     -- Title divider
-    self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
+    frame.TitleDivider = self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
 
     ---------------------------------------------------------------
     -- Tab Container (under title bar)
@@ -119,11 +119,26 @@ function XP:CreateViewerFrame()
     frame.TabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
     frame.TabBg:SetAllPoints()
     XP.SetTexColor(frame.TabBg, XP:ColorRGBA("bg_medium"))
+
+    -- Tab decoration overlay (viewer8-tabs.tga) — shown when skin TabsDecor == true
+    local tabDecorTex = tabContainer:CreateTexture(nil, "ARTWORK")
+    tabDecorTex:SetAllPoints()
+    local _tabDecorPath = XP:SD("TabsDecorTexture")
+    if _tabDecorPath then
+        tabDecorTex:SetTexture(_tabDecorPath)
+    end
+    if XP:SD("TabsDecor") then
+        tabDecorTex:Show()
+    else
+        tabDecorTex:Hide()
+    end
+    frame.TabDecorTex = tabDecorTex
+
     frame.TabContainer = tabContainer
 
     -- Tab divider
     local tabDivY = -(self:Size("titlebar_height") + self:Size("tab_height") + 1)
-    self:CreateDivider(frame, tabDivY, "border_dim")
+    frame.TabDivider = self:CreateDivider(frame, tabDivY, "border_dim")
 
     ---------------------------------------------------------------
     -- Toolbar (step navigation)
@@ -176,7 +191,7 @@ function XP:CreateViewerFrame()
     frame.GuideName = guideName
 
     -- Toolbar divider
-    self:CreateDivider(frame, toolbarY - self:Size("toolbar_height"), "border_dim")
+    frame.ToolbarDivider = self:CreateDivider(frame, toolbarY - self:Size("toolbar_height"), "border_dim")
 
     ---------------------------------------------------------------
     -- Step Scroll Area
@@ -355,6 +370,17 @@ function XP:CreateViewerFrame()
             XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
         end
 
+        -- Tab decoration texture (skin-specific TGA, shown when TabsDecor == true)
+        if f.TabDecorTex then
+            local tdPath = XP:SD("TabsDecorTexture")
+            if tdPath then f.TabDecorTex:SetTexture(tdPath) end
+            if XP:SD("TabsDecor") then
+                f.TabDecorTex:Show()
+            else
+                f.TabDecorTex:Hide()
+            end
+        end
+
         -- Toolbar background
         if f.ToolbarBg then
             XP.SetTexColor(f.ToolbarBg, XP:ColorRGBA("bg_medium"))
@@ -392,6 +418,11 @@ function XP:CreateViewerFrame()
         if f.GuideName then
             XP:ApplyFont(f.GuideName, "small", "cyan_dark")
         end
+
+        -- Dividers
+        if f.TitleDivider then XP.SetTexColor(f.TitleDivider, XP:ColorRGBA("border"))     end
+        if f.TabDivider    then XP.SetTexColor(f.TabDivider,   XP:ColorRGBA("border_dim")) end
+        if f.ToolbarDivider then XP.SetTexColor(f.ToolbarDivider, XP:ColorRGBA("border_dim")) end
 
         -- Scrollbar track + thumb
         if f.ScrollTrack then
