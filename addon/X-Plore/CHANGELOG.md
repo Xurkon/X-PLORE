@@ -4,6 +4,57 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Session 17 — 2026-04-14
+
+### Skin System — GuideMenu Row/Header Audit Fixes + Viewer Step Line Audit Fixes
+
+#### GuideMenu.lua
+
+- **DETAIL_WIDTH** reduced from 260 to **219** (matches Zygor exactly)
+
+- **Section header height** reduced from 36px to **22px**; section divider offset updated from -36 to **-22**; list scroll top offset updated from -37 to **-23**; scrollbar top offset updated from -37 to **-23**
+
+- **Header tabs** reduced from 80x40 to **70x24**; starting X changed from 120 to **3**; spacing changed from 85 to **71** (70 + 1px gap). `tab:GetFontString():GetStringWidth() + 6` used for dynamic indicator width (Zygor-style text-width sizing)
+
+- **Header close button** changed from 24x24 red text "x" to **15x15 icon texture** using `XP:SD("TitleButtonsTexture")` with `SetTexCoord(0, 0.25, 0, 0.5)` to crop the close sprite. OnEnter/OnLeave use `XP.SetTexColor` for tint swap instead of font string color
+
+- **Guide row height** reduced from 36px to **26px** (matches Zygor's 26px); subtitle FontString removed entirely; load button hidden by default, shown on hover; icon size reduced from 20x20 to **15x15 bottom-aligned** (BOTTOMLEFT at 12, 5)
+
+- **Category button font** changed from "small" to **"normal"**; icon X offset changed from 12 to **11**; **2px LeftDecor vertical bar** added on left edge (shown when category is active, hidden when not). `MenuNavigate` updated to toggle `LeftDecor:Show()/Hide()` alongside `SelectionHighlight`
+
+- **Home view** now hides `DetailColumn` and expands `CenterColumn` to full width (same treatment as options/about). Condition changed from `fullWidth = (view == "options" or view == "about")` to `fullWidth = (view == "options" or view == "about" or view == "home")`
+
+- **`CreateGuideRows`** — removed `row.Subtitle` entirely; load button starts hidden; icon is 15x15 BOTTOMLEFT; hover shows both selection highlight + load button
+
+- **`MenuNavigate`** — updated sidebar block to show/hide `LeftDecor` on active/inactive categories
+
+- **`PopulateGuideList`** — `rowHeight` changed from 36 to **26**; removed subtitle population code; updated `ApplyFont` call for active guide (uses `cyan` color)
+
+- **Re-skin subscriber** — removed `row.Subtitle` block; added `btn.LeftDecor` re-skin with `XP.SetTexColor`; updated category button `Text` font from "small" to "normal"
+
+#### Viewer.lua
+
+- **STEP_LINE_HEIGHT** reduced from **50px to 22px** (CRITICAL fix — Zygor is ~22px, was 2.3x too tall)
+
+- **CreateStepLine** redesign (matches Zygor's single-line step style):
+  - 2px left edge indicator (was 3px)
+  - 14x14 icon (was 20x20) centered vertically with `MIDDLE` anchor
+  - New `stepNum2` badge: small font, right of icon, shows step number
+  - Title uses `MIDDLE` vertical anchor (single line, no description below)
+  - Status shows UTF-8 checkmark `✓` for completed steps (was "Done" text)
+  - Progress bar removed from step line (moved to separate area)
+  - `UpdateViewer` — `line.Desc` reference removed; `line.StepNum2` populated; `line.Progress` removed from upcoming/completed branches; completed status shows checkmark character
+
+- **Progress bar relocated** from Footer frame to a new `ProgressArea` frame (20px tall, between scroll content and footer). `scrollFrame` and `scrollBar` bottom anchor updated to `footerH + progressH` instead of `scrollBottom`. Progress bar now spans full width with `pctText` on the right. `footerH` and `progressH` variables introduced.
+
+- **Footer simplified** to contain only sync indicator (dot + "AUTO"/"MANUAL" text, centered). Footer divider removed. Sync dot repositioned from `LEFT, 10` to `CENTER, -16` offset.
+
+- **Viewer close button** changed from 20x20 red text "x" to **15x15 icon texture** using `XP:SD("TitleButtonsTexture")`. Re-skin subscriber updated accordingly.
+
+- **`OK_CHAR` constant** defined as UTF-8 checkmark for completed step status.
+
+---
+
 ## [Unreleased] — Session 16 — 2026-04-14
 
 ### Skin System — Selection Highlights, Tab Decoration, Re-skin Audit

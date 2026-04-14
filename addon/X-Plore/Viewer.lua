@@ -10,8 +10,9 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------
+local OK_CHAR = "\228\149\157"  -- UTF-8 checkmark
 local MAX_VISIBLE_STEPS = 8
-local STEP_LINE_HEIGHT  = 50
+local STEP_LINE_HEIGHT  = 22
 
 -----------------------------------------------------------------------
 -- Step Line Pool (reusable step line frames)
@@ -74,20 +75,18 @@ function XP:CreateViewerFrame()
     titleText:SetText("X-PLORE")
     frame.TitleText = titleText
 
-    -- Close button
+    -- Close button (15x15 icon texture from TitleButtonsTexture skin asset)
     local closeBtn = CreateFrame("Button", nil, titleBar)
-    closeBtn:SetSize(20, 20)
+    closeBtn:SetSize(15, 15)
     closeBtn:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
-    closeBtn:SetNormalFontObject(GameFontNormalSmall)
-    closeBtn:SetText("x")
-    closeBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
+    local closeTex = closeBtn:CreateTexture(nil, "ARTWORK")
+    closeTex:SetAllPoints()
+    closeTex:SetTexture(XP:SD("TitleButtonsTexture"))
+    closeTex:SetTexCoord(0, 0.25, 0, 0.5)  -- close sprite (row 1, col 1)
+    closeBtn.CloseTex = closeTex
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
-    closeBtn:SetScript("OnEnter", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("red_light"))
-    end)
-    closeBtn:SetScript("OnLeave", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
-    end)
+    closeBtn:SetScript("OnEnter", function(btn) XP.SetTexColor(btn.CloseTex, XP:ColorRGBA("red_light")) end)
+    closeBtn:SetScript("OnLeave", function(btn) XP.SetTexColor(btn.CloseTex, 1, 1, 1, 1) end)
     frame.CloseBtn = closeBtn
 
     -- Menu button (opens guide browser)
@@ -199,13 +198,14 @@ function XP:CreateViewerFrame()
     -- adds scroll-arrow buttons that bleed outside the frame on WotLK.
     ---------------------------------------------------------------
     local scrollTop    = toolbarY - self:Size("toolbar_height") - 1
-    local scrollBottom = self:Size("footer_height")
-    local scrollbarW   = 12  -- narrow internal scrollbar
+    local progressH    = 20   -- progress bar area height (between scroll and footer)
+    local footerH      = self:Size("footer_height")
+    local scrollbarW    = 12  -- narrow internal scrollbar
 
     -- ScrollFrame fills the content area (no right overhang)
     local scrollFrame = CreateFrame("ScrollFrame", "XPlore_ViewerScroll", frame)
     scrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, scrollTop)
-    scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(scrollbarW + 2), scrollBottom)
+    scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(scrollbarW + 2), footerH + progressH)
     frame.ScrollFrame = scrollFrame
 
     -- Mousewheel scrolling
@@ -231,7 +231,7 @@ function XP:CreateViewerFrame()
     local scrollBar = CreateFrame("Slider", nil, frame)
     scrollBar:SetWidth(scrollbarW)
     scrollBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, scrollTop)
-    scrollBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, scrollBottom)
+    scrollBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, footerH + progressH)
     scrollBar:SetOrientation("VERTICAL")
     scrollBar:SetMinMaxValues(0, 1)
     scrollBar:SetValue(0)
@@ -277,50 +277,20 @@ function XP:CreateViewerFrame()
     frame.ScrollChild = scrollChild
 
     ---------------------------------------------------------------
-    -- Footer (Auto-sync indicator + progress bar)
+    -- Progress Area (between scroll content and footer bar)
     ---------------------------------------------------------------
-    local footer = CreateFrame("Frame", nil, frame)
-    footer:SetHeight(self:Size("footer_height"))
-    footer:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-    footer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-    frame.Footer = footer
+    local progressArea = CreateFrame("Frame", nil, frame)
+    progressArea:SetHeight(progressH)
+    progressArea:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, footerH)
+    progressArea:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, footerH)
+    frame.ProgressArea = progressArea
 
-    frame.FooterBg = footer:CreateTexture(nil, "BACKGROUND")
-    frame.FooterBg:SetAllPoints()
-    XP.SetTexColor(frame.FooterBg, XP:ColorRGBA("bg_medium"))
-
-    -- Footer divider (at top of footer)
-    local footerDiv = footer:CreateTexture(nil, "ARTWORK")
-    footerDiv:SetHeight(1)
-    footerDiv:SetPoint("TOPLEFT", footer, "TOPLEFT", 0, 0)
-    footerDiv:SetPoint("TOPRIGHT", footer, "TOPRIGHT", 0, 0)
-    XP.SetTexColor(footerDiv, XP:ColorRGBA("border_dim"))
-
-    -- Auto-sync indicator
-    local syncDot = footer:CreateTexture(nil, "OVERLAY")
-    syncDot:SetSize(6, 6)
-    syncDot:SetPoint("LEFT", footer, "LEFT", 10, 0)
-    XP.SetTexColor(syncDot, XP:ColorRGBA("green"))
-    frame.SyncDot = syncDot
-
-    local syncText = footer:CreateFontString(nil, "OVERLAY")
-    syncText:SetPoint("LEFT", syncDot, "RIGHT", 4, 0)
-    self:ApplyFont(syncText, "small", "cyan_dark")
-    syncText:SetText("AUTO")
-    frame.SyncText = syncText
-
-    -- Progress percent
-    local pctText = footer:CreateFontString(nil, "OVERLAY")
-    pctText:SetPoint("RIGHT", footer, "RIGHT", -8, 0)
-    self:ApplyFont(pctText, "small", "cyan_dark")
-    pctText:SetText("0%")
-    frame.ProgressPercent = pctText
-
-    -- Progress bar
-    local progressBar = CreateFrame("StatusBar", nil, footer)
+    -- Progress bar (spans full width of progress area, vertically centered)
+    local progressBar = CreateFrame("StatusBar", nil, progressArea)
     progressBar:SetHeight(4)
-    progressBar:SetPoint("LEFT", syncText, "RIGHT", 10, 0)
-    progressBar:SetPoint("RIGHT", pctText, "LEFT", -10, 0)
+    progressBar:SetPoint("LEFT", progressArea, "LEFT", 10, 0)
+    progressBar:SetPoint("RIGHT", progressArea, "RIGHT", -10, 0)
+    progressBar:SetPoint("MIDDLE", progressArea, "MIDDLE", 0, 0)
     local pbarTex = XP:SD("ProgressBarTextureFile")
     if pbarTex then
         progressBar:SetStatusBarTexture(pbarTex)
@@ -343,6 +313,40 @@ function XP:CreateViewerFrame()
     local pbarBgColor = XP:SD("ProgressBarBackdropColor") or {0, 0, 0, 0.4}
     XP.SetTexColor(pbarBg, pbarBgColor[1], pbarBgColor[2], pbarBgColor[3], pbarBgColor[4])
     frame.ProgressBarBg = pbarBg
+
+    -- Progress percent (right side of progress area)
+    local pctText = progressArea:CreateFontString(nil, "OVERLAY")
+    pctText:SetPoint("RIGHT", progressArea, "RIGHT", -8, 0)
+    pctText:SetPoint("MIDDLE", progressArea, "MIDDLE", 0, 0)
+    self:ApplyFont(pctText, "small", "cyan_dark")
+    pctText:SetText("0%")
+    frame.ProgressPercent = pctText
+
+    ---------------------------------------------------------------
+    -- Footer (minimal — sync indicator only)
+    ---------------------------------------------------------------
+    local footer = CreateFrame("Frame", nil, frame)
+    footer:SetHeight(footerH)
+    footer:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+    footer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    frame.Footer = footer
+
+    frame.FooterBg = footer:CreateTexture(nil, "BACKGROUND")
+    frame.FooterBg:SetAllPoints()
+    XP.SetTexColor(frame.FooterBg, XP:ColorRGBA("bg_medium"))
+
+    -- Auto-sync indicator (centered in footer)
+    local syncDot = footer:CreateTexture(nil, "OVERLAY")
+    syncDot:SetSize(6, 6)
+    syncDot:SetPoint("CENTER", footer, "CENTER", -16, 0)
+    XP.SetTexColor(syncDot, XP:ColorRGBA("green"))
+    frame.SyncDot = syncDot
+
+    local syncText = footer:CreateFontString(nil, "OVERLAY")
+    syncText:SetPoint("LEFT", syncDot, "RIGHT", 4, 0)
+    self:ApplyFont(syncText, "small", "cyan_dark")
+    syncText:SetText("AUTO")
+    frame.SyncText = syncText
 
     ---------------------------------------------------------------
     -- Apply saved settings
@@ -398,8 +402,8 @@ function XP:CreateViewerFrame()
         if f.TitleText then
             XP:ApplyFont(f.TitleText, "bold", "cyan")
         end
-        if f.CloseBtn and f.CloseBtn:GetFontString() then
-            f.CloseBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
+        if f.CloseBtn and f.CloseBtn.CloseTex then
+            XP.SetTexColor(f.CloseBtn.CloseTex, 1, 1, 1, 1)
         end
         if f.MenuBtn and f.MenuBtn:GetNormalTexture() then
             f.MenuBtn:GetNormalTexture():SetVertexColor(XP:ColorRGBA("cyan_dark"))
@@ -480,50 +484,46 @@ local function CreateStepLine(parent, index)
     -- Background (set by status: active, complete, upcoming)
     XP:ApplyBackdrop(line, "panel", "bg_medium", "border_dim")
 
-    -- Left edge indicator (colored bar, 3px wide)
+    -- Left edge indicator (colored bar, 2px wide)
     local edge = line:CreateTexture(nil, "ARTWORK")
-    edge:SetWidth(3)
+    edge:SetWidth(2)
     edge:SetPoint("TOPLEFT", line, "TOPLEFT", 0, 0)
     edge:SetPoint("BOTTOMLEFT", line, "BOTTOMLEFT", 0, 0)
     XP.SetTexColor(edge, XP:ColorRGBA("cyan"))
     line.Edge = edge
 
-    -- Action icon
+    -- Action icon (14×14, left-aligned with vertical centering)
     local icon = line:CreateTexture(nil, "ARTWORK")
-    icon:SetSize(20, 20)
-    icon:SetPoint("TOPLEFT", line, "TOPLEFT", 10, -8)
+    icon:SetSize(14, 14)
+    icon:SetPoint("LEFT", line, "LEFT", 6, 0)
+    icon:SetPoint("MIDDLE", line, "MIDDLE", 0, 0)
     line.Icon = icon
 
-    -- Step title
+    -- Step number badge (small circle with number, left of title)
+    local stepNum = line:CreateFontString(nil, "OVERLAY")
+    stepNum:SetPoint("LEFT", icon, "RIGHT", 6, 0)
+    stepNum:SetWidth(16)
+    XP:ApplyFont(stepNum, "small", "text_dim")
+    stepNum:SetJustifyH("CENTER")
+    line.StepNum2 = stepNum
+
+    -- Step title (single line, takes remaining space)
     local title = line:CreateFontString(nil, "OVERLAY")
-    title:SetPoint("TOPLEFT", icon, "TOPRIGHT", 8, 0)
-    title:SetPoint("TOPRIGHT", line, "TOPRIGHT", -40, -6)
+    title:SetPoint("LEFT", stepNum, "RIGHT", 4, 0)
+    title:SetPoint("RIGHT", line, "RIGHT", -40, 0)
     title:SetJustifyH("LEFT")
-    title:SetJustifyV("TOP")
-    XP:ApplyFont(title, "normal", "text_bright")
+    title:SetJustifyV("MIDDLE")
+    title:SetNonSpaceWrap(false)
+    title:SetMaxLines(1)
+    XP:ApplyFont(title, "small", "text_bright")
     line.Title = title
 
-    -- Step description (smaller, muted)
-    local desc = line:CreateFontString(nil, "OVERLAY")
-    desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -3)
-    desc:SetPoint("TOPRIGHT", title, "BOTTOMRIGHT", 0, -3)
-    desc:SetJustifyH("LEFT")
-    desc:SetJustifyV("TOP")
-    desc:SetWordWrap(true)
-    XP:ApplyFont(desc, "small", "text_muted")
-    line.Desc = desc
-
-    -- Status indicator (checkbox area on right)
+    -- Status indicator (right side — shows check or progress)
     local status = line:CreateFontString(nil, "OVERLAY")
-    status:SetPoint("RIGHT", line, "RIGHT", -10, 0)
+    status:SetPoint("RIGHT", line, "RIGHT", -6, 0)
+    status:SetPoint("MIDDLE", line, "MIDDLE", 0, 0)
     XP:ApplyFont(status, "small", "text_dim")
     line.Status = status
-
-    -- Progress text (e.g., "3/8")
-    local progress = line:CreateFontString(nil, "OVERLAY")
-    progress:SetPoint("TOPRIGHT", line, "TOPRIGHT", -8, -8)
-    XP:ApplyFont(progress, "small", "cyan_dark")
-    line.Progress = progress
 
     line.stepIndex = index
 
@@ -609,7 +609,7 @@ function XP:UpdateViewer()
 
         -- Set content
         line.Title:SetText(step:GetTitle())
-        line.Desc:SetText(step:GetDescription())
+        line.StepNum2:SetText(i)
 
         -- Set icon (iconName may be a full WoW path or a bare name)
         local iconName = step:GetPrimaryIcon()
@@ -629,29 +629,23 @@ function XP:UpdateViewer()
             self:ApplyBackdrop(line, "panel", "step_complete", "border_dim")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("green"))
             line.Title:SetTextColor(XP:ColorRGBA("green"))
-            line.Status:SetText("Done")
+            line.StepNum2:SetTextColor(XP:ColorRGBA("green"))
+            line.Status:SetText(OK_CHAR)
             line.Status:SetTextColor(XP:ColorRGBA("green"))
-            line.Progress:SetText("")
         elseif i == currentStep then
             -- Active step (highlighted)
             self:ApplyBackdrop(line, "panel", "step_active", "cyan")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("cyan"))
             line.Title:SetTextColor(XP:ColorRGBA("text_bright"))
+            line.StepNum2:SetTextColor(XP:ColorRGBA("cyan"))
             line.Status:SetText("")
-
-            -- Show goal progress if available
-            if step.goals[1] then
-                line.Progress:SetText(step.goals[1]:GetProgressText())
-            else
-                line.Progress:SetText("")
-            end
         else
             -- Upcoming step
             self:ApplyBackdrop(line, "panel", "step_upcoming", "border_dim")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("text_dim"))
             line.Title:SetTextColor(XP:ColorRGBA("text_muted"))
+            line.StepNum2:SetTextColor(XP:ColorRGBA("text_dim"))
             line.Status:SetText("")
-            line.Progress:SetText("")
         end
 
         -- Click handler: go to this step

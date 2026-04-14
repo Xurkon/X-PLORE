@@ -10,7 +10,7 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------
-local DETAIL_WIDTH    = 260       -- width of the right detail panel
+local DETAIL_WIDTH    = 219       -- width of the right detail panel (matches Zygor)
 
 -----------------------------------------------------------------------
 -- State
@@ -85,48 +85,46 @@ function XP:CreateGuideMenu()
     frame.HeaderBg:SetAllPoints()
     XP.SetTexColor(frame.HeaderBg, XP:ColorRGBA("bg_deep"))
 
-    -- Logo
-    local logoIcon = header:CreateTexture(nil, "ARTWORK")
-    logoIcon:SetSize(20, 20)
-    logoIcon:SetPoint("LEFT", header, "LEFT", 12, 0)
-    logoIcon:SetTexture("Interface\\AddOns\\X-Plore\\textures\\logo")
-    frame.LogoIcon = logoIcon
-
+    -- Logo title text (no icon)
     local logoText = header:CreateFontString(nil, "OVERLAY")
-    logoText:SetPoint("LEFT", logoIcon, "RIGHT", 8, 0)
+    logoText:SetPoint("LEFT", header, "LEFT", 14, 0)
     self:ApplyFont(logoText, "bold", "cyan")
     logoText:SetText("X-PLORE")
     frame.LogoText = logoText
 
-    -- Header close button
+    -- Header close button (15x15 icon texture from TitleButtonsTexture skin asset)
     local closeBtn = CreateFrame("Button", nil, header)
-    closeBtn:SetSize(24, 24)
+    closeBtn:SetSize(15, 15)
     closeBtn:SetPoint("RIGHT", header, "RIGHT", -10, 0)
-    closeBtn:SetNormalFontObject(GameFontNormalSmall)
-    closeBtn:SetText("x")
-    closeBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
+    local closeTex = closeBtn:CreateTexture(nil, "ARTWORK")
+    closeTex:SetAllPoints()
+    closeTex:SetTexture(XP:SD("TitleButtonsTexture"))
+    -- Crop the "close" sprite (row 1, column 1 of titlebuttons-thin sheet)
+    closeTex:SetTexCoord(0, 0.25, 0, 0.5)
+    closeBtn.CloseTex = closeTex
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
-    closeBtn:SetScript("OnEnter", function(btn) btn:GetFontString():SetTextColor(XP:ColorRGBA("red_light")) end)
-    closeBtn:SetScript("OnLeave", function(btn) btn:GetFontString():SetTextColor(XP:ColorRGBA("red")) end)
+    closeBtn:SetScript("OnEnter", function(btn) XP.SetTexColor(btn.CloseTex, XP:ColorRGBA("red_light")) end)
+    closeBtn:SetScript("OnLeave", function(btn) XP.SetTexColor(btn.CloseTex, 1, 1, 1, 1) end)
     frame.CloseBtn = closeBtn
 
     -- Header Tab Buttons (Options lives in sidebar, not here)
+    -- Tabs are 70x24, starting at x=3 from left, spaced by tab width + 1px separator
     local tabNames = { "Home", "Current", "Recent" }
     local headerTabs = {}
-    local tabX = 120
+    local tabX = 3
     for i, tabName in ipairs(tabNames) do
         local tab = CreateFrame("Button", nil, header)
-        tab:SetSize(80, 40)
+        tab:SetSize(70, 24)
         tab:SetPoint("LEFT", header, "LEFT", tabX, 0)
         tab:SetNormalFontObject(GameFontNormalSmall)
         tab:SetText(tabName)
         tab:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
 
-        -- Active indicator (bottom line)
+        -- Active indicator (bottom line, width tracks text width + 6px padding)
         local indicator = tab:CreateTexture(nil, "ARTWORK")
         indicator:SetHeight(2)
-        indicator:SetPoint("BOTTOMLEFT", tab, "BOTTOMLEFT", 4, 0)
-        indicator:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -4, 0)
+        indicator:SetPoint("BOTTOM", tab, "BOTTOM", 0, 0)
+        indicator:SetWidth(tab:GetFontString():GetStringWidth() + 6)
         XP.SetTexColor(indicator, XP:ColorRGBA("cyan"))
         indicator:Hide()
         tab.Indicator = indicator
@@ -144,7 +142,7 @@ function XP:CreateGuideMenu()
         end)
 
         headerTabs[tabName:lower()] = tab
-        tabX = tabX + 85
+        tabX = tabX + 71  -- 70px tab + 1px gap
     end
     frame.HeaderTabs = headerTabs
 
@@ -167,11 +165,11 @@ function XP:CreateGuideMenu()
 
     -- Search box
     local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", sidebar, "InputBoxTemplate")
-    searchBox:SetSize(sideW - 8, 22)
-    searchBox:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 4, -13)
+    searchBox:SetSize(sideW - 32, 18)
+    searchBox:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 16, -10)
     searchBox:SetAutoFocus(false)
     searchBox:SetMaxLetters(50)
-    self:ApplyFont(searchBox, "small", "text_normal")
+    self:ApplyFont(searchBox, "normal", "text_normal")
     searchBox:SetScript("OnEscapePressed", function(self_eb) self_eb:ClearFocus() end)
     searchBox:SetScript("OnEnterPressed", function(self_eb)
         local text = self_eb:GetText()
@@ -191,8 +189,8 @@ function XP:CreateGuideMenu()
 
     -- Search background texture from skin
     local searchBgTex = sidebar:CreateTexture(nil, "BACKGROUND")
-    searchBgTex:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  4, -4)
-    searchBgTex:SetPoint("BOTTOMRIGHT", sidebar, "TOPLEFT", sideW - 8, -38)
+    searchBgTex:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  12, -5)
+    searchBgTex:SetPoint("BOTTOMRIGHT", sidebar, "TOPLEFT", sideW - 12, -32)
     local sBgPath = XP:SD("GuideMenuSearchTexture")
     if sBgPath then searchBgTex:SetTexture(sBgPath) end
     local sBgColor = XP:SD("GuideMenuSearchEdit")
@@ -201,19 +199,19 @@ function XP:CreateGuideMenu()
     end
     frame.SearchBg = searchBgTex
 
-    -- Also handle the search box border via a custom thin line instead
+    -- Thin 1px bottom border under search box
     local sbBorder = sidebar:CreateTexture(nil, "ARTWORK")
     sbBorder:SetHeight(1)
-    sbBorder:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  4, -34)
-    sbBorder:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", -4, -34)
+    sbBorder:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  12, -32)
+    sbBorder:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", -12, -32)
     XP.SetTexColor(sbBorder, XP:ColorRGBA("border_dim"))
     frame.SearchBorder = sbBorder
 
     -- Search divider
     local searchDivider = sidebar:CreateTexture(nil, "ARTWORK")
     searchDivider:SetHeight(1)
-    searchDivider:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 0, -48)
-    searchDivider:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", 0, -48)
+    searchDivider:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 0, -44)
+    searchDivider:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", 0, -44)
     XP.SetTexColor(searchDivider, XP:ColorRGBA("border_dim"))
 
     -- Category buttons (populated dynamically)
@@ -242,7 +240,7 @@ function XP:CreateGuideMenu()
 
     -- Section header (back arrow + category name)
     local sectionHeader = CreateFrame("Frame", nil, centerCol)
-    sectionHeader:SetHeight(36)
+    sectionHeader:SetHeight(22)
     sectionHeader:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, 0)
     sectionHeader:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, 0)
     frame.SectionHeader = sectionHeader
@@ -254,8 +252,8 @@ function XP:CreateGuideMenu()
 
     -- Back button
     local backBtn = CreateFrame("Button", nil, sectionHeader)
-    backBtn:SetSize(24, 24)
-    backBtn:SetPoint("LEFT", sectionHeader, "LEFT", 8, 0)
+    backBtn:SetSize(12, 12)
+    backBtn:SetPoint("LEFT", sectionHeader, "LEFT", 10, 0)
     backBtn:SetNormalFontObject(GameFontNormalSmall)
     backBtn:SetText("<")
     backBtn:GetFontString():SetTextColor(XP:ColorRGBA("cyan"))
@@ -279,8 +277,8 @@ function XP:CreateGuideMenu()
     -- Section divider
     local sectionDiv = centerCol:CreateTexture(nil, "ARTWORK")
     sectionDiv:SetHeight(1)
-    sectionDiv:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, -36)
-    sectionDiv:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, -36)
+    sectionDiv:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, -22)
+    sectionDiv:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, -22)
     XP.SetTexColor(sectionDiv, XP:ColorRGBA("border_dim"))
     frame.SectionDivider = sectionDiv
 
@@ -290,7 +288,7 @@ function XP:CreateGuideMenu()
     ---------------------------------------------------------------
     local listScrollbarW = 12
     local listArea = CreateFrame("ScrollFrame", "XPlore_GuideMenuScroll", centerCol)
-    listArea:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, -37)
+    listArea:SetPoint("TOPLEFT", centerCol, "TOPLEFT", 0, -23)
     listArea:SetPoint("BOTTOMRIGHT", centerCol, "BOTTOMRIGHT", -(listScrollbarW + 2), 0)
     frame.ListScroll = listArea
 
@@ -310,7 +308,7 @@ function XP:CreateGuideMenu()
 
     local listScrollBar = CreateFrame("Slider", nil, centerCol)
     listScrollBar:SetWidth(listScrollbarW)
-    listScrollBar:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, -37)
+    listScrollBar:SetPoint("TOPRIGHT", centerCol, "TOPRIGHT", 0, -23)
     listScrollBar:SetPoint("BOTTOMRIGHT", centerCol, "BOTTOMRIGHT", 0, 0)
     listScrollBar:SetOrientation("VERTICAL")
     listScrollBar:SetMinMaxValues(0, 1)
@@ -374,7 +372,9 @@ function XP:CreateGuideMenu()
     -- Options View (inline, themed — shown when Options tab clicked)
     ---------------------------------------------------------------
     local optionsView = CreateFrame("Frame", nil, centerCol)
-    optionsView:SetAllPoints(centerCol)
+    -- Anchor below section header so it doesn't overlap the header bar
+    optionsView:SetPoint("TOPLEFT", frame.SectionHeader, "BOTTOMLEFT", 0, -1)
+    optionsView:SetPoint("BOTTOMRIGHT", centerCol, "BOTTOMRIGHT", 0, 0)
     optionsView:Hide()
     frame.OptionsView = optionsView
 
@@ -555,8 +555,11 @@ function XP:CreateGuideMenu()
                     btn.SelectionHighlight:SetTexture(XP:SD("SelectionTexture"))
                     btn.SelectionHighlight:Hide()
                 end
+                if btn.LeftDecor then
+                    XP.SetTexColor(btn.LeftDecor, XP:ColorRGBA("cyan"))
+                end
                 if btn.Text then
-                    XP:ApplyFont(btn.Text, "small", "text_normal")
+                    XP:ApplyFont(btn.Text, "normal", "text_normal")
                 end
                 if btn.CountBadge then
                     XP:ApplyFont(btn.CountBadge, "small", "text_dim")
@@ -574,9 +577,6 @@ function XP:CreateGuideMenu()
                 end
                 if row.Title then
                     XP:ApplyFont(row.Title, "normal", "text_bright")
-                end
-                if row.Subtitle then
-                    XP:ApplyFont(row.Subtitle, "small", "text_dim")
                 end
             end
         end
@@ -611,14 +611,14 @@ function XP:CreateCategoryButtons(sidebar)
         -- Category icon
         local icon = btn:CreateTexture(nil, "ARTWORK")
         icon:SetSize(16, 16)
-        icon:SetPoint("LEFT", btn, "LEFT", 12, 0)
+        icon:SetPoint("LEFT", btn, "LEFT", 11, 0)
         icon:SetTexture(GetCategoryIconPath(cat))
         btn.Icon = icon
 
-        -- Category name
+        -- Category name (normal font, not small)
         local text = btn:CreateFontString(nil, "OVERLAY")
         text:SetPoint("LEFT", icon, "RIGHT", 8, 0)
-        self:ApplyFont(text, "small", "text_normal")
+        self:ApplyFont(text, "normal", "text_normal")
         text:SetText(cat.name)
         btn.Text = text
 
@@ -627,6 +627,15 @@ function XP:CreateCategoryButtons(sidebar)
         countBadge:SetPoint("RIGHT", btn, "RIGHT", -10, 0)
         self:ApplyFont(countBadge, "small", "text_dim")
         btn.CountBadge = countBadge
+
+        -- LeftDecor: 2px vertical bar on left edge (shown when active category)
+        local leftDecor = btn:CreateTexture(nil, "OVERLAY")
+        leftDecor:SetWidth(2)
+        leftDecor:SetPoint("TOPLEFT", btn, "TOPLEFT", 0, 0)
+        leftDecor:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
+        XP.SetTexColor(leftDecor, XP:ColorRGBA("cyan"))
+        leftDecor:Hide()
+        btn.LeftDecor = leftDecor
 
         -- Hover highlight
         btn:SetScript("OnEnter", function(self_btn)
@@ -707,7 +716,7 @@ end
 function XP:CreateGuideRows(parent)
     for i = 1, MAX_GUIDE_ROWS do
         local row = XP.CreateBackdropFrame("Button", nil, parent)
-        row:SetHeight(36)
+        row:SetHeight(26)
         row:Hide()
 
         self:ApplyBackdrop(row, "none", "bg_deep")
@@ -719,30 +728,23 @@ function XP:CreateGuideRows(parent)
         selHl:Hide()
         row.SelectionHighlight = selHl
 
-        -- Icon
+        -- Icon (15x15, bottom-aligned, matching Zygor)
         local icon = row:CreateTexture(nil, "ARTWORK")
-        icon:SetSize(20, 20)
-        icon:SetPoint("LEFT", row, "LEFT", 12, 0)
+        icon:SetSize(15, 15)
+        icon:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 12, 5)
         row.Icon = icon
 
-        -- Title
+        -- Title (vertically centered, no subtitle below)
         local title = row:CreateFontString(nil, "OVERLAY")
-        title:SetPoint("LEFT", icon, "RIGHT", 10, 2)
-        title:SetPoint("RIGHT", row, "RIGHT", -80, 2)
+        title:SetPoint("LEFT", icon, "RIGHT", 8, 0)
+        title:SetPoint("RIGHT", row, "RIGHT", -70, 0)
         title:SetJustifyH("LEFT")
         self:ApplyFont(title, "normal", "text_bright")
         row.Title = title
 
-        -- Subtitle (faction, expansion)
-        local subtitle = row:CreateFontString(nil, "OVERLAY")
-        subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -1)
-        subtitle:SetJustifyH("LEFT")
-        self:ApplyFont(subtitle, "small", "text_dim")
-        row.Subtitle = subtitle
-
-        -- Load button
+        -- Load button (hidden by default, shown on hover)
         local loadBtn = CreateFrame("Button", nil, row)
-        loadBtn:SetSize(60, 22)
+        loadBtn:SetSize(60, 20)
         loadBtn:SetPoint("RIGHT", row, "RIGHT", -10, 0)
         loadBtn:SetNormalFontObject(GameFontNormalSmall)
         loadBtn:SetText("Load")
@@ -753,14 +755,17 @@ function XP:CreateGuideRows(parent)
         loadBtn:SetScript("OnLeave", function(btn)
             btn:GetFontString():SetTextColor(XP:ColorRGBA("cyan"))
         end)
+        loadBtn:Hide()
         row.LoadBtn = loadBtn
 
-        -- Hover
+        -- Hover: show selection highlight + load button
         row:SetScript("OnEnter", function(self_row)
             if self_row.SelectionHighlight then self_row.SelectionHighlight:Show() end
+            if self_row.LoadBtn then self_row.LoadBtn:Show() end
         end)
         row:SetScript("OnLeave", function(self_row)
             if self_row.SelectionHighlight then self_row.SelectionHighlight:Hide() end
+            if self_row.LoadBtn then self_row.LoadBtn:Hide() end
         end)
 
         -- Divider
@@ -1375,13 +1380,39 @@ function XP:MenuNavigate(view, param)
     if frame.OptionsView   then frame.OptionsView:Hide()   end
     if frame.AboutView     then frame.AboutView:Hide()     end
 
-    -- Update sidebar highlight (selection texture for active, hide for inactive)
+    -- Options/About/Home take full width — hide detail column and expand center
+    local fullWidth = (view == "options" or view == "about" or view == "home")
+    if frame.DetailColumn then
+        if fullWidth then
+            frame.DetailColumn:Hide()
+        else
+            frame.DetailColumn:Show()
+        end
+    end
+    if frame.CenterColumn then
+        frame.CenterColumn:ClearAllPoints()
+        local sidebar = frame.Sidebar or frame.SideBar
+        if sidebar then
+            frame.CenterColumn:SetPoint("TOPLEFT", sidebar, "TOPRIGHT", 1, 0)
+        else
+            frame.CenterColumn:SetPoint("TOPLEFT", frame, "TOPLEFT", (XP:SD("SidebarWidth") or 222) + 1, -41)
+        end
+        if fullWidth then
+            frame.CenterColumn:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        else
+            frame.CenterColumn:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(DETAIL_WIDTH + 1), 0)
+        end
+    end
+
+    -- Update sidebar highlight (selection texture + LeftDecor for active, hide for inactive)
     for id, btn in pairs(categoryButtons) do
         if id == param then
             if btn.SelectionHighlight then btn.SelectionHighlight:Show() end
+            if btn.LeftDecor then btn.LeftDecor:Show() end
             btn.Text:SetTextColor(XP:ColorRGBA("cyan"))
         else
             if btn.SelectionHighlight then btn.SelectionHighlight:Hide() end
+            if btn.LeftDecor then btn.LeftDecor:Hide() end
             btn.Text:SetTextColor(XP:ColorRGBA("text_normal"))
         end
     end
@@ -1499,7 +1530,7 @@ function XP:PopulateGuideList(guides)
     end
 
     local yOffset = 0
-    local rowHeight = 36
+    local rowHeight = 26
 
     for i, guide in ipairs(guides) do
         if i > MAX_GUIDE_ROWS then break end
@@ -1517,12 +1548,6 @@ function XP:PopulateGuideList(guides)
 
         -- Set title
         row.Title:SetText(guide.title or guide.titleShort or "Untitled")
-
-        -- Set subtitle
-        local parts = {}
-        if guide.faction then table.insert(parts, guide.faction) end
-        if guide.expansion then table.insert(parts, guide.expansion) end
-        row.Subtitle:SetText(table.concat(parts, " - "))
 
         -- Load button handler: route through Tabs system
         row.LoadBtn:SetScript("OnClick", function()
