@@ -116,9 +116,9 @@ function XP:CreateViewerFrame()
     tabContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -self:Size("titlebar_height") - 1)
     tabContainer:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -self:Size("titlebar_height") - 1)
 
-    local tabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
-    tabBg:SetAllPoints()
-    XP.SetTexColor(tabBg, 0, 0, 0, 0.3)
+    frame.TabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
+    frame.TabBg:SetAllPoints()
+    XP.SetTexColor(frame.TabBg, XP:ColorRGBA("bg_medium"))
     frame.TabContainer = tabContainer
 
     -- Tab divider
@@ -135,9 +135,9 @@ function XP:CreateViewerFrame()
     toolbar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, toolbarY)
     frame.Toolbar = toolbar
 
-    local toolbarBg = toolbar:CreateTexture(nil, "BACKGROUND")
-    toolbarBg:SetAllPoints()
-    XP.SetTexColor(toolbarBg, XP:ColorRGBA("bg_medium"))
+    frame.ToolbarBg = toolbar:CreateTexture(nil, "BACKGROUND")
+    frame.ToolbarBg:SetAllPoints()
+    XP.SetTexColor(frame.ToolbarBg, XP:ColorRGBA("bg_medium"))
 
     -- Prev button
     local prevBtn = CreateFrame("Button", nil, toolbar)
@@ -264,9 +264,9 @@ function XP:CreateViewerFrame()
     footer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
     frame.Footer = footer
 
-    local footerBg = footer:CreateTexture(nil, "BACKGROUND")
-    footerBg:SetAllPoints()
-    XP.SetTexColor(footerBg, XP:ColorRGBA("bg_medium"))
+    frame.FooterBg = footer:CreateTexture(nil, "BACKGROUND")
+    frame.FooterBg:SetAllPoints()
+    XP.SetTexColor(frame.FooterBg, XP:ColorRGBA("bg_medium"))
 
     -- Footer divider (at top of footer)
     local footerDiv = footer:CreateTexture(nil, "ARTWORK")
@@ -331,6 +331,21 @@ function XP:CreateViewerFrame()
 
         -- Main frame backdrop
         XP:ApplyBackdrop(f, "main", "bg_deep", "border")
+
+        -- Tab bar background
+        if f.TabBg then
+            XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
+        end
+
+        -- Toolbar background
+        if f.ToolbarBg then
+            XP.SetTexColor(f.ToolbarBg, XP:ColorRGBA("bg_medium"))
+        end
+
+        -- Footer background
+        if f.FooterBg then
+            XP.SetTexColor(f.FooterBg, XP:ColorRGBA("bg_medium"))
+        end
 
         -- Title bar elements
         if f.LogoIcon then
@@ -530,9 +545,16 @@ function XP:UpdateViewer()
         line.Title:SetText(step:GetTitle())
         line.Desc:SetText(step:GetDescription())
 
-        -- Set icon
+        -- Set icon (iconName may be a full WoW path or a bare name)
         local iconName = step:GetPrimaryIcon()
-        local iconPath = XP.ICON_PATH .. iconName .. ".tga"
+        local iconPath
+        if iconName and (iconName:find("^Interface") or iconName:find("^interface")) then
+            iconPath = iconName
+        elseif iconName and iconName ~= "" then
+            iconPath = XP.ICON_PATH .. iconName .. ".tga"
+        else
+            iconPath = nil
+        end
         line.Icon:SetTexture(iconPath)
 
         -- Style based on status

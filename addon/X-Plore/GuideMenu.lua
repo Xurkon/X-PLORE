@@ -81,9 +81,9 @@ function XP:CreateGuideMenu()
     header:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
     frame.Header = header
 
-    local headerBg = header:CreateTexture(nil, "BACKGROUND")
-    headerBg:SetAllPoints()
-    XP.SetTexColor(headerBg, 0.02, 0.04, 0.08, 1.0)
+    frame.HeaderBg = header:CreateTexture(nil, "BACKGROUND")
+    frame.HeaderBg:SetAllPoints()
+    XP.SetTexColor(frame.HeaderBg, XP:ColorRGBA("bg_deep"))
 
     -- Logo
     local logoIcon = header:CreateTexture(nil, "ARTWORK")
@@ -157,9 +157,9 @@ function XP:CreateGuideMenu()
     sidebar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
     frame.Sidebar = sidebar
 
-    local sidebarBg = sidebar:CreateTexture(nil, "BACKGROUND")
-    sidebarBg:SetAllPoints()
-    XP.SetTexColor(sidebarBg, 0.03, 0.05, 0.10, 0.95)
+    frame.SidebarBg = sidebar:CreateTexture(nil, "BACKGROUND")
+    frame.SidebarBg:SetAllPoints()
+    XP.SetTexColor(frame.SidebarBg, XP:ColorRGBA("bg_deep"))
 
     -- Search box
     local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", sidebar, "InputBoxTemplate")
@@ -365,6 +365,16 @@ function XP:CreateGuideMenu()
 
         -- Main frame backdrop
         XP:ApplyBackdrop(f, "main", "bg_deep", "border_bright")
+
+        -- Header background
+        if f.HeaderBg then
+            XP.SetTexColor(f.HeaderBg, XP:ColorRGBA("bg_deep"))
+        end
+
+        -- Sidebar background
+        if f.SidebarBg then
+            XP.SetTexColor(f.SidebarBg, XP:ColorRGBA("bg_deep"))
+        end
 
         -- Header: logo, close button, tab indicators
         if f.HeaderTabs then
