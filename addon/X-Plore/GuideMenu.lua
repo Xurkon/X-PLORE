@@ -178,6 +178,19 @@ function XP:CreateGuideMenu()
     end)
     frame.SearchBox = searchBox
 
+    -- Hide InputBoxTemplate built-in textures (grey border/glow artifacts on WotLK)
+    for _, texName in ipairs({ "Left", "Right", "Mid", "Background",
+                                "FocusLeft", "FocusRight", "FocusMid" }) do
+        local t = searchBox[texName] or _G["XPlore_GuideMenuSearch" .. texName]
+        if t and t.Hide then t:Hide() end
+    end
+    -- Also handle the search box border via a custom thin line instead
+    local sbBorder = sidebar:CreateTexture(nil, "ARTWORK")
+    sbBorder:SetHeight(1)
+    sbBorder:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  4, -34)
+    sbBorder:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", -4, -34)
+    XP.SetTexColor(sbBorder, XP:ColorRGBA("border_dim"))
+
     -- Search divider
     local searchDivider = sidebar:CreateTexture(nil, "ARTWORK")
     searchDivider:SetHeight(1)
@@ -202,6 +215,12 @@ function XP:CreateGuideMenu()
     centerCol:SetPoint("TOPLEFT", sidebar, "TOPRIGHT", 1, 0)
     centerCol:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(DETAIL_WIDTH + 1), 0)
     frame.CenterColumn = centerCol
+
+    -- Center column background
+    local centerBg = centerCol:CreateTexture(nil, "BACKGROUND")
+    centerBg:SetAllPoints()
+    XP.SetTexColor(centerBg, XP:ColorRGBA("bg_deep"))
+    frame.CenterBg = centerBg
 
     -- Section header (back arrow + category name)
     local sectionHeader = CreateFrame("Frame", nil, centerCol)
@@ -287,6 +306,7 @@ function XP:CreateGuideMenu()
         listArea:SetVerticalScroll(val)
     end)
     listArea.ScrollBar = listScrollBar
+    frame.ListScrollBar = listScrollBar
     listArea:SetScript("OnScrollRangeChanged", function(sf, xRange, yRange)
         local maxScroll = yRange or sf:GetVerticalScrollRange()
         listScrollBar:SetMinMaxValues(0, math.max(0, maxScroll))
@@ -315,6 +335,10 @@ function XP:CreateGuideMenu()
     ---------------------------------------------------------------
     local homeView = CreateFrame("Frame", nil, centerCol)
     homeView:SetAllPoints(centerCol)
+    -- Solid bg so list/scrollbar beneath don't bleed through
+    local homeViewBg = homeView:CreateTexture(nil, "BACKGROUND")
+    homeViewBg:SetAllPoints()
+    XP.SetTexColor(homeViewBg, XP:ColorRGBA("bg_deep"))
     frame.HomeView = homeView
 
     self:CreateHomeView(homeView)
@@ -374,6 +398,11 @@ function XP:CreateGuideMenu()
         -- Sidebar background
         if f.SidebarBg then
             XP.SetTexColor(f.SidebarBg, XP:ColorRGBA("bg_deep"))
+        end
+
+        -- Center column background
+        if f.CenterBg then
+            XP.SetTexColor(f.CenterBg, XP:ColorRGBA("bg_deep"))
         end
 
         -- Header: logo, close button, tab indicators
@@ -1204,9 +1233,10 @@ function XP:MenuNavigate(view, param)
     -- Hide everything first
     if frame.HomeView    then frame.HomeView:Hide()    end
     if frame.SectionHeader then frame.SectionHeader:Hide() end
-    if frame.ListScroll  then frame.ListScroll:Hide()  end
-    if frame.OptionsView then frame.OptionsView:Hide() end
-    if frame.AboutView   then frame.AboutView:Hide()   end
+    if frame.ListScroll    then frame.ListScroll:Hide()    end
+    if frame.ListScrollBar then frame.ListScrollBar:Hide() end
+    if frame.OptionsView   then frame.OptionsView:Hide()   end
+    if frame.AboutView     then frame.AboutView:Hide()     end
 
     -- Update sidebar highlight
     for id, btn in pairs(categoryButtons) do
@@ -1232,6 +1262,7 @@ function XP:MenuNavigate(view, param)
         currentCategory = param
         frame.SectionHeader:Show()
         frame.ListScroll:Show()
+        if frame.ListScrollBar then frame.ListScrollBar:Show() end
         frame.HomeView:Hide()
 
         local cat = self:GetCategory(param)
@@ -1247,6 +1278,7 @@ function XP:MenuNavigate(view, param)
         currentCategory = nil
         frame.SectionHeader:Show()
         frame.ListScroll:Show()
+        if frame.ListScrollBar then frame.ListScrollBar:Show() end
         frame.HomeView:Hide()
         frame.SectionName:SetText("Current Guide")
 
@@ -1262,6 +1294,7 @@ function XP:MenuNavigate(view, param)
         currentCategory = nil
         frame.SectionHeader:Show()
         frame.ListScroll:Show()
+        if frame.ListScrollBar then frame.ListScrollBar:Show() end
         frame.HomeView:Hide()
         frame.SectionName:SetText("Recent Guides")
         frame.GuideCount:SetText("0 guides")
