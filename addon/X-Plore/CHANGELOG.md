@@ -4,6 +4,62 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Session 16 — 2026-04-14
+
+### Skin System — Selection Highlights, Tab Decoration, Re-skin Audit
+
+#### GuideMenu.lua
+
+- **selection.tga hover/active highlight on category buttons** (`CreateCategoryButtons`):
+  - Each button now has `btn.SelectionHighlight` (OVERLAY texture, `SetAllPoints`, initially hidden)
+  - `OnEnter`: show highlight + use `cyan_light` text color (if not active category)
+  - `OnLeave`: hide highlight + restore `text_normal` (if not active category)
+  - `MenuNavigate` sidebar block replaced `SetBackdropColor` calls with `SelectionHighlight:Show()/Hide()`; active category button keeps highlight shown + text set to `cyan`
+
+- **selection.tga hover highlight on guide rows** (`CreateGuideRows`):
+  - Each row now has `row.SelectionHighlight` (OVERLAY texture, `SetAllPoints`, initially hidden)
+  - `OnEnter`: show highlight; `OnLeave`: hide highlight
+
+- **Sidebar background now uses `GuideMenuMenuBackground` SD key** (`#2B2B2BFF`) instead of `bg_deep` (`#111111`), creating proper visual separation from the center panel.
+
+- **New frame references stored for re-skin**:
+  - `frame.HomeView.HomeViewBg` — home view background texture
+  - `detailCol.DetailBorderL` and `detailCol.DetailBg` — detail column textures
+  - `frame.HeaderDivider` — header divider (was missing from subscriber)
+  - `frame.SectionHeaderBg` and `frame.SectionDivider` — section header elements
+
+- **Re-skin subscriber fully audited and expanded**:
+  - `HeaderDivider` re-skinned with `border` color
+  - `SidebarBg` now uses `GuideMenuMenuBackground` SD key
+  - `HomeView.HomeViewBg` re-skinned with `bg_deep`
+  - Detail column block (`dc`): covers `DetailBorderL`, `DetailBg`, `DetailScrollTrack`, `DetailScrollThumb`, `EmptyMsg`, `DetailTitle`, `DetailInfo`, `DetailDesc`, `DetailSteps`, `DetailExpansion`, `DetailLoadBtn` (backdrop + label) — all in one merged block
+  - `SectionHeaderBg` + `SectionDivider` re-skinned
+  - Category buttons: `SelectionHighlight` texture updated + hidden on skin switch
+  - Guide rows: `SelectionHighlight` texture updated + hidden on skin switch
+  - Removed duplicate `dc` block (was causing re-skin issues)
+
+#### Viewer.lua
+
+- **`viewer8-tabs.tga` decoration applied to tab container**:
+  - `frame.TabDecorTex` texture (ARTWORK layer, `SetAllPoints`)
+  - Shown when `XP:SD("TabsDecor") == true` (STARLIGHT skin), hidden when false (MIDNIGHT, STEALTH)
+  - Re-skin subscriber updates texture path and toggles show/hide based on `TabsDecor` SD key
+
+- **New divider frame references stored**:
+  - `frame.TitleDivider`, `frame.TabDivider`, `frame.ToolbarDivider` (were not persisted before, so could not be re-skinned)
+
+- **Re-skin subscriber updated**:
+  - `TitleDivider` uses `border` color
+  - `TabDivider` uses `border_dim` color
+  - `ToolbarDivider` uses `border_dim` color
+  - Tab decor block: sets texture path, shows/hides based on `TabsDecor` key
+
+### Commit
+
+- **4ed6aeb** — `feat: selection.tga highlights, viewer8-tabs decor, full re-skin subscriber audit`
+
+---
+
 ## [Unreleased] — Session 15 — 2026-04-14
 
 ### Bug Fixes / Skin System Completion
