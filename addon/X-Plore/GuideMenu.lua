@@ -29,7 +29,11 @@ local function ResolveIconPath(iconName)
     if iconName:match("Interface") then
         return iconName
     end
-    return "Interface\\AddOns\\X-Plore\\textures\\icons\\" .. iconName .. ".tga"
+    local p = XP.ICON_PATH .. iconName
+    if not p:match("%.tga$") and not p:match("%.blp$") then
+        p = p .. ".tga"
+    end
+    return p
 end
 
 -- Resolve a category's icon to a full texture path.
@@ -288,14 +292,14 @@ function XP:CreateGuideMenu()
     centerCol:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(DETAIL_WIDTH + 1), 0)
     frame.CenterColumn = centerCol
 
-    -- Center column background (SAME color as sidebar per Zygor)
+    -- Center column background (darker than sidebar per Zygor)
     local centerBg = centerCol:CreateTexture(nil, "BACKGROUND")
     centerBg:SetAllPoints()
-    local _cBgC = XP:SD("GuideMenuMenuBackground")
+    local _cBgC = XP:SD("GuideMenuContentBackground")
     if _cBgC then
         XP.SetTexColor(centerBg, _cBgC[1], _cBgC[2], _cBgC[3], _cBgC[4])
     else
-        XP.SetTexColor(centerBg, 0.169, 0.169, 0.169, 0.95)
+        XP.SetTexColor(centerBg, 0.125, 0.125, 0.125, 0.95)
     end
     frame.CenterBg = centerBg
 
@@ -308,7 +312,7 @@ function XP:CreateGuideMenu()
 
     local sectionBg = sectionHeader:CreateTexture(nil, "BACKGROUND")
     sectionBg:SetAllPoints()
-    XP.SetTexColor(sectionBg, XP:ColorRGBA("bg_medium"))
+    XP.SetTexColor(sectionBg, XP:ColorRGBA("bg_deep"))
     frame.SectionHeaderBg = sectionBg
 
     -- Back button
@@ -423,7 +427,12 @@ function XP:CreateGuideMenu()
     -- Solid bg so list/scrollbar beneath don't bleed through
     local homeViewBg = homeView:CreateTexture(nil, "BACKGROUND")
     homeViewBg:SetAllPoints()
-    XP.SetTexColor(homeViewBg, XP:ColorRGBA("bg_deep"))
+    local _hBgC = XP:SD("GuideMenuContentBackground")
+    if _hBgC then
+        XP.SetTexColor(homeViewBg, _hBgC[1], _hBgC[2], _hBgC[3], _hBgC[4])
+    else
+        XP.SetTexColor(homeViewBg, 0.125, 0.125, 0.125, 0.95)
+    end
     homeView.HomeViewBg = homeViewBg
     frame.HomeView = homeView
 
@@ -459,7 +468,12 @@ function XP:CreateGuideMenu()
 
     local detailBg = detailCol:CreateTexture(nil, "BACKGROUND")
     detailBg:SetAllPoints()
-    XP.SetTexColor(detailBg, XP:ColorRGBA("bg_medium"))
+    local _dBgC = XP:SD("GuideMenuMenuBackground")
+    if _dBgC then
+        XP.SetTexColor(detailBg, _dBgC[1], _dBgC[2], _dBgC[3], _dBgC[4])
+    else
+        XP.SetTexColor(detailBg, 0.169, 0.169, 0.169, 0.95)
+    end
     detailCol.DetailBg = detailBg
 
     self:CreateDetailPanel(detailCol)
@@ -498,12 +512,14 @@ function XP:CreateGuideMenu()
 
         -- Center column background
         if f.CenterBg then
-            XP.SetTexColor(f.CenterBg, XP:ColorRGBA("bg_deep"))
+            local cBgC = XP:SD("GuideMenuContentBackground") or {XP:ColorRGBA("bg_medium")}
+            XP.SetTexColor(f.CenterBg, cBgC[1], cBgC[2], cBgC[3], cBgC[4])
         end
 
         -- Home view background
         if f.HomeView and f.HomeView.HomeViewBg then
-            XP.SetTexColor(f.HomeView.HomeViewBg, XP:ColorRGBA("bg_deep"))
+            local hBgC = XP:SD("GuideMenuContentBackground") or {XP:ColorRGBA("bg_medium")}
+            XP.SetTexColor(f.HomeView.HomeViewBg, hBgC[1], hBgC[2], hBgC[3], hBgC[4])
         end
 
         -- Detail column border, background, scrollbar, and panel elements
@@ -513,7 +529,8 @@ function XP:CreateGuideMenu()
                 XP.SetTexColor(dc.DetailBorderL, XP:ColorRGBA("border_dim"))
             end
             if dc.DetailBg then
-                XP.SetTexColor(dc.DetailBg, XP:ColorRGBA("bg_medium"))
+                local dBgC = XP:SD("GuideMenuMenuBackground") or {XP:ColorRGBA("bg_medium")}
+                XP.SetTexColor(dc.DetailBg, dBgC[1], dBgC[2], dBgC[3], dBgC[4])
             end
             if dc.DetailScrollTrack then
                 local dsbtc = XP:SD("ScrollBackColor") or {0, 0, 0, 0.3}
@@ -590,7 +607,7 @@ function XP:CreateGuideMenu()
 
         -- Section header background + divider
         if f.SectionHeaderBg then
-            XP.SetTexColor(f.SectionHeaderBg, XP:ColorRGBA("bg_medium"))
+            XP.SetTexColor(f.SectionHeaderBg, XP:ColorRGBA("bg_deep"))
         end
         if f.SectionDivider then
             XP.SetTexColor(f.SectionDivider, XP:ColorRGBA("border_dim"))
@@ -611,7 +628,13 @@ function XP:CreateGuideMenu()
         -- Category buttons (live in categoryButtons table)
         for _, btn in pairs(categoryButtons) do
             if btn then
-                XP:ApplyBackdrop(btn, "none", "bg_deep")
+                XP:ApplyBackdrop(btn, "none", "bg_medium")
+                if btn.Icon then
+                    local cat = btn.categoryID and XP:GetCategory(btn.categoryID)
+                    if cat then
+                        btn.Icon:SetTexture(GetCategoryIconPath(cat))
+                    end
+                end
                 if btn.SelectionHighlight then
                     btn.SelectionHighlight:SetTexture(XP:SD("SelectionTexture"))
                     btn.SelectionHighlight:Hide()
@@ -631,7 +654,7 @@ function XP:CreateGuideMenu()
         -- Guide rows (live in guideRows table)
         for _, row in pairs(guideRows) do
             if row then
-                XP:ApplyBackdrop(row, "none", "bg_deep")
+                XP:ApplyBackdrop(row, "none", "bg_medium")
                 if row.SelectionHighlight then
                     row.SelectionHighlight:SetTexture(XP:SD("SelectionTexture"))
                     row.SelectionHighlight:Hide()
