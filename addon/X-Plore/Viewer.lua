@@ -317,7 +317,7 @@ function XP:CreateViewerFrame()
     -- Progress percent (right side of progress area)
     local pctText = progressArea:CreateFontString(nil, "OVERLAY")
     pctText:SetPoint("RIGHT", progressArea, "RIGHT", -8, 0)
-    pctText:SetPoint("MIDDLE", progressArea, "MIDDLE", 0, 0)
+    pctText:SetPoint("CENTER", progressArea, "CENTER", 0, 0)
     self:ApplyFont(pctText, "small", "cyan_dark")
     pctText:SetText("0%")
     frame.ProgressPercent = pctText
