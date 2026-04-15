@@ -290,7 +290,7 @@ function XP:CreateViewerFrame()
     progressBar:SetHeight(4)
     progressBar:SetPoint("LEFT", progressArea, "LEFT", 10, 0)
     progressBar:SetPoint("RIGHT", progressArea, "RIGHT", -10, 0)
-    progressBar:SetPoint("MIDDLE", progressArea, "MIDDLE", 0, 0)
+    progressBar:SetPoint("CENTER", progressArea, "CENTER", 0, 0)
     local pbarTex = XP:SD("ProgressBarTextureFile")
     if pbarTex then
         progressBar:SetStatusBarTexture(pbarTex)
