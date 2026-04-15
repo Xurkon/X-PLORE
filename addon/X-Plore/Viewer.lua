@@ -198,7 +198,7 @@ function XP:CreateViewerFrame()
     -- adds scroll-arrow buttons that bleed outside the frame on WotLK.
     ---------------------------------------------------------------
     local scrollTop    = toolbarY - self:Size("toolbar_height") - 1
-    local progressH    = 20   -- progress bar area height (between scroll and footer)
+    local progressH    = 12   -- progress bar area height (between scroll and footer)
     local footerH      = self:Size("footer_height")
     local scrollbarW    = 12  -- narrow internal scrollbar
 
@@ -317,7 +317,6 @@ function XP:CreateViewerFrame()
     -- Progress percent (right side of progress area)
     local pctText = progressArea:CreateFontString(nil, "OVERLAY")
     pctText:SetPoint("RIGHT", progressArea, "RIGHT", -8, 0)
-    pctText:SetPoint("CENTER", progressArea, "CENTER", 0, 0)
     self:ApplyFont(pctText, "small", "cyan_dark")
     pctText:SetText("0%")
     frame.ProgressPercent = pctText
