@@ -89,19 +89,12 @@ function XP:CreateViewerFrame()
     closeBtn:SetScript("OnLeave", function(btn) XP.SetTexColor(btn.CloseTex, 1, 1, 1, 1) end)
     frame.CloseBtn = closeBtn
 
-    -- Menu button (opens guide browser)
+    -- Menu button (opens guide browser) — no vertex color tint, shows icon in full color
     local menuBtn = CreateFrame("Button", nil, titleBar)
     menuBtn:SetSize(20, 20)
     menuBtn:SetPoint("RIGHT", closeBtn, "LEFT", -4, 0)
     menuBtn:SetNormalTexture("Interface\\Icons\\INV_Misc_Map_01")
-    menuBtn:GetNormalTexture():SetVertexColor(XP:ColorRGBA("cyan_dark"))
     menuBtn:SetScript("OnClick", function() XP:ToggleMenu() end)
-    menuBtn:SetScript("OnEnter", function(self_btn)
-        self_btn:GetNormalTexture():SetVertexColor(XP:ColorRGBA("cyan"))
-    end)
-    menuBtn:SetScript("OnLeave", function(self_btn)
-        self_btn:GetNormalTexture():SetVertexColor(XP:ColorRGBA("cyan_dark"))
-    end)
     frame.MenuBtn = menuBtn
 
     -- Title divider
@@ -404,8 +397,8 @@ function XP:CreateViewerFrame()
         if f.CloseBtn and f.CloseBtn.CloseTex then
             XP.SetTexColor(f.CloseBtn.CloseTex, 1, 1, 1, 1)
         end
-        if f.MenuBtn and f.MenuBtn:GetNormalTexture() then
-            f.MenuBtn:GetNormalTexture():SetVertexColor(XP:ColorRGBA("cyan_dark"))
+        if f.MenuBtn then
+            f.MenuBtn:SetNormalTexture("Interface\\Icons\\INV_Misc_Map_01")
         end
 
         -- Toolbar elements
