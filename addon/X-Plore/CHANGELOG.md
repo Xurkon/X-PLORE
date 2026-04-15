@@ -16,9 +16,21 @@ All notable changes to X-PLORE are documented here.
 
 #### GuideMenu.lua
 
-- **Sidebar background now reads `XP:SD("GuideMenuMenuBackground")` directly** instead of `XP:ColorRGBA("bg_deep")` fallback; fallback changed from `#111111` to `#2B2B2B` (matching Zygor's lighter sidebar)
+- **Sidebar background** now reads `XP:SD("GuideMenuMenuBackground")` directly instead of `XP:ColorRGBA("bg_deep")` fallback; fallback changed from `#111111` to `#2B2B2B` (matching Zygor's lighter sidebar)
 - **Placeholder `SetPoint("MIDDLE"...)` → `SetPoint("CENTER"...)`** (WoW anchor name fix)
 - **Search icon added**: magnifying glass texture inside search box on right side, shows only when user is typing
+
+#### GuideMenu.lua — Color Hierarchy Fixes
+
+- **Center column background** now uses `XP:SD("GuideMenuContentBackground")` (`#202020`) instead of `XP:SD("GuideMenuMenuBackground")` (`#2B2B2B`) — sidebar is now visually lighter than center panel, matching Zygor
+- **Section header background** now uses `XP:ColorRGBA("bg_deep")` (`#111111`) instead of `bg_medium` (`#202020`) — matches Zygor's dark header bar
+- **Detail panel background** now uses `XP:SD("GuideMenuMenuBackground")` (`#2B2B2B`) instead of `bg_medium` (`#202020`) — matches Zygor's detail panel color
+- **Home view background** now uses `XP:SD("GuideMenuContentBackground")` (`#202020`) instead of `bg_deep` (`#111111`)
+- **Skin subscriber center column/home view/detail panel** now all re-read their respective SD keys at runtime instead of hardcoded color fallbacks
+- **Category button backdrop** in skin subscriber changed from `bg_deep` to `bg_medium` (`#202020`) — visible when hovering/active
+- **Guide row backdrop** in skin subscriber changed from `bg_deep` to `bg_medium` (`#202020`)
+- **Icon path resolution**: `ResolveIconPath` now uses `XP.ICON_PATH` (supports custom paths) and only appends `.tga` if no extension present (prevents double-extension like `icon.png.tga`)
+- **Skin subscriber now re-applies category button icons** on skin change by calling `GetCategoryIconPath(cat)` for each button with a `categoryID`
 
 ---
 
