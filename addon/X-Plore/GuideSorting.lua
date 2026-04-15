@@ -12,20 +12,20 @@ local XP = ADDON_TABLE.XP
 -- order (display priority), and optional faction filter.
 -----------------------------------------------------------------------
 local CATEGORIES = {
-    { id = "LEVELING",     name = "Leveling",       icon = "Interface\\Icons\\INV_Misc_Map_01",                   iconFull = true, order = 1  },
-    { id = "DUNGEONS",     name = "Dungeons",        icon = "Interface\\Icons\\Spell_Holy_BlessingOfProtection",   iconFull = true, order = 2  },
-    { id = "GEAR",         name = "Gear",            icon = "Interface\\Icons\\INV_Chest_Chain_01",                iconFull = true, order = 3  },
-    { id = "QUESTS",       name = "Quests",          icon = "Interface\\Icons\\INV_Misc_QuestionMark",             iconFull = true, order = 4  },
-    { id = "DAILIES",      name = "Dailies",         icon = "Interface\\Icons\\INV_Misc_SunShard_01",              iconFull = true, order = 5  },
-    { id = "EVENTS",       name = "Events",          icon = "Interface\\Icons\\INV_Misc_Gift_01",                  iconFull = true, order = 6  },
-    { id = "REPUTATIONS",  name = "Reputations",     icon = "Interface\\Icons\\Achievement_Reputation_01",         iconFull = true, order = 7  },
-    { id = "GOLD",         name = "Gold",            icon = "Interface\\Icons\\INV_Misc_Coin_01",                  iconFull = true, order = 8  },
-    { id = "PROFESSIONS",  name = "Professions",     icon = "Interface\\Icons\\Trade_Alchemy",                     iconFull = true, order = 9  },
-    { id = "PETS_MOUNTS",  name = "Pets & Mounts",   icon = "Interface\\Icons\\Ability_Mount_Charger",             iconFull = true, order = 10 },
-    { id = "TITLES",       name = "Titles",          icon = "Interface\\Icons\\INV_Scroll_10",                     iconFull = true, order = 11 },
-    { id = "ACHIEVEMENTS", name = "Achievements",    icon = "Interface\\Icons\\Achievement_General",               iconFull = true, order = 12 },
-    { id = "MACROS",       name = "Macros",          icon = "Interface\\Icons\\INV_Misc_Note_05",                  iconFull = true, order = 13 },
-    { id = "FAVOURITES",   name = "Favourites",      icon = "Interface\\Icons\\INV_Misc_StarFire",                 iconFull = true, order = 14 },
+    { id = "LEVELING",     name = "Leveling",       icon = "map",                  iconFull = false, order = 1  },
+    { id = "DUNGEONS",     name = "Dungeons",        icon = "dun",                  iconFull = false, order = 2  },
+    { id = "GEAR",         name = "Gear",            icon = "default",              iconFull = false, order = 3  },
+    { id = "QUESTS",       name = "Quests",          icon = "accept_quest",         iconFull = false, order = 4  },
+    { id = "DAILIES",      name = "Dailies",         icon = "dailies",              iconFull = false, order = 5  },
+    { id = "EVENTS",       name = "Events",          icon = "events",               iconFull = false, order = 6  },
+    { id = "REPUTATIONS",  name = "Reputations",     icon = "reputation",          iconFull = false, order = 7  },
+    { id = "GOLD",         name = "Gold",            icon = "gold",                 iconFull = false, order = 8  },
+    { id = "PROFESSIONS",  name = "Professions",     icon = "profession",           iconFull = false, order = 9  },
+    { id = "PETS_MOUNTS",  name = "Pets & Mounts",   icon = "pets_mounts",          iconFull = false, order = 10 },
+    { id = "TITLES",       name = "Titles",          icon = "titles",               iconFull = false, order = 11 },
+    { id = "ACHIEVEMENTS", name = "Achievements",    icon = "achievement",          iconFull = false, order = 12 },
+    { id = "MACROS",       name = "Macros",          icon = "note",                 iconFull = false, order = 13 },
+    { id = "FAVOURITES",   name = "Favourites",      icon = "favorites",            iconFull = false, order = 14 },
 }
 
 -----------------------------------------------------------------------

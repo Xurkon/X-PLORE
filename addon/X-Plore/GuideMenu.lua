@@ -159,8 +159,12 @@ function XP:CreateGuideMenu()
 
     frame.SidebarBg = sidebar:CreateTexture(nil, "BACKGROUND")
     frame.SidebarBg:SetAllPoints()
-    local _sBgC = XP:SD("GuideMenuMenuBackground") or {XP:ColorRGBA("bg_deep")}
-    XP.SetTexColor(frame.SidebarBg, _sBgC[1], _sBgC[2], _sBgC[3], _sBgC[4])
+    local _sBgC = XP:SD("GuideMenuMenuBackground")
+    if _sBgC then
+        XP.SetTexColor(frame.SidebarBg, _sBgC[1], _sBgC[2], _sBgC[3], _sBgC[4])
+    else
+        XP.SetTexColor(frame.SidebarBg, 0.169, 0.169, 0.169, 0.95)
+    end
 
     -- Search box
     local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", sidebar, "InputBoxTemplate")
@@ -205,6 +209,32 @@ function XP:CreateGuideMenu()
         end
     end)
     frame.SearchBox = searchBox
+
+    -- Search magnifying glass icon (inside search box on right side)
+    local searchIcon = sidebar:CreateTexture(nil, "OVERLAY")
+    searchIcon:SetSize(12, 12)
+    searchIcon:SetPoint("RIGHT", searchBox, "RIGHT", -6, 0)
+    searchIcon:SetTexture("Interface\\Common\\VoiceChat-Mic")
+    searchIcon:SetVertexColor(XP:ColorRGBA("text_dim"))
+    searchIcon:Hide()
+    frame.SearchIcon = searchIcon
+
+    -- Show search icon when placeholder is hidden (user is typing)
+    searchBox:HookScript("OnEditFocusGained", function()
+        searchIcon:Show()
+    end)
+    searchBox:HookScript("OnEditFocusLost", function()
+        if searchBox:GetText() == "" then
+            searchIcon:Hide()
+        end
+    end)
+    searchBox:HookScript("OnTextChanged", function()
+        if searchBox:GetText() == "" then
+            searchIcon:Hide()
+        else
+            searchIcon:Show()
+        end
+    end)
 
     -- Hide InputBoxTemplate built-in textures (grey border/glow artifacts on WotLK)
     for _, texName in ipairs({ "Left", "Right", "Mid", "Background",
