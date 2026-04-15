@@ -177,6 +177,33 @@ function XP:CreateGuideMenu()
         end
         self_eb:ClearFocus()
     end)
+
+    -- Placeholder text ("Search guides...")
+    searchBox:SetTextInsets(4, 4, 0, 0)
+    local phText = sidebar:CreateFontString(nil, "OVERLAY")
+    phText:SetPoint("LEFT", searchBox, "LEFT", 8, 0)
+    phText:SetPoint("RIGHT", searchBox, "RIGHT", -4, 0)
+    phText:SetPoint("MIDDLE", searchBox, "MIDDLE", 0, 0)
+    self:ApplyFont(phText, "small", "text_dim")
+    phText:SetText("Search guides...")
+    phText:Show()
+    searchBox.Placeholder = phText
+
+    searchBox:SetScript("OnEditFocusGained", function()
+        phText:Hide()
+    end)
+    searchBox:SetScript("OnEditFocusLost", function()
+        if searchBox:GetText() == "" then
+            phText:Show()
+        end
+    end)
+    searchBox:SetScript("OnTextChanged", function()
+        if searchBox:GetText() == "" then
+            phText:Show()
+        else
+            phText:Hide()
+        end
+    end)
     frame.SearchBox = searchBox
 
     -- Hide InputBoxTemplate built-in textures (grey border/glow artifacts on WotLK)
