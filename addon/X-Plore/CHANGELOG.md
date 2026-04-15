@@ -10,9 +10,17 @@ All notable changes to X-PLORE are documented here.
 
 #### GuideSorting.lua
 
-- **All 14 category icons now use local TGA files** from `textures/icons/` (no more WoW `Interface\Icons` paths):
-  - `GEAR` → `default.tga`, `DAILIES` → `dailies.tga`, `FAVOURITES` → `favorites.tga`, `PETS_MOUNTS` → `pets_mounts.tga`, etc.
-  - `iconFull=false` for all categories — `GetCategoryIconPath` routes through `ResolveIconPath` to build local TGA path
+- **All 14 category icons now use sprite sheet** (`guideicons-big.tga`, 512x512, 8x4 grid, 64x64 per icon) via `XP.IconSets.TabsIcons` — replaces individual TGA files
+- Category icons changed from string names (`"dailies"`, `"gold"`, etc.) to `{col, row}` table format matching Zygor's grid positions (e.g., `DAILIES = {3, 1}`, `GOLD = {1, 2}`)
+
+#### Skins.lua
+
+- **`XP.IconSets` table added** — mirrors Zygor's IconSets with `TabsIcons` (guideicons-big) and `GuideIconsSmall` (guideicons-small) grids
+- Each icon set has `getTexCoord(name)` and `getIconPath()` methods for easy sprite lookup
+- `GUIDEICONS_DIR` added as shared path constant
+- `STARLIGHT.TabsIcons` changed from `ICONSDIR` (individual icons folder) to `GUIDEICONS_DIR .. "-big"` (sprite sheet)
+- `STEALTH.TabsIcons` updated same way
+- Both skins now also define `GuideMenuSmallIcons` key
 
 #### GuideMenu.lua
 
@@ -29,8 +37,13 @@ All notable changes to X-PLORE are documented here.
 - **Skin subscriber center column/home view/detail panel** now all re-read their respective SD keys at runtime instead of hardcoded color fallbacks
 - **Category button backdrop** in skin subscriber changed from `bg_deep` to `bg_medium` (`#202020`) — visible when hovering/active
 - **Guide row backdrop** in skin subscriber changed from `bg_deep` to `bg_medium` (`#202020`)
-- **Icon path resolution**: `ResolveIconPath` now uses `XP.ICON_PATH` (supports custom paths) and only appends `.tga` if no extension present (prevents double-extension like `icon.png.tga`)
-- **Skin subscriber now re-applies category button icons** on skin change by calling `GetCategoryIconPath(cat)` for each button with a `categoryID`
+
+#### GuideMenu.lua — Sprite Sheet Icon System
+
+- **`GetCategoryIconPath`** now returns `(path, l, r, t, b)` — sprite sheet path + normalized texcoords (0-1 range)
+- **`ResolveIconPath`** still used for non-sprite icons (About/Options buttons) — uses `XP.ICON_PATH` and handles extension properly
+- All icon `SetTexture` calls now followed by `SetTexCoord` — category buttons, guide rows, home view cards, and detail panel icons
+- Skin subscriber re-applies icons with `SetTexCoord` on skin change
 
 ---
 
