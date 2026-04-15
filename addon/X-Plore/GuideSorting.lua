@@ -12,20 +12,20 @@ local XP = ADDON_TABLE.XP
 -- order (display priority), and optional faction filter.
 -----------------------------------------------------------------------
 local CATEGORIES = {
-    { id = "LEVELING",     name = "Leveling",       icon = "map",                  iconFull = false, order = 1  },
-    { id = "DUNGEONS",     name = "Dungeons",        icon = "dun",                  iconFull = false, order = 2  },
-    { id = "GEAR",         name = "Gear",            icon = "default",              iconFull = false, order = 3  },
-    { id = "QUESTS",       name = "Quests",          icon = "accept_quest",         iconFull = false, order = 4  },
-    { id = "DAILIES",      name = "Dailies",         icon = "dailies",              iconFull = false, order = 5  },
-    { id = "EVENTS",       name = "Events",          icon = "events",               iconFull = false, order = 6  },
-    { id = "REPUTATIONS",  name = "Reputations",     icon = "reputation",          iconFull = false, order = 7  },
-    { id = "GOLD",         name = "Gold",            icon = "gold",                 iconFull = false, order = 8  },
-    { id = "PROFESSIONS",  name = "Professions",     icon = "profession",           iconFull = false, order = 9  },
-    { id = "PETS_MOUNTS",  name = "Pets & Mounts",   icon = "pets_mounts",          iconFull = false, order = 10 },
-    { id = "TITLES",       name = "Titles",          icon = "titles",               iconFull = false, order = 11 },
-    { id = "ACHIEVEMENTS", name = "Achievements",    icon = "achievement",          iconFull = false, order = 12 },
-    { id = "MACROS",       name = "Macros",          icon = "note",                 iconFull = false, order = 13 },
-    { id = "FAVOURITES",   name = "Favourites",      icon = "favorites",            iconFull = false, order = 14 },
+    { id = "LEVELING",     name = "Leveling",       icon = {1, 1}, order = 1  },
+    { id = "DUNGEONS",     name = "Dungeons",       icon = {4, 3}, order = 2  },
+    { id = "GEAR",         name = "Gear",            icon = {1, 4}, order = 3  },
+    { id = "QUESTS",       name = "Quests",         icon = {3, 4}, order = 4  },
+    { id = "DAILIES",      name = "Dailies",        icon = {3, 1}, order = 5  },
+    { id = "EVENTS",       name = "Events",          icon = {2, 1}, order = 6  },
+    { id = "REPUTATIONS",  name = "Reputations",    icon = {2, 3}, order = 7  },
+    { id = "GOLD",         name = "Gold",            icon = {1, 2}, order = 8  },
+    { id = "PROFESSIONS",  name = "Professions",    icon = {2, 2}, order = 9  },
+    { id = "PETS_MOUNTS",  name = "Pets & Mounts",  icon = {3, 2}, order = 10 },
+    { id = "TITLES",       name = "Titles",          icon = {1, 3}, order = 11 },
+    { id = "ACHIEVEMENTS", name = "Achievements",  icon = {4, 2}, order = 12 },
+    { id = "MACROS",       name = "Macros",          icon = {3, 3}, order = 13 },
+    { id = "FAVOURITES",   name = "Favourites",     icon = {4, 4}, order = 14 },
 }
 
 -----------------------------------------------------------------------

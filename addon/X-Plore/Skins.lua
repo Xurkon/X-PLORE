@@ -27,6 +27,7 @@ local skinSubscribers = {}
 -- Shared asset directories
 local SKINSDIR = "Interface\\AddOns\\X-Plore\\textures\\"
 local ICONSDIR = "Interface\\AddOns\\X-Plore\\textures\\icons\\"
+local GUIDEICONS_DIR = SKINSDIR .. "guideicons"
 
 -- white.tga — copied from Zygor, used as bgFile/edgeFile for 1px borders
 local WHITE_TEX = SKINSDIR .. "white"
@@ -213,7 +214,8 @@ STARLIGHT.GuideMenuSearchTexture             = STARLIGHT_DIR .. "search-bgr"
 STARLIGHT.GuideMenuDropdownBackdrop          = TiledBackdrop(WHITE_TEX, STARLIGHT_DIR .. "dropdown-opaque", 8, 8)
 
 STARLIGHT.TabsMargin            = 0
-STARLIGHT.TabsIcons             = ICONSDIR
+STARLIGHT.TabsIcons             = GUIDEICONS_DIR .. "-big"
+STARLIGHT.GuideMenuSmallIcons   = GUIDEICONS_DIR .. "-small"
 STARLIGHT.TabsBackdropActive    = HTML("#202020FF")
 STARLIGHT.TabsBackdropInactive  = {0, 0, 0, 0}
 STARLIGHT.TabsBorderColor       = {0, 0, 0, 0}
@@ -416,7 +418,8 @@ STEALTH.GuideMenuSearchEdit                = HTML("#302617FF")
 STEALTH.GuideMenuSearchTexture             = STEALTH_DIR .. "search-bgr"
 
 STEALTH.TabsMargin            = 0
-STEALTH.TabsIcons             = ICONSDIR
+STEALTH.TabsIcons             = GUIDEICONS_DIR .. "-big"
+STEALTH.GuideMenuSmallIcons   = GUIDEICONS_DIR .. "-small"
 STEALTH.TabsBackdropActive    = HTML("#221C14FF")
 STEALTH.TabsBackdropInactive  = {0, 0, 0, 0}
 STEALTH.TabsBorderColor       = {0, 0, 0, 0}
@@ -673,4 +676,75 @@ function XP:CreateDivider(parent, yOffset, colorName)
     div:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, yOffset or 0)
     XP.SetTexColor(div, XP:ColorRGBA(colorName or "border"))
     return div
+end
+
+---------------------------------------------------------------------------------------
+-- Icon Sets — sprite sheet manager mirroring Zygor's IconSets
+-- TabsIcons: guideicons-big.tga — 512x512, 8 cols x 4 rows, 64x64 per icon
+-- GuideIconsSmall: guideicons-small.tga — 128x64, 4 cols x 2 rows, 32x32 per icon
+---------------------------------------------------------------------------------------
+do
+    local getTexCoord = function(set, name)
+        local data = set[name]
+        if not data then return 0, 1, 0, 1 end
+        local c, r = data[1], data[2]
+        return
+            (c - 1) / set.cols,
+            c / set.cols,
+            (r - 1) / set.rows,
+            r / set.rows
+    end
+
+    XP.IconSets = {
+        TabsIcons = {
+            LEVELING     = {1, 1},
+            EVENTS       = {2, 1},
+            DAILIES      = {3, 1},
+            LOREMASTER   = {4, 1},
+            GOLD         = {1, 2},
+            PROFESSIONS  = {2, 2},
+            PETSMOUNTS   = {3, 2},
+            ACHIEVEMENTS = {4, 2},
+            TITLES       = {1, 3},
+            REPUTATIONS  = {2, 3},
+            MACROS       = {3, 3},
+            DUNGEONS     = {4, 3},
+            GEAR         = {1, 4},
+            SHARED       = {2, 4},
+            QUESTS       = {3, 4},
+            FAVOURITES   = {4, 4},
+            STARTUPWIZ   = {5, 1},
+            TEST         = {0, 0},
+            cols = 8,
+            rows = 4,
+            width = 512,
+            height = 512,
+        },
+        GuideIconsSmall = {
+            FOLDER     = {1, 1},
+            GUIDE      = {2, 1},
+            EXCLAMATION = {3, 1},
+            STAR       = {1, 2},
+            QUEST      = {2, 2},
+            cols = 4,
+            rows = 2,
+            width = 128,
+            height = 64,
+        },
+    }
+
+    for setName, set in pairs(XP.IconSets) do
+        set.getTexCoord = function(name)
+            return getTexCoord(set, name)
+        end
+        set.getIconPath = function(name)
+            local skinPath = XP:SD(setName == "TabsIcons" and "TabsIcons" or "GuideMenuSmallIcons")
+            if skinPath then return skinPath end
+            -- fallback to starlight guideicons-big
+            if setName == "TabsIcons" then
+                return GUIDEICONS_DIR .. "-big"
+            end
+            return GUIDEICONS_DIR .. "-small"
+        end
+    end
 end

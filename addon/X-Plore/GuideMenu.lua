@@ -36,13 +36,24 @@ local function ResolveIconPath(iconName)
     return p
 end
 
--- Resolve a category's icon to a full texture path.
+-- Resolve a category's icon to sprite sheet path + texcoords.
+-- Returns: path, left, right, top, bottom
 local function GetCategoryIconPath(cat)
     if not cat then return nil end
     if cat.iconFull then
-        return cat.icon
+        return cat.icon, 0, 1, 0, 1
     end
-    return ResolveIconPath(cat.icon)
+    if type(cat.icon) == "table" then
+        local col, row = cat.icon[1], cat.icon[2]
+        local set = XP.IconSets.TabsIcons
+        local l = (col - 1) / set.cols
+        local r = col / set.cols
+        local t = (row - 1) / set.rows
+        local b = row / set.rows
+        local path = set.getIconPath()
+        return path, l, r, t, b
+    end
+    return ResolveIconPath(cat.icon), 0, 1, 0, 1
 end
 
 -----------------------------------------------------------------------
@@ -632,7 +643,9 @@ function XP:CreateGuideMenu()
                 if btn.Icon then
                     local cat = btn.categoryID and XP:GetCategory(btn.categoryID)
                     if cat then
-                        btn.Icon:SetTexture(GetCategoryIconPath(cat))
+                        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+                        btn.Icon:SetTexture(iconPath)
+                        btn.Icon:SetTexCoord(l, r, t, b)
                     end
                 end
                 if btn.SelectionHighlight then
@@ -692,11 +705,13 @@ function XP:CreateCategoryButtons(sidebar)
         selHl:Hide()
         btn.SelectionHighlight = selHl
 
-        -- Category icon
+        -- Category icon (sprite sheet — apply SetTexCoord)
         local icon = btn:CreateTexture(nil, "ARTWORK")
         icon:SetSize(16, 16)
         icon:SetPoint("LEFT", btn, "LEFT", 11, 0)
-        icon:SetTexture(GetCategoryIconPath(cat))
+        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+        icon:SetTexture(iconPath)
+        icon:SetTexCoord(l, r, t, b)
         btn.Icon = icon
 
         -- Category name (normal font, not small)
@@ -908,7 +923,9 @@ function XP:CreateHomeView(parent)
             local cardIcon = card:CreateTexture(nil, "ARTWORK")
             cardIcon:SetSize(24, 24)
             cardIcon:SetPoint("TOPLEFT", card, "TOPLEFT", 12, -12)
-            cardIcon:SetTexture(GetCategoryIconPath(cat))
+            local cPath, l, r, t, b = GetCategoryIconPath(cat)
+            cardIcon:SetTexture(cPath)
+            cardIcon:SetTexCoord(l, r, t, b)
 
             local cardTitle = card:CreateFontString(nil, "OVERLAY")
             cardTitle:SetPoint("TOPLEFT", cardIcon, "TOPRIGHT", 8, 0)
@@ -1353,12 +1370,10 @@ function XP:ShowGuideDetail(guideID)
 
     -- Icon
     local cat = self:GetCategory(guide.category)
-    local iconPath
-    if cat then
-        iconPath = GetCategoryIconPath(cat)
-    end
-    if panel.DetailIcon and iconPath then
+    if panel.DetailIcon and cat then
+        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
         panel.DetailIcon:SetTexture(iconPath)
+        panel.DetailIcon:SetTexCoord(l, r, t, b)
     end
 
     -- Title
@@ -1628,7 +1643,9 @@ function XP:PopulateGuideList(guides)
 
         -- Set icon
         local cat = self:GetCategory(guide.category)
-        row.Icon:SetTexture(GetCategoryIconPath(cat))
+        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+        row.Icon:SetTexture(iconPath)
+        row.Icon:SetTexCoord(l, r, t, b)
 
         -- Set title
         row.Title:SetText(guide.title or guide.titleShort or "Untitled")
