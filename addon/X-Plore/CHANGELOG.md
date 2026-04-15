@@ -4,6 +4,24 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Session 18 — 2026-04-14
+
+### Color & Icon Fixes
+
+#### GuideSorting.lua
+
+- **All 14 category icons now use local TGA files** from `textures/icons/` (no more WoW `Interface\Icons` paths):
+  - `GEAR` → `default.tga`, `DAILIES` → `dailies.tga`, `FAVOURITES` → `favorites.tga`, `PETS_MOUNTS` → `pets_mounts.tga`, etc.
+  - `iconFull=false` for all categories — `GetCategoryIconPath` routes through `ResolveIconPath` to build local TGA path
+
+#### GuideMenu.lua
+
+- **Sidebar background now reads `XP:SD("GuideMenuMenuBackground")` directly** instead of `XP:ColorRGBA("bg_deep")` fallback; fallback changed from `#111111` to `#2B2B2B` (matching Zygor's lighter sidebar)
+- **Placeholder `SetPoint("MIDDLE"...)` → `SetPoint("CENTER"...)`** (WoW anchor name fix)
+- **Search icon added**: magnifying glass texture inside search box on right side, shows only when user is typing
+
+---
+
 ## [Unreleased] — Session 17 — 2026-04-14
 
 ### Skin System — GuideMenu Row/Header Audit Fixes + Viewer Step Line Audit Fixes
