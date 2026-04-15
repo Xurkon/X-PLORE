@@ -85,7 +85,7 @@ function XP:CreateGuideMenu()
     frame.HeaderBg:SetAllPoints()
     XP.SetTexColor(frame.HeaderBg, XP:ColorRGBA("bg_deep"))
 
-    -- Logo title text (no icon)
+    -- Logo title text (no icon) — left side of header
     local logoText = header:CreateFontString(nil, "OVERLAY")
     logoText:SetPoint("LEFT", header, "LEFT", 14, 0)
     self:ApplyFont(logoText, "bold", "cyan")
@@ -99,7 +99,6 @@ function XP:CreateGuideMenu()
     local closeTex = closeBtn:CreateTexture(nil, "ARTWORK")
     closeTex:SetAllPoints()
     closeTex:SetTexture(XP:SD("TitleButtonsTexture"))
-    -- Crop the "close" sprite (row 1, column 1 of titlebuttons-thin sheet)
     closeTex:SetTexCoord(0, 0.25, 0, 0.5)
     closeBtn.CloseTex = closeTex
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
@@ -107,11 +106,11 @@ function XP:CreateGuideMenu()
     closeBtn:SetScript("OnLeave", function(btn) XP.SetTexColor(btn.CloseTex, 1, 1, 1, 1) end)
     frame.CloseBtn = closeBtn
 
-    -- Header Tab Buttons (Options lives in sidebar, not here)
-    -- Tabs are 70x24, starting at x=3 from left, spaced by tab width + 1px separator
+    -- Header Tab Buttons — anchored to RIGHT of logo text, not to header left edge
+    -- Tabs are 70x24, starting right after logo, spaced by tab width + 1px separator
     local tabNames = { "Home", "Current", "Recent" }
     local headerTabs = {}
-    local tabX = 3
+    local tabX = 90  -- start tabs after logo text ends (logo is ~76px wide in bold font at 14px size)
     for i, tabName in ipairs(tabNames) do
         local tab = CreateFrame("Button", nil, header)
         tab:SetSize(70, 24)
