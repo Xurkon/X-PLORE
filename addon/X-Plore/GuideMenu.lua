@@ -123,7 +123,7 @@ function XP:CreateGuideMenu()
 
     -- Header Tab Buttons — anchored to RIGHT of logo text, not to header left edge
     -- Tabs are 70x24, starting right after logo, spaced by tab width + 1px separator
-    local tabNames = { "Home", "Current", "Recent" }
+    local tabNames = { "Home", "Featured", "Current", "Recent" }
     local headerTabs = {}
     local tabX = 180  -- start tabs well after logo text (logo is ~80px at 14px bold + padding)
     for i, tabName in ipairs(tabNames) do
@@ -181,13 +181,29 @@ function XP:CreateGuideMenu()
         XP.SetTexColor(frame.SidebarBg, 0.169, 0.169, 0.169, 0.95)
     end
 
-    -- Search box
-    local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", sidebar, "InputBoxTemplate")
-    searchBox:SetSize(sideW - 32, 18)
-    searchBox:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 16, -10)
+    -- Search box — pill-shaped with solid dark background, no border
+    -- Use a backdrop frame for the pill shape, EditBox inside for text input
+    local searchFrame = XP.CreateBackdropFrame("Frame", nil, sidebar)
+    searchFrame:SetSize(sideW - 24, 26)
+    searchFrame:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 12, -8)
+    local sBgColor = XP:SD("GuideMenuSearchEdit")
+    if searchFrame.SetBackdrop then
+        searchFrame:SetBackdrop(nil)  -- no tiled texture
+        if sBgColor then
+            searchFrame:SetBackdropColor(sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
+        else
+            searchFrame:SetBackdropColor(0.22, 0.22, 0.22, 1)
+        end
+    end
+    frame.SearchFrame = searchFrame
+
+    local searchBox = CreateFrame("EditBox", "XPlore_GuideMenuSearch", searchFrame)
+    searchBox:SetSize(sideW - 40, 26)
+    searchBox:SetPoint("LEFT", searchFrame, "LEFT", 8, 0)
     searchBox:SetAutoFocus(false)
     searchBox:SetMaxLetters(50)
     self:ApplyFont(searchBox, "normal", "text_normal")
+    searchBox:SetTextColor(XP:ColorRGBA("text_normal"))
     searchBox:SetScript("OnEscapePressed", function(self_eb) self_eb:ClearFocus() end)
     searchBox:SetScript("OnEnterPressed", function(self_eb)
         local text = self_eb:GetText()
@@ -197,14 +213,13 @@ function XP:CreateGuideMenu()
         self_eb:ClearFocus()
     end)
 
-    -- Placeholder text ("Search guides...")
-    searchBox:SetTextInsets(4, 4, 0, 0)
-    local phText = sidebar:CreateFontString(nil, "OVERLAY")
-    phText:SetPoint("LEFT", searchBox, "LEFT", 8, 0)
-    phText:SetPoint("RIGHT", searchBox, "RIGHT", -4, 0)
-    phText:SetPoint("CENTER", searchBox, "CENTER", 0, 0)
-    self:ApplyFont(phText, "small", "text_dim")
-    phText:SetText("Search guides...")
+    -- Placeholder text ("Search" — Zygor uses short placeholder)
+    searchBox:SetTextInsets(0, 24, 0, 0)
+    local phText = searchFrame:CreateFontString(nil, "OVERLAY")
+    phText:SetPoint("LEFT", searchBox, "LEFT", 2, 0)
+    phText:SetPoint("RIGHT", searchBox, "RIGHT", 0, 0)
+    self:ApplyFont(phText, "normal", "text_dim")
+    phText:SetText("Search")
     phText:Show()
     searchBox.Placeholder = phText
 
@@ -225,16 +240,15 @@ function XP:CreateGuideMenu()
     end)
     frame.SearchBox = searchBox
 
-    -- Search magnifying glass icon (inside search box on right side)
-    local searchIcon = sidebar:CreateTexture(nil, "OVERLAY")
-    searchIcon:SetSize(12, 12)
-    searchIcon:SetPoint("RIGHT", searchBox, "RIGHT", -6, 0)
+    -- Magnifying glass icon (right side of search frame)
+    local searchIcon = searchFrame:CreateTexture(nil, "OVERLAY")
+    searchIcon:SetSize(14, 14)
+    searchIcon:SetPoint("RIGHT", searchFrame, "RIGHT", -8, 0)
     searchIcon:SetTexture("Interface\\Common\\VoiceChat-Mic")
     searchIcon:SetVertexColor(XP:ColorRGBA("text_dim"))
-    searchIcon:Hide()
     frame.SearchIcon = searchIcon
 
-    -- Show search icon when placeholder is hidden (user is typing)
+    -- Only show icon when user is typing
     searchBox:HookScript("OnEditFocusGained", function()
         searchIcon:Show()
     end)
@@ -250,40 +264,7 @@ function XP:CreateGuideMenu()
             searchIcon:Show()
         end
     end)
-
-    -- Hide InputBoxTemplate built-in textures (grey border/glow artifacts on WotLK)
-    for _, texName in ipairs({ "Left", "Right", "Mid", "Background",
-                                "FocusLeft", "FocusRight", "FocusMid" }) do
-        local t = searchBox[texName] or _G["XPlore_GuideMenuSearch" .. texName]
-        if t and t.Hide then t:Hide() end
-    end
-
-    -- Search background texture from skin
-    local searchBgTex = sidebar:CreateTexture(nil, "BACKGROUND")
-    searchBgTex:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  12, -5)
-    searchBgTex:SetPoint("BOTTOMRIGHT", sidebar, "TOPLEFT", sideW - 12, -32)
-    local sBgPath = XP:SD("GuideMenuSearchTexture")
-    if sBgPath then searchBgTex:SetTexture(sBgPath) end
-    local sBgColor = XP:SD("GuideMenuSearchEdit")
-    if sBgColor then
-        XP.SetTexColor(searchBgTex, sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
-    end
-    frame.SearchBg = searchBgTex
-
-    -- Thin 1px bottom border under search box
-    local sbBorder = sidebar:CreateTexture(nil, "ARTWORK")
-    sbBorder:SetHeight(1)
-    sbBorder:SetPoint("TOPLEFT",  sidebar, "TOPLEFT",  12, -32)
-    sbBorder:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", -12, -32)
-    XP.SetTexColor(sbBorder, XP:ColorRGBA("border_dim"))
-    frame.SearchBorder = sbBorder
-
-    -- Search divider
-    local searchDivider = sidebar:CreateTexture(nil, "ARTWORK")
-    searchDivider:SetHeight(1)
-    searchDivider:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 0, -44)
-    searchDivider:SetPoint("TOPRIGHT", sidebar, "TOPRIGHT", 0, -44)
-    XP.SetTexColor(searchDivider, XP:ColorRGBA("border_dim"))
+    searchIcon:Hide()  -- start hidden (placeholder showing)
 
     -- Category buttons (populated dynamically)
     self:CreateCategoryButtons(sidebar)
@@ -578,17 +559,21 @@ function XP:CreateGuideMenu()
             f.CloseBtn:GetFontString():SetTextColor(XP:ColorRGBA("red"))
         end
 
-        -- Search background
-        if f.SearchBg then
-            local sBgPath = XP:SD("GuideMenuSearchTexture")
-            if sBgPath then f.SearchBg:SetTexture(sBgPath) end
+        -- Search frame background
+        if f.SearchFrame and f.SearchFrame.SetBackdropColor then
             local sBgColor = XP:SD("GuideMenuSearchEdit")
             if sBgColor then
-                XP.SetTexColor(f.SearchBg, sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
+                f.SearchFrame:SetBackdropColor(sBgColor[1], sBgColor[2], sBgColor[3], sBgColor[4])
+            else
+                f.SearchFrame:SetBackdropColor(0.22, 0.22, 0.22, 1)
             end
         end
+        -- Hide old SearchBg texture (orphaned after search bar redesign)
+        if f.SearchBg then
+            f.SearchBg:Hide()
+        end
         if f.SearchBorder then
-            XP.SetTexColor(f.SearchBorder, XP:ColorRGBA("border_dim"))
+            f.SearchBorder:Hide()
         end
 
         -- Header: tab indicators
@@ -698,13 +683,6 @@ function XP:CreateCategoryButtons(sidebar)
         -- Background (transparent by default)
         self:ApplyBackdrop(btn, "none", "bg_deep")
 
-        -- Selection/hover highlight texture (shown on hover or when active)
-        local selHl = btn:CreateTexture(nil, "OVERLAY")
-        selHl:SetAllPoints()
-        selHl:SetTexture(XP:SD("SelectionTexture"))
-        selHl:Hide()
-        btn.SelectionHighlight = selHl
-
         -- Category icon (sprite sheet — apply SetTexCoord)
         local icon = btn:CreateTexture(nil, "ARTWORK")
         icon:SetSize(16, 16)
@@ -736,16 +714,20 @@ function XP:CreateCategoryButtons(sidebar)
         leftDecor:Hide()
         btn.LeftDecor = leftDecor
 
-        -- Hover highlight
+        -- Hover highlight: solid medium-gray backdrop (Zygor style — no gradient/texture)
         btn:SetScript("OnEnter", function(self_btn)
             if currentCategory ~= cat.id then
-                self_btn.SelectionHighlight:Show()
-                self_btn.Text:SetTextColor(XP:ColorRGBA("cyan_light"))
+                if self_btn.SetBackdropColor then
+                    self_btn:SetBackdropColor(XP:ColorRGBA("bg_hover"))
+                end
+                self_btn.Text:SetTextColor(1, 1, 1, 1)  -- white on hover
             end
         end)
         btn:SetScript("OnLeave", function(self_btn)
             if currentCategory ~= cat.id then
-                self_btn.SelectionHighlight:Hide()
+                if self_btn.SetBackdropColor then
+                    self_btn:SetBackdropColor(0, 0, 0, 0)  -- transparent when not hovered
+                end
                 self_btn.Text:SetTextColor(XP:ColorRGBA("text_normal"))
             end
         end)
@@ -757,35 +739,23 @@ function XP:CreateCategoryButtons(sidebar)
 
         btn.categoryID = cat.id
         categoryButtons[cat.id] = btn
-        yOffset = yOffset - self:Size("category_height") - 1
+        yOffset = yOffset - self:Size("category_height")
     end
 
-    -- Bottom section: Options & About
+    -- Bottom section: Divider + Options button
     local bottomY = 10
 
-    -- About button
-    local aboutBtn = XP.CreateBackdropFrame("Button", nil, sidebar)
-    aboutBtn:SetSize(self:Size("sidebar_width"), self:Size("category_height"))
-    aboutBtn:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY)
-    self:ApplyBackdrop(aboutBtn, "none", "bg_deep")
-    local aboutIcon = aboutBtn:CreateTexture(nil, "ARTWORK")
-    aboutIcon:SetSize(16, 16)
-    aboutIcon:SetPoint("LEFT", aboutBtn, "LEFT", 12, 0)
-    aboutIcon:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
-    local aboutText = aboutBtn:CreateFontString(nil, "OVERLAY")
-    aboutText:SetPoint("LEFT", aboutIcon, "RIGHT", 8, 0)
-    self:ApplyFont(aboutText, "normal", "text_normal")
-    aboutText:SetText("About")
-    aboutBtn:SetScript("OnEnter", function(btn) aboutText:SetTextColor(XP:ColorRGBA("cyan_light")) end)
-    aboutBtn:SetScript("OnLeave", function(btn) aboutText:SetTextColor(XP:ColorRGBA("text_dim")) end)
-    aboutBtn:SetScript("OnClick", function()
-        XP:MenuNavigate("about")
-    end)
+    -- Divider above Options (separates options from category list)
+    local optDiv = sidebar:CreateTexture(nil, "ARTWORK")
+    optDiv:SetHeight(1)
+    optDiv:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY + self:Size("category_height") + 4)
+    optDiv:SetPoint("BOTTOMRIGHT", sidebar, "BOTTOMRIGHT", 0, bottomY + self:Size("category_height") + 4)
+    XP.SetTexColor(optDiv, XP:ColorRGBA("border_dim"))
 
     -- Options button
     local optBtn = XP.CreateBackdropFrame("Button", nil, sidebar)
     optBtn:SetSize(self:Size("sidebar_width"), self:Size("category_height"))
-    optBtn:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY + self:Size("category_height") + 1)
+    optBtn:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY)
     self:ApplyBackdrop(optBtn, "none", "bg_deep")
     local optIcon = optBtn:CreateTexture(nil, "ARTWORK")
     optIcon:SetSize(16, 16)
@@ -793,20 +763,19 @@ function XP:CreateCategoryButtons(sidebar)
     optIcon:SetTexture("Interface\\Icons\\INV_Misc_Gear_01")
     local optText = optBtn:CreateFontString(nil, "OVERLAY")
     optText:SetPoint("LEFT", optIcon, "RIGHT", 8, 0)
-    self:ApplyFont(optText, "small", "text_normal")
+    self:ApplyFont(optText, "normal", "text_normal")
     optText:SetText("Options")
+    optBtn:SetScript("OnEnter", function(btn)
+        if btn.SetBackdropColor then btn:SetBackdropColor(XP:ColorRGBA("bg_hover")) end
+        optText:SetTextColor(1, 1, 1, 1)
+    end)
+    optBtn:SetScript("OnLeave", function(btn)
+        if btn.SetBackdropColor then btn:SetBackdropColor(0, 0, 0, 0) end
+        optText:SetTextColor(XP:ColorRGBA("text_normal"))
+    end)
     optBtn:SetScript("OnClick", function()
         XP:MenuNavigate("options")
     end)
-    optBtn:SetScript("OnEnter", function(btn) optText:SetTextColor(XP:ColorRGBA("cyan_light")) end)
-    optBtn:SetScript("OnLeave", function(btn) optText:SetTextColor(XP:ColorRGBA("text_normal")) end)
-
-    -- Divider above Options
-    local optDiv = sidebar:CreateTexture(nil, "ARTWORK")
-    optDiv:SetHeight(1)
-    optDiv:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMLEFT", 0, bottomY + (self:Size("category_height") + 1) * 2 + 4)
-    optDiv:SetPoint("BOTTOMRIGHT", sidebar, "BOTTOMRIGHT", 0, bottomY + (self:Size("category_height") + 1) * 2 + 4)
-    XP.SetTexColor(optDiv, XP:ColorRGBA("border_dim"))
 end
 
 -----------------------------------------------------------------------
@@ -1503,20 +1472,20 @@ function XP:MenuNavigate(view, param)
         end
     end
 
-    -- Update sidebar highlight (selection texture + LeftDecor for active, hide for inactive)
+    -- Update sidebar highlight (solid gray backdrop for active, LeftDecor cyan bar)
     for id, btn in pairs(categoryButtons) do
         if id == param then
-            if btn.SelectionHighlight then btn.SelectionHighlight:Show() end
-            if btn.LeftDecor then btn.LeftDecor:Show() end
-            btn.Text:SetTextColor(XP:ColorRGBA("cyan"))
+            if btn.SetBackdropColor then btn:SetBackdropColor(XP:ColorRGBA("bg_hover")) end
+            btn.Text:SetTextColor(1, 1, 1, 1)  -- white for active
+            btn.LeftDecor:Show()
         else
-            if btn.SelectionHighlight then btn.SelectionHighlight:Hide() end
-            if btn.LeftDecor then btn.LeftDecor:Hide() end
+            if btn.SetBackdropColor then btn:SetBackdropColor(0, 0, 0, 0) end
+            btn.LeftDecor:Hide()
             btn.Text:SetTextColor(XP:ColorRGBA("text_normal"))
         end
     end
 
-    if view == "home" then
+    if view == "featured" or view == "home" then
         currentCategory = nil
         frame.HomeView:Show()
         -- Update guide count on home
@@ -1576,43 +1545,6 @@ function XP:MenuNavigate(view, param)
         if frame.OptionsView then
             frame.OptionsView:Show()
         end
-
-    elseif view == "about" then
-        currentCategory = nil
-        frame.SectionHeader:Show()
-        frame.SectionName:SetText("About X-Plore")
-        frame.GuideCount:SetText("")
-        -- Create on first access
-        if not frame.AboutView then
-            local av = CreateFrame("Frame", nil, frame.CenterColumn)
-            av:SetPoint("TOPLEFT", frame.CenterColumn, "TOPLEFT", 0, -37)
-            av:SetPoint("BOTTOMRIGHT", frame.CenterColumn, "BOTTOMRIGHT", 0, 0)
-            frame.AboutView = av
-
-            local title = av:CreateFontString(nil, "OVERLAY")
-            title:SetPoint("TOP", av, "TOP", 0, -30)
-            XP:ApplyFont(title, "header", "cyan")
-            title:SetText("X-PLORE")
-
-            local ver = av:CreateFontString(nil, "OVERLAY")
-            ver:SetPoint("TOP", title, "BOTTOM", 0, -8)
-            XP:ApplyFont(ver, "normal", "text_muted")
-            ver:SetText("Version " .. (XP.version or "1.0"))
-
-            local desc = av:CreateFontString(nil, "OVERLAY")
-            desc:SetPoint("TOP", ver, "BOTTOM", 0, -16)
-            desc:SetPoint("LEFT", av, "LEFT", 24, 0)
-            desc:SetPoint("RIGHT", av, "RIGHT", -24, 0)
-            desc:SetJustifyH("CENTER")
-            XP:ApplyFont(desc, "normal", "text_normal")
-            desc:SetText("A guide viewer for World of Warcraft.\nSupports all WoW versions (Vanilla through Retail).\nCompatible with Zygor guide format.")
-
-            local credit = av:CreateFontString(nil, "OVERLAY")
-            credit:SetPoint("BOTTOM", av, "BOTTOM", 0, 24)
-            XP:ApplyFont(credit, "small", "text_dim")
-            credit:SetText("Powered by !X-Libs")
-        end
-        frame.AboutView:Show()
     end
 end
 
