@@ -288,10 +288,15 @@ function XP:CreateGuideMenu()
     centerCol:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(DETAIL_WIDTH + 1), 0)
     frame.CenterColumn = centerCol
 
-    -- Center column background
+    -- Center column background (SAME color as sidebar per Zygor)
     local centerBg = centerCol:CreateTexture(nil, "BACKGROUND")
     centerBg:SetAllPoints()
-    XP.SetTexColor(centerBg, XP:ColorRGBA("bg_deep"))
+    local _cBgC = XP:SD("GuideMenuMenuBackground")
+    if _cBgC then
+        XP.SetTexColor(centerBg, _cBgC[1], _cBgC[2], _cBgC[3], _cBgC[4])
+    else
+        XP.SetTexColor(centerBg, 0.169, 0.169, 0.169, 0.95)
+    end
     frame.CenterBg = centerBg
 
     -- Section header (back arrow + category name)
