@@ -110,7 +110,7 @@ function XP:CreateGuideMenu()
     -- Tabs are 70x24, starting right after logo, spaced by tab width + 1px separator
     local tabNames = { "Home", "Current", "Recent" }
     local headerTabs = {}
-    local tabX = 90  -- start tabs after logo text ends (logo is ~76px wide in bold font at 14px size)
+    local tabX = 110  -- start tabs well after logo text ends
     for i, tabName in ipairs(tabNames) do
         local tab = CreateFrame("Button", nil, header)
         tab:SetSize(70, 24)
