@@ -178,3 +178,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 - **[Patreon](https://www.patreon.com/Xurkon)** — Support development
 - **[PayPal](https://www.paypal.me/Xurkon)** — One-time support
 
+
