@@ -947,3 +947,6 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 ### Removed
 
 - All files from prior XPV_Main/XPV_Guide/XPV_Sorting iteration (16 files deleted).
+
+
+## test changelog push Sat May  2 22:44:35 CDT 2026
