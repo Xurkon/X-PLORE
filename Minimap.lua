@@ -192,7 +192,12 @@ function MM:CreateButton()
     --
     --             Therefore on WotLK the icon renders as a square (no mask).
     --             The icon is still fully functional and recognisable.
-    if self._icon.AddMaskTexture then
+    -- Circular mask — only apply when Masque is NOT active.
+    -- Masque handles all masking/skinning on both Retail and WotLK.
+    -- On Retail without Masque, AddMaskTexture stacks a circular mask on the icon.
+    -- On WotLK without Masque, no compatible mask exists for atlas UV selection
+    -- (SetPortraitToTexture resets SetTexCoord), so the icon renders square.
+    if not self._masqueSkinned and self._icon.AddMaskTexture then
         -- Retail: create a dedicated mask texture and stack it on the icon.
         -- The mask clips the icon to the button's round shape without
         -- disturbing SetTexCoord (mask is a separate texture layer).
@@ -242,6 +247,22 @@ function MM:CreateButton()
     btn:SetScript("OnDragStop",  OnDragStop)
 
     self.button = btn
+
+    -- Masque support — if Masque is installed, let it skin the button.
+    -- Masque handles circular masking automatically on ALL WoW versions
+    -- (WotLK, Cata, MoP, Legion, BfA, Shadowlands, Dragonflight, Retail).
+    -- If Masque is absent we fall through to the built-in AddMaskTexture path.
+    local Masque = LibStub and LibStub("Masque", true)
+    if Masque then
+        local group = Masque:Group("X-PLORE", "Minimap Button")
+        group:AddButton(btn, {
+            -- Icon/Foreground
+            Icon = ICON_PATH,
+            -- Tell Masque this is a "square" icon so it knows how to mask it
+            Square = true,
+        })
+        self._masqueSkinned = true
+    end
 
     -- Place at saved or default angle
     local angle = (XP.db and XP.db.profile and XP.db.profile.minimapAngle) or DEFAULT_ANGLE

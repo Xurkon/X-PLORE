@@ -1277,7 +1277,7 @@ function XP:CreateInlineOptions(parent)
 
     -- ===== ACTION BUTTONS =====
     local btnRow = CreateFrame("Frame", nil, contentArea)
-    btnRow:SetHeight(48)
+    btnRow:SetSize(440, 48)
     btnRow:SetPoint("BOTTOMLEFT", contentScroll, "BOTTOMLEFT", 0, 0)
     btnRow:SetPoint("BOTTOMRIGHT", contentScroll, "BOTTOMRIGHT", 0, 0)
     parent.ActionButtonRow = btnRow
