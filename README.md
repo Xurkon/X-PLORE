@@ -14,7 +14,7 @@ Do not attempt to use this addon — it will not work correctly.
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/Xurkon)
 ![Platform](https://img.shields.io/badge/PLATFORM-WoW%20(All%20Versions)-blue?style=for-the-badge&logo=windows&logoColor=white)
-![WoW Versions](https://img.shields.io/badge/WoW-Vanilla%201.12%20%7C%20TBC%20%7C%20WotLK%203.3.5%20%7C%20Retail-blue?style=for-the-badge)
+![WoW Versions](https://img.shields.io/badge/WoW-Vanilla%E2%80%93Retail-blue?style=for-the-badge)
 
 <br/>
 
@@ -38,7 +38,7 @@ If you are looking for a working guide addon, use the reference implementation: 
 
 ## What Is X-PLORE?
 
-X-PLORE is a universal guide viewer and navigation engine targeting full parity with **ZygorGuides** — the gold-standard quest guide addon for World of Warcraft. It is being built to work across **all WoW versions**: Vanilla 1.12, The Burning Crusade, Wrath of the Lich King 3.3.5a, and current Retail.
+X-PLORE is a universal guide viewer and navigation engine targeting full parity with **ZygorGuides** — the gold-standard quest guide addon for World of Warcraft. It is being built to work across **all WoW versions**: Vanilla through current Retail.
 
 ### Core Goals
 
@@ -73,9 +73,9 @@ X-PLORE targets all major WoW versions simultaneously. The `Compat.lua` module h
 | Vanilla 1.12 | 110100 | ✔️ Core + UI |
 | TBC 2.5.x | 11507 | ✔️ Core + UI |
 | WotLK 3.3.5a | 30403 | ✔️ Core + UI |
-| Retail (Dragonflight) | 40402 | ✔️ Core + UI |
+| Retail (Midnight) | 40402 | ✔️ Core + UI |
 
-**Universal baseline rule:** All version-specific code **must** include a fallback that works on Vanilla 1.12 through current retail. Core functionality is never allowed to break on any supported version.
+**Universal baseline rule:** All version-specific code **must** include a fallback that works on Vanilla 1.12 through current Retail. Core functionality is never allowed to break on any supported version.
 
 ---
 
