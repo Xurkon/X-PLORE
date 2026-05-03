@@ -995,3 +995,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 - re-test Sun May  3 02:45:02 CDT 2026
 - redeploy test Sun May  3 02:46:39 CDT 2026
 test Sun May  3 02:56:03 CDT 2026
+
+## [9.2.7] - 2026-05-03
+### Changed
+- Test changelog diff verification
