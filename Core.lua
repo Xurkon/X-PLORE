@@ -75,6 +75,8 @@ local DB_DEFAULTS = {
         repositionViewer   = true,
         -- Map button
         showMapButton      = true,
+        -- Visible steps count in viewer
+        showcountsteps     = 1,
         -- Announcements
         announcements = {
             enabled     = true,   -- show step-advance messages in chat

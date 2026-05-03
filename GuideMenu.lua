@@ -1792,7 +1792,10 @@ function XP:RefreshOptionsTab(parent, tabId)
         stepsDD:SetWidth(100)
         stepsDD:SetPoint("RIGHT", stepsRow, "RIGHT", 0, 0)
         UIDropDownMenu_SetWidth(stepsDD, 80)
-        UIDropDownMenu_SetSelectedID(stepsDD, XP.db.profile.showcountsteps or 1)
+        local showCountVal = XP.db.profile.showcountsteps
+        if showCountVal and showCountVal >= 1 and showCountVal <= 5 then
+            UIDropDownMenu_SetSelectedID(stepsDD, showCountVal)
+        end
         UIDropDownMenu_Initialize(stepsDD, function()
             for i = 1, 5 do
                 UIDropDownMenu_AddButton({
