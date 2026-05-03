@@ -188,7 +188,13 @@ function MM:CreateButton()
     icon:SetAllPoints()
     icon:SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas (first of 4 cells)
     icon:SetTexture(ICON_PATH)
-    icon:AddMaskTexture(mask)
+    -- AddMaskTexture was introduced in WoW 8.0 (BFA). On WotLK (3.3.5a)
+    -- the older SetMaskTexture API exists but accepts only one mask.
+    if icon.AddMaskTexture then
+        icon:AddMaskTexture(mask)
+    elseif icon.SetMaskTexture then
+        icon:SetMaskTexture(mask)
+    end
     self._icon = icon
 
     -- Circular border texture (optional cosmetic)
