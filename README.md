@@ -73,7 +73,7 @@ X-PLORE targets all major WoW versions simultaneously. The `Compat.lua` module h
 | Vanilla 1.12 | 110100 | ✔️ Core + UI |
 | TBC 2.5.x | 11507 | ✔️ Core + UI |
 | WotLK 3.3.5a | 30403 | ✔️ Core + UI |
-| Retail (Midnight) | 40402 | ✔️ Core + UI |
+| Retail (Midnight) | 120000 | ✔️ Core + UI |
 
 **Universal baseline rule:** All version-specific code **must** include a fallback that works on Vanilla 1.12 through current Retail. Core functionality is never allowed to break on any supported version.
 
@@ -155,17 +155,6 @@ X-PLORE includes a multi-skin system. Currently available:
 | Midnight | 🔜 Coming |
 | Starlight-glass | 🔜 Coming |
 | Stealth-glass | 🔜 Coming |
-
----
-
-## Source vs. Game Paths
-
-| Purpose | Path |
-|---------|------|
-| **GitHub source** | `/mnt/c/Users/kance/Documents/GitHub/X-PLORE/` |
-| **Game load (Ebonhold)** | `/mnt/c/Ebonhold/Ebonhold/Interface/AddOns/X-Plore/` |
-
-The `addon/X-Plore/` subdirectory shown in some older documentation is **deprecated** — as of the May 2 2026 refactor, all addon source files live at the repo root.
 
 ---
 
