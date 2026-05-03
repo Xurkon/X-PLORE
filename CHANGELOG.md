@@ -990,3 +990,4 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 - Test entry with longer content to verify diff formatting works correctly
 
 - Changelog diff formatting test 23:13
+- worker tail test
