@@ -85,37 +85,19 @@ X-PLORE targets all major WoW versions simultaneously. The `Compat.lua` module h
 
 ---
 
-## Installation (Source Build)
+## Installation
 
-Since this is source-only and not a release build, installation requires a manual build step.
-
-### Prerequisites
-
-- [Git](https://git-scm.com/)
-- [Git LFS](https://git-lfs.github.com/) (for `.tga`, `.blp`, `.ogg` binary assets)
-
-### Clone with Git LFS
-
-```bash
-git clone https://github.com/Xurkon/X-PLORE.git
-cd X-PLORE
-git lfs install
-git lfs pull
-```
-
-### Game Load Path
-
-After cloning, the addon must be placed in your WoW `Interface/AddOns/` directory:
+Download and extract the addon to your WoW `Interface/AddOns/` directory:
 
 ```
 <WoW Directory>/Interface/AddOns/X-Plore/
 ```
 
-**Note:** The in-game load path (`/mnt/c/Ebonhold/Ebonhold/Interface/AddOns/`) differs from the GitHub source path. Ensure the addon folder is named `X-Plore` (with hyphen) for proper TOC loading.
+Ensure the addon folder is named `X-Plore` (with hyphen) for proper TOC loading.
 
 ### Required Dependency
 
-**!X-Libs** must be installed in the same `AddOns/` directory:
+**!X-Libs** must also be installed:
 
 ```
 <WoW Directory>/Interface/AddOns/!X-Libs/
