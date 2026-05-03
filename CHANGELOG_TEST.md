@@ -1,14 +1,9 @@
 
-## Changes in v0.0.6
+## Changes in v0.0.7
 
 ### Added
-- New command: /status shows bot uptime
-- Rate limiting for API requests
-
-### Changed  
-- Updated Discord.js to v14.11
-- Refactored event handler architecture
+- New feature: export settings to JSON
+- Support for custom themes
 
 ### Fixed
-- Memory leak in message cache
-- Race condition in worker pool
+- Bug in theme switching logic
