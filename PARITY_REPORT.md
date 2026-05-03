@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-04-29 (Session 27)
+**Last Updated:** 2026-05-02 (Session 31)
 **Based on:** ZygorGuidesViewer (Retail) · ZygorGuidesViewerClassicTBC · ZygorGuidesViewerClassicTBCAnniv · RXPGuides
 **Sources:** ZygorGuidesViewer · ZygorGuidesViewerClassicTBC · ZygorGuidesViewerClassicTBCAnniv · RXPGuides
 **Goal:** Universal WoW 1.12 through Retail 12.0+ (Vanilla → Retail)
@@ -470,3 +470,18 @@ X-Plore/
 - **Priority roadmap Tier 1–4** formalized: GuideMenu-View, ViewerFrame skin, Pointer/Arrows, Options first
 - **UiWidgets analysis:** X-PLORE has 1 combined file vs Zygor's 19 separate files
 - **Parity matrix:** ~3% file coverage, ~12–15% code parity
+
+### Session 30 (2026-05-02)
+- **Universal minimap button** — 5-iteration fix cycle (commits `e7cb618` → `ca15daa` → `5a3a22b` → `a45f546` → `a792fa3`):
+  - `AddMaskTexture` exists WoW 8.0+ only — added pcall guard
+  - `SetMaskTexture` is a Minimap frame method, not a texture method
+  - `TextureBase:SetMask` does not exist on any WoW version
+  - `SetPortraitToTexture` incompatible with atlas UV selection (calls SetTexture internally, resets SetTexCoord)
+  - Final pattern: Retail uses `AddMaskTexture(mask)`; WotLK renders square icon (fully functional, recognisable)
+- **Minimap icon path fix** — stale path `Skins\ui\minimap_button.tga` corrected to `Skins\minimap_button.tga`
+
+### Session 31 (2026-05-02)
+- **Masque support** — `LibStub("Masque", true)` probe after button creation; `Masque:Group("X-PLORE", "Minimap Button"):AddButton(btn, {Icon=..., Square=true})`. Masque handles circular masking on ALL WoW versions including WotLK.
+- **btnRow width fix** (`GuideMenu.lua:1281`) — frame had `SetHeight(48)` with only bottom anchors and no explicit width → collapsed to minimal dimensions, stacking buttons at identical coordinates. Fix: `SetSize(440, 48)`.
+- **SkinID type guard** (`Skins.lua:962`) — Cancel → `SetSkin(numeric)` crash fixed; combined-format parser now guarded with `if type(skinID) == "string" and ...`
+- **Documentation updated** — Session 31 entry added to CHANGELOG, PARITY_REPORT, PROGRESS

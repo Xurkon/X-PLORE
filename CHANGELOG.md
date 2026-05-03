@@ -4,6 +4,34 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Session 31 — 2026-05-02
+
+### Summary
+
+**Universal Minimap Button (Retail + WotLK) + Masque Support + Options Panel Fixes.** Five iterative fixes to get the minimap button working across all WoW versions. Added Masque library integration so users with Masque get proper circular icons. Fixed options panel button overlap (btnRow width collapse). Comprehensive documentation update.
+
+### Bugs Fixed
+
+1. **Options panel buttons overlap** (`GuideMenu.lua:1281`) — `btnRow` frame had `SetHeight(48)` with only `BOTTOMLEFT`/`BOTTOMRIGHT` anchors to `contentScroll` and no explicit width. Without `SetWidth`, the frame collapsed to minimal width, stacking all buttons at identical coordinates. Fix: `SetSize(440, 48)` to give explicit width.
+
+2. **`AddMaskTexture` nil on WotLK** (`Minimap.lua`) — `AddMaskTexture` is WoW 8.0+ only. Added `if self._masqueSkinned then return end` guard at start of mask path.
+
+3. **WotLK mask fixes (multiple iterations)** — `SetMaskTexture` is a Minimap method, not a texture method; `TextureBase:SetMask` does not exist; `SetPortraitToTexture` calls `SetTexture(path)` internally resetting `SetTexCoord` (incompatible with atlas UV selection). Final universal pattern: Retail uses `AddMaskTexture(mask)`; WotLK renders square (fully functional). Masque overrides this entirely when installed.
+
+4. **GuideMenu cancel → SetSkin numeric skinID crash** (`Skins.lua:962`) — `RestoreSettings()` restores `XP.db.profile` with `skin=numeric` from DeepCopy; Cancel calls `SetSkin(revertedSkin)` with a number. Fix: combined-format parser guarded with `if type(skinID) == "string" and ...`.
+
+### Features Added
+
+1. **Masque support** (`Minimap.lua`) — After button creation, probe `LibStub("Masque", true)`. If present: `Masque:Group("X-PLORE", "Minimap Button"):AddButton(btn, {Icon=ICON_PATH, Square=true})`. Masque handles circular masking on all WoW versions including WotLK. Manual `AddMaskTexture` path skipped when `_masqueSkinned` is true.
+
+### Files Modified
+
+- `Minimap.lua` — Universal button (SetNormalTexture/SetHighlightTexture/SetPushedTexture), Masque registration, pcall guard on `AddMaskTexture`
+- `GuideMenu.lua` — btnRow `SetSize(440, 48)` fix
+- `Skins.lua` — skinID type guard on combined-format parser
+
+---
+
 ## [Unreleased] — Session 27 — 2026-04-29
 
 ### Summary
