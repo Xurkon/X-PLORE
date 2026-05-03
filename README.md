@@ -177,3 +177,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 - **[PE-ElvUI](https://github.com/Xurkon/PE-ElvUI)** — Related Ebonhold UI project
 - **[Patreon](https://www.patreon.com/Xurkon)** — Support development
 - **[PayPal](https://www.paypal.me/Xurkon)** — One-time support
+
