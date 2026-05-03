@@ -171,13 +171,13 @@ The `addon/X-Plore/` subdirectory shown in some older documentation is **depreca
 
 ## Contributing
 
-This is a private project under active development. The repository is public for transparency purposes. Issues and pull requests are not currently being accepted.
+This is an open-source community project under active development. Issues and pull requests are welcome!
 
 ---
 
 ## License
 
-Private — All rights reserved.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
