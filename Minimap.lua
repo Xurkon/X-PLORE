@@ -175,20 +175,43 @@ function MM:CreateButton()
     btn:SetFrameStrata("MEDIUM")
     btn:SetFrameLevel(8)
 
-    -- Minimap button icon — use the classic Button widget texture API which
-    -- works on ALL WoW versions (WotLK 3.3.5a through Retail).
-    -- SetNormalTexture sets the icon directly on the button; no mask needed.
+    -- Icon texture — SetNormalTexture exists on Button in ALL WoW versions.
+    -- SetTexCoord selects the correct cell from the multi-cell atlas.
     btn:SetNormalTexture(ICON_PATH)
     btn:GetNormalTexture():SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas
+    self._icon = btn:GetNormalTexture()
 
-    -- Highlight (mouseover glow)
+    -- Circular mask — implemented differently per version:
+    --
+    -- Retail (8.0+): AddMaskTexture stacks a mask texture onto the icon.
+    -- WotLK:     The classic approach is SetPortraitToTexture(tex, path) which
+    --             applies the built-in circular alpha mask to a texture AND sets
+    --             its texture to the path. However, SetPortraitToTexture calls
+    --             SetTexture(path) internally which resets SetTexCoord — making
+    --             it incompatible with atlas UV selection.
+    --
+    --             Therefore on WotLK the icon renders as a square (no mask).
+    --             The icon is still fully functional and recognisable.
+    if self._icon.AddMaskTexture then
+        -- Retail: create a dedicated mask texture and stack it on the icon.
+        -- The mask clips the icon to the button's round shape without
+        -- disturbing SetTexCoord (mask is a separate texture layer).
+        local mask = btn:CreateTexture(nil, "MASK")
+        mask:SetAllPoints()
+        mask:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Mask")
+        self._icon:AddMaskTexture(mask)
+        self._maskApplied = true
+    else
+        -- WotLK: no mask available that works with atlas UV selection.
+        -- Icon renders as a square — fully functional, recognisable.
+        self._maskApplied = false
+    end
+
+    -- Highlight (mouseover glow) — works on all versions
     btn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 
     -- Pushed state (cosmetic)
     btn:SetPushedTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
-
-    -- Store reference for potential texture swaps
-    self._icon = btn:GetNormalTexture()
 
     -- Tooltip
     btn:SetScript("OnEnter", function(self)
