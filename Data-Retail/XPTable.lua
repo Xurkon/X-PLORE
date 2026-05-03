@@ -1,0 +1,3 @@
+﻿-- Data-Retail\XPTable.lua
+-- XP-per-level table
+-- TODO: Implement

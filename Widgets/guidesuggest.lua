@@ -1,0 +1,3 @@
+﻿-- Widgets\guidesuggest.lua
+-- Game-feature widget: guidesuggest
+-- TODO: Implement

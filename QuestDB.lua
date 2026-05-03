@@ -1,0 +1,3 @@
+﻿-- QuestDB.lua
+-- Quest database
+-- TODO: Implement

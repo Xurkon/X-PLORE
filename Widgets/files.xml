@@ -1,0 +1,10 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- Widgets/files.xml
+         Game-feature widget modules. Each registers itself with Widgets.lua factory. -->
+    <Script file="guidehistory.lua"/>
+    <Script file="guidesuggest.lua"/>
+    <Script file="zygormessage.lua"/>
+    <Script file="timeplayed.lua"/>
+    <Script file="events.lua"/>
+    <Script file="daily reset.lua"/>
+</Ui>

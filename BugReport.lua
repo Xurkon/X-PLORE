@@ -1,0 +1,3 @@
+﻿-- BugReport.lua
+-- Bug report frame and submission
+-- TODO: Implement

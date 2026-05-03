@@ -1,0 +1,3 @@
+﻿-- GoldUI\Goldguide-View.lua
+-- Gold guide UI renderer
+-- TODO: Implement

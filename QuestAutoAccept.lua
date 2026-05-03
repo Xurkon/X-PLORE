@@ -1,0 +1,3 @@
+﻿-- QuestAutoAccept.lua
+-- Auto-accept/turn-in quest hooks
+-- TODO: Implement

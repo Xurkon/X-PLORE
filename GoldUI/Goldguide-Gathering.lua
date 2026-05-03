@@ -1,0 +1,3 @@
+﻿-- GoldUI\Goldguide-Gathering.lua
+-- Gathering gold guide
+-- TODO: Implement

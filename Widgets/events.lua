@@ -1,0 +1,3 @@
+﻿-- Widgets\events.lua
+-- Game-feature widget: events
+-- TODO: Implement

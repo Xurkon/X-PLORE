@@ -1,0 +1,3 @@
+﻿-- Sync.lua
+-- Party/guild guide sync
+-- TODO: Implement

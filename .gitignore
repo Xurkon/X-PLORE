@@ -4,5 +4,21 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
-!.env.example
+
+# IDE/OS
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+
+# Local development
+*.bak
+*.tmp
+
+# Binary assets
+*.png
+*.tga
+*.ttf
+*.woff
+*.woff2

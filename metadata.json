@@ -1,5 +1,0 @@
-{
-  "name": "X-Plore WoW Guide Viewer",
-  "description": "An X-PLORE-inspired World of Warcraft guide viewer and development dashboard. Features a minimalist main frame, a separate guide browser, and a deep options panel for customizing display, steps, and navigation arrows across all WoW versions.",
-  "requestFramePermissions": []
-}

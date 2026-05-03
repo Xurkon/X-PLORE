@@ -1,0 +1,3 @@
+﻿-- Widgets\feast.lua
+-- Game-feature widget: feast
+-- TODO: Implement

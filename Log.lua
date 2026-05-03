@@ -1,0 +1,3 @@
+﻿-- Log.lua
+-- Debug logging system
+-- TODO: Implement

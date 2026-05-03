@@ -1,0 +1,3 @@
+﻿-- UiWidgets\Visuals.lua
+-- Visual helpers for widgets
+-- TODO: Implement

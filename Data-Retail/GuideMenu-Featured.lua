@@ -1,0 +1,3 @@
+﻿-- Data-Retail\GuideMenu-Featured.lua
+-- Featured guide list data
+-- TODO: Implement

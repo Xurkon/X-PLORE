@@ -1,0 +1,3 @@
+﻿-- GoldUI\Gold.lua
+-- Gold guide core
+-- TODO: Implement

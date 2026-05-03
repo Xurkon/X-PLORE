@@ -1,0 +1,3 @@
+﻿-- Widgets\grandhunt.lua
+-- Game-feature widget: grandhunt
+-- TODO: Implement

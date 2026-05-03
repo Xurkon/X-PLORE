@@ -1,0 +1,3 @@
+﻿-- MapCoords.lua
+-- Map coordinate system
+-- TODO: Implement

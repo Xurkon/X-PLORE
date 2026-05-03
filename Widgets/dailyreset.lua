@@ -1,0 +1,3 @@
+﻿-- Widgets\dailyreset.lua
+-- Game-feature widget: dailyreset
+-- TODO: Implement

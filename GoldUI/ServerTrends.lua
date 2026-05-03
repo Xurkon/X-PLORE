@@ -1,0 +1,3 @@
+﻿-- GoldUI\ServerTrends.lua
+-- Server price trend tracker
+-- TODO: Implement

@@ -1,0 +1,3 @@
+﻿-- Data-Retail\GuideMenu-Home.lua
+-- Home screen guide data
+-- TODO: Implement

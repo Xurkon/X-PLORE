@@ -1,0 +1,3 @@
+﻿-- Widgets\notablequests.lua
+-- Game-feature widget: notablequests
+-- TODO: Implement

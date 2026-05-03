@@ -1,0 +1,3 @@
+﻿-- GuideMenu-View.lua
+-- Guide menu UI renderer (GuideMenu-View.lua equivalent)
+-- TODO: Implement

@@ -1,0 +1,3 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Script file="Achievement.lua"/>     <Script file="Goal-Dragonrace.lua"/>     <Script file="InitialFlightPaths.lua"/>     <Script file="Item-DataTables.lua"/>     <Script file="Item-GearFinder.lua"/>     <Script file="Item-ItemScore.lua"/>     <Script file="PetBattle.lua"/>     <Script file="PointerMap.lua"/>     <Script file="Profession.lua"/>     <Script file="TalentAdvisor-Data.lua"/>     <Script file="TalentAdvisor.lua"/>     <Script file="WorldQuests.lua"/>     <Script file="Faction.lua"/>     <Script file="Goal.lua"/>     <Script file="QuestDB.lua"/>     <Script file="QuestTracking.lua"/>
+</Ui>

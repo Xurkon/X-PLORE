@@ -1,0 +1,3 @@
+﻿-- Widgets\valor.lua
+-- Game-feature widget: valor
+-- TODO: Implement

@@ -1,0 +1,614 @@
+-----------------------------------------------------------------------
+-- X-Plore: Core.lua
+-- Main addon entry point using AceAddon-3.0 from !X-Libs.
+-- Handles initialization, saved variables, slash commands, and
+-- orchestrates all subsystems.
+-----------------------------------------------------------------------
+local ADDON_NAME, ADDON_TABLE = ...
+local XP = ADDON_TABLE.XP
+
+-----------------------------------------------------------------------
+-- Upgrade XP to a full AceAddon
+-----------------------------------------------------------------------
+local AceAddon = LibStub("AceAddon-3.0")
+XP = AceAddon:NewAddon(XP, "X-Plore",
+    "AceEvent-3.0",
+    "AceTimer-3.0",
+    "AceConsole-3.0",
+    "AceHook-3.0"
+)
+-- Re-export after AceAddon mixes in
+_G.XP = XP
+ADDON_TABLE.XP = XP
+
+-----------------------------------------------------------------------
+-- Library references (all from !X-Libs)
+-----------------------------------------------------------------------
+local AceDB      = LibStub("AceDB-3.0")
+local AceConfig  = LibStub("AceConfig-3.0", true)
+local AceConfigDialog = LibStub("AceConfigDialog-3.0", true)
+
+-----------------------------------------------------------------------
+-- Saved variable defaults
+-----------------------------------------------------------------------
+local DB_DEFAULTS = {
+    profile = {
+        -- Viewer frame
+        viewer = {
+            scale    = 1.0,
+            locked   = false,
+            shown    = true,
+            width    = 320,
+            height   = 450,
+        },
+        -- Guide menu / browser
+        menu = {
+            width    = 825,
+            height   = 630,
+        },
+        -- Waypoint arrow
+        arrow = {
+            enabled      = true,
+            locked       = false,
+            scale        = 1.0,
+            theme        = "MODERN",
+            showDistance  = true,
+        },
+        -- Skin
+        skin  = "starlight",
+        -- Auto-advance engine
+        autoAdvance        = true,
+        -- AutoComplete: skip already-completed quest steps when loading a guide
+        autoSkipCompleted  = true,
+        -- Minimap button
+        showMinimapButton  = true,
+        minimapAngle       = 45,
+        -- Frame appearance
+        frameScale         = 1.0,
+        fontSize           = 12,
+        -- Dungeon/raid hiding
+        hideInDungeon      = false,
+        showAfterDungeon   = true,
+        -- Combat hiding
+        hideInCombat       = false,
+        -- Viewer repositioning
+        repositionViewer   = true,
+        -- Map button
+        showMapButton      = true,
+        -- Announcements
+        announcements = {
+            enabled     = true,   -- show step-advance messages in chat
+            shareParty  = false,  -- broadcast to party/raid chat
+            showZoneHint = true,  -- suggest a guide when entering a new zone
+        },
+    },
+    char = {
+        currentGuide = nil,
+        currentStep  = 1,
+        tabGuides    = {},  -- saved tab state
+    },
+}
+
+-----------------------------------------------------------------------
+-- OnInitialize: runs once when ADDON_LOADED fires for us
+-----------------------------------------------------------------------
+function XP:OnInitialize()
+    -- Saved variables via AceDB
+    self.db = AceDB:New("XPloreDB", DB_DEFAULTS, true)
+
+    -- Initialize skin system (must happen before creating frames)
+    self:InitSkins()
+
+    -- Register guide categories
+    self:InitCategories()
+
+    -- Register slash commands
+    self:RegisterChatCommand("xp", "SlashCommand")
+    self:RegisterChatCommand("xplore", "SlashCommand")
+
+    -- Initialize options system (mirrors Zygor's Options_Initialize)
+    self:Options_Initialize()
+
+    -- Run Config profile management (mirrors Zygor's Config:Run)
+    if XP.Config and XP.Config.Run then
+        XP.Config:Run()
+    end
+end
+
+-----------------------------------------------------------------------
+-- OnEnable: runs after all addons loaded and the player logs in
+-----------------------------------------------------------------------
+function XP:OnEnable()
+    -- Create UI frames
+    self:CreateViewerFrame()
+    self:CreateGuideMenu()
+    self:CreateWaypointArrow()
+
+    -- Register waypoint-related events
+    self:RegisterEvent("PLAYER_CORPSE_EXPIRED", function()
+        self:ClearWaypoints()
+    end)
+
+    -- Initialize tabs
+    self:InitTabs()
+
+    -- Initialize minimap button
+    if XP.Minimap then
+        XP.Minimap:OnEnable()
+    end
+
+    -- Initialize AutoComplete suggestion maps (needs guides loaded first)
+    if XP.AutoComplete then
+        XP.AutoComplete:OnEnable()
+    end
+
+        -- Initialize GoalTracker event frame
+        if XP.GoalTracker then
+            XP.GoalTracker:OnEnable()
+        end
+
+        -- Initialize Tooltip hints (injects X-Plore context into GameTooltip)
+        if XP.Tooltip then
+            XP.Tooltip:OnEnable()
+        end
+
+        -- Initialize Announcements (step chat messages, party broadcast)
+        if XP.Announcements then
+            XP.Announcements:OnEnable()
+        end
+
+        -- Initialize ActionBar slot highlighting
+        self:InitActionBar()
+
+        -- Initialize Faction reputation tracking
+        self:InitFaction()
+
+    -- Register game events for auto-advance
+    self:RegisterEvent("QUEST_ACCEPTED", "OnQuestEvent")
+    self:RegisterEvent("QUEST_LOG_UPDATE", "OnQuestEvent")
+    self:RegisterEvent("ZONE_CHANGED", "OnZoneEvent")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "OnZoneEvent")
+
+    -- Register combat and zone events for viewer visibility
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", function()
+        if self.db.profile.hideInCombat then
+            self:UpdateViewerVisibility()
+        end
+    end)
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+        if self.db.profile.hideInCombat then
+            self:UpdateViewerVisibility()
+        end
+    end)
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA", function()
+        self:UpdateViewerVisibility()
+    end)
+
+    -- WotLK / Classic specific events
+    if not XP.isRetail then
+        self:RegisterEvent("QUEST_COMPLETE", "OnQuestEvent")
+    else
+        self:RegisterEvent("QUEST_TURNED_IN", "OnQuestEvent")
+    end
+
+    -- Load last-used guide
+    local lastGuide = self.db.char.currentGuide
+    if lastGuide and self.Guides[lastGuide] then
+        self:LoadGuide(lastGuide)
+    else
+        -- No saved guide: force viewer to show "No Guide" state
+        self:UpdateViewer()
+    end
+
+    self:Print("v" .. self.version .. " loaded. Type |cff00e5ff/xp|r to open.")
+end
+
+-----------------------------------------------------------------------
+-- Slash command handler
+-----------------------------------------------------------------------
+function XP:SlashCommand(input)
+    input = input and input:lower():match("^%s*(.-)%s*$") or ""
+
+    if input == "viewer" then
+        self:ToggleViewer()
+    elseif input == "menu" or input == "browser" then
+        self:ToggleMenu()
+    elseif input == "options" or input == "config" then
+        self:OpenOptions()
+    elseif input == "reset" then
+        self:Print("Resetting frame positions...")
+        self:ResetFrames()
+    else
+        -- Default: toggle the guide menu
+        self:ToggleMenu()
+    end
+end
+
+-----------------------------------------------------------------------
+-- Guide Management
+-- NOTE: XP:RegisterGuide() is defined in Guide.lua (loaded after Core).
+-- Guide data files call it to register guide objects.
+-- Core.lua provides LoadGuide, NextStep, PrevStep, GoToStep which
+-- operate on Guide objects (have .numSteps, .steps as Step objects, etc.)
+-----------------------------------------------------------------------
+
+function XP:LoadGuide(guideID)
+    local guide = self.Guides[guideID]
+    if not guide then
+        self:Print("|cffff0000Error:|r Guide not found: " .. tostring(guideID))
+        return
+    end
+
+    self.CurrentGuide = guide
+    self.CurrentStep  = self.db.char.currentGuide == guideID
+                        and self.db.char.currentStep or 1
+
+    -- Clamp step to valid range
+    if guide.numSteps then
+        self.CurrentStep = math.max(1, math.min(self.CurrentStep, guide.numSteps))
+    end
+
+    -- AutoComplete: advance past already-completed steps
+    if XP.AutoComplete then
+        local firstIncomplete = XP.AutoComplete:OnGuideLoaded(guide)
+        if firstIncomplete and firstIncomplete > self.CurrentStep then
+            self.CurrentStep = firstIncomplete
+        end
+    end
+
+    -- Persist
+    self.db.char.currentGuide = guideID
+    self.db.char.currentStep  = self.CurrentStep
+
+    -- Notify GoalTracker of the new step
+    if XP.GoalTracker then
+        XP.GoalTracker:OnStepChanged(guide, self.CurrentStep)
+    end
+
+    -- Update UI
+    self:UpdateViewer()
+
+    -- Send message so other subsystems can react
+    self:SendMessage("XP_GUIDE_LOADED", guide)
+end
+
+function XP:NextStep()
+    if not self.CurrentGuide then return end
+    local numSteps = self.CurrentGuide.numSteps or #self.CurrentGuide.steps
+    if self.CurrentStep >= numSteps then return end
+
+    self.CurrentStep = self.CurrentStep + 1
+    self.db.char.currentStep = self.CurrentStep
+
+    -- Notify GoalTracker
+    if XP.GoalTracker then
+        XP.GoalTracker:OnStepChanged(self.CurrentGuide, self.CurrentStep)
+    end
+
+    self:UpdateViewer()
+    self:SendMessage("XP_STEP_CHANGED", self.CurrentStep)
+
+    -- Announce step advance to chat / party
+    if XP.Announcements then
+        XP.Announcements:OnStepAdvanced(self.CurrentStep)
+    end
+
+    -- Play completion sound
+    local soundFile = XP.SOUND_PATH .. "step_complete.ogg"
+    if PlaySoundFile then
+        PlaySoundFile(soundFile, "Master")
+    end
+end
+
+function XP:PrevStep()
+    if not self.CurrentGuide or self.CurrentStep <= 1 then return end
+    self.CurrentStep = self.CurrentStep - 1
+    self.db.char.currentStep = self.CurrentStep
+
+    -- Notify GoalTracker
+    if XP.GoalTracker then
+        XP.GoalTracker:OnStepChanged(self.CurrentGuide, self.CurrentStep)
+    end
+
+    self:UpdateViewer()
+    self:SendMessage("XP_STEP_CHANGED", self.CurrentStep)
+
+    -- Announce step change (no party broadcast for prev — informational only)
+    if XP.Announcements then
+        XP.Announcements:OnStepAdvanced(self.CurrentStep)
+    end
+end
+
+function XP:GoToStep(n)
+    if not self.CurrentGuide then return end
+    local numSteps = self.CurrentGuide.numSteps or #self.CurrentGuide.steps
+    n = math.max(1, math.min(n, numSteps))
+    self.CurrentStep = n
+    self.db.char.currentStep = n
+
+    -- Notify GoalTracker
+    if XP.GoalTracker then
+        XP.GoalTracker:OnStepChanged(self.CurrentGuide, n)
+    end
+
+    self:UpdateViewer()
+    self:SendMessage("XP_STEP_CHANGED", n)
+
+    -- Announce step jump
+    if XP.Announcements then
+        XP.Announcements:OnStepAdvanced(n)
+    end
+end
+
+-----------------------------------------------------------------------
+-- Event Handlers
+-----------------------------------------------------------------------
+function XP:OnQuestEvent(event, ...)
+    -- Trigger auto-advance check
+    if self.db.profile.autoAdvance and self.CurrentGuide then
+        self:CheckAutoAdvance()
+    end
+end
+
+function XP:OnZoneEvent(event, ...)
+    -- Update waypoint if needed
+    if self.CurrentGuide then
+        self:UpdateWaypoint()
+    end
+    -- AutoComplete: check for zone-based guide suggestion
+    if XP.AutoComplete then
+        XP.AutoComplete:OnZoneChanged()
+    end
+end
+
+function XP:CheckAutoAdvance()
+    if not self.CurrentGuide then return end
+    local step = self.CurrentGuide:GetStep(self.CurrentStep)
+    if not step then return end
+
+    -- Check each goal in the step for quest-based completion
+    local allComplete = true
+    for _, goal in ipairs(step.goals) do
+        if not goal.complete and not goal.noComplete then
+            local action = (goal.action or ""):lower()
+            -- Accept quest: check if quest is in log
+            if (action == "accept" or action == "accept_quest") and goal.questID then
+                if self:IsQuestInLog(goal.questID) then
+                    goal.complete = true
+                    goal.current = goal.count or 1
+                else
+                    allComplete = false
+                end
+            -- Turn in quest: check if quest is flagged completed
+            elseif (action == "turnin" or action == "turnin_quest") and goal.questID then
+                if self:IsQuestCompleted(goal.questID) then
+                    goal.complete = true
+                    goal.current = goal.count or 1
+                else
+                    allComplete = false
+                end
+            -- Confirm: requires manual click, can't auto-complete
+            elseif action == "confirm" then
+                allComplete = false
+            -- Goals with quest objective tracking
+            elseif goal.questID and goal.questObjective then
+                if self:IsQuestObjectiveComplete(goal.questID, goal.questObjective) then
+                    goal.complete = true
+                    goal.current = goal.count or 1
+                else
+                    allComplete = false
+                end
+            else
+                -- Non-quest goals can't be auto-completed here
+                allComplete = false
+            end
+        end
+    end
+
+    -- If all goals in the step are complete, advance
+    if allComplete and step:IsComplete() then
+        self:NextStep()
+    end
+end
+
+-----------------------------------------------------------------------
+-- Quest Objective Completion Check
+-----------------------------------------------------------------------
+function XP:IsQuestObjectiveComplete(questID, objectiveIndex)
+    if not questID or not objectiveIndex then return false end
+    if XP.isRetail then
+        -- Retail: C_QuestLog API
+        if C_QuestLog and C_QuestLog.GetQuestObjectives then
+            local objectives = C_QuestLog.GetQuestObjectives(questID)
+            if objectives and objectives[objectiveIndex] then
+                return objectives[objectiveIndex].finished
+            end
+        end
+    else
+        -- Classic/WotLK: scan quest log
+        for i = 1, GetNumQuestLogEntries() do
+            local _, _, _, isHeader, _, _, _, qID = GetQuestLogTitle(i)
+            if qID == questID then
+                SelectQuestLogEntry(i)
+                local _, _, completed = GetQuestLogLeaderBoard(objectiveIndex)
+                return completed
+            end
+        end
+    end
+    return false
+end
+
+-----------------------------------------------------------------------
+-- Quest Helpers (universal across versions)
+-----------------------------------------------------------------------
+function XP:IsQuestInLog(questID)
+    if XP.isRetail then
+        return C_QuestLog and C_QuestLog.IsOnQuest and C_QuestLog.IsOnQuest(questID)
+    else
+        for i = 1, GetNumQuestLogEntries() do
+            local _, _, _, _, _, _, _, qID = GetQuestLogTitle(i)
+            if qID == questID then return true end
+        end
+    end
+    return false
+end
+
+function XP:IsQuestCompleted(questID)
+    if XP.isRetail then
+        return C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted
+               and C_QuestLog.IsQuestFlaggedCompleted(questID)
+    else
+        -- 3.3.5a / Classic: check the quest log for completion flag
+        for i = 1, GetNumQuestLogEntries() do
+            local title, _, _, isHeader, _, isComplete, _, qID = GetQuestLogTitle(i)
+            if qID == questID then
+                return isComplete and isComplete > 0
+            end
+        end
+    end
+    return false
+end
+
+-----------------------------------------------------------------------
+-- Frame Toggle Helpers (actual frame creation is in Viewer.lua / GuideMenu.lua)
+-----------------------------------------------------------------------
+function XP:ToggleViewer()
+    if self.ViewerFrame and self.ViewerFrameCreated then
+        if self.ViewerFrame:IsShown() then
+            self.ViewerFrame:Hide()
+        else
+            self.ViewerFrame:Show()
+            self:UpdateViewer()
+        end
+    else
+        -- Either no frame or stub only (ViewerFrameCreated not set) — create now
+        self:CreateViewerFrame()
+        if self.ViewerFrame and self.ViewerFrameCreated then
+            self.ViewerFrame:Show()
+            self:UpdateViewer()
+        end
+    end
+end
+
+function XP:ToggleMenu()
+    if self.MenuFrame then
+        if self.MenuFrame:IsShown() then
+            self.MenuFrame:Hide()
+        else
+            self.MenuFrame:Show()
+            self:UpdateMenu()
+        end
+    end
+end
+
+function XP:ResetFrames()
+    if self.ViewerFrame then
+        self.ViewerFrame:ClearAllPoints()
+        self.ViewerFrame:SetPoint("RIGHT", UIParent, "RIGHT", -50, 0)
+    end
+    if self.MenuFrame then
+        self.MenuFrame:ClearAllPoints()
+        self.MenuFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    end
+end
+
+-----------------------------------------------------------------------
+-- Options Table (basic; expandable later)
+-----------------------------------------------------------------------
+function XP:GetOptionsTable()
+    return {
+        type = "group",
+        name = "X-Plore",
+        args = {
+            general = {
+                type = "group",
+                name = "General",
+                order = 1,
+                args = {
+                    autoAdvance = {
+                        type = "toggle",
+                        name = "Auto-Advance Steps",
+                        desc = "Automatically advance to the next step when the current step is completed.",
+                        get = function() return self.db.profile.autoAdvance end,
+                        set = function(_, val) self.db.profile.autoAdvance = val end,
+                        order = 1,
+                    },
+                    viewerScale = {
+                        type = "range",
+                        name = "Viewer Scale",
+                        desc = "Scale of the step viewer frame.",
+                        min = 0.5, max = 2.0, step = 0.05,
+                        get = function() return self.db.profile.viewer.scale end,
+                        set = function(_, val)
+                            self.db.profile.viewer.scale = val
+                            if self.ViewerFrame then
+                                self.ViewerFrame:SetScale(val)
+                            end
+                        end,
+                        order = 2,
+                    },
+                    lockViewer = {
+                        type = "toggle",
+                        name = "Lock Viewer",
+                        desc = "Prevent the viewer from being moved.",
+                        get = function() return self.db.profile.viewer.locked end,
+                        set = function(_, val)
+                            self.db.profile.viewer.locked = val
+                            if self.ViewerFrame then
+                                self.ViewerFrame:SetMovable(not val)
+                            end
+                        end,
+                        order = 3,
+                    },
+                },
+            },
+            arrow = {
+                type = "group",
+                name = "Waypoint Arrow",
+                order = 2,
+                args = {
+                    enabled = {
+                        type = "toggle",
+                        name = "Enable Arrow",
+                        get = function() return self.db.profile.arrow.enabled end,
+                        set = function(_, val) self.db.profile.arrow.enabled = val end,
+                        order = 1,
+                    },
+                    arrowScale = {
+                        type = "range",
+                        name = "Arrow Scale",
+                        min = 0.5, max = 2.0, step = 0.05,
+                        get = function() return self.db.profile.arrow.scale end,
+                        set = function(_, val) self.db.profile.arrow.scale = val end,
+                        order = 2,
+                    },
+                },
+            },
+        },
+    }
+end
+
+-----------------------------------------------------------------------
+-- Update Viewer Visibility: apply combat and dungeon visibility rules
+-----------------------------------------------------------------------
+function XP:UpdateViewerVisibility()
+    if not self.ViewerFrame then return end
+    local p = self.db.profile
+    local show = true
+
+    -- Check combat hiding
+    if p.hideInCombat and InCombatLockdown() then
+        show = false
+    end
+
+    -- Check dungeon/raid hiding
+    if p.hideInDungeon and IsInInstance() then
+        show = false
+    end
+
+    if show then
+        self.ViewerFrame:Show()
+    else
+        self.ViewerFrame:Hide()
+    end
+end

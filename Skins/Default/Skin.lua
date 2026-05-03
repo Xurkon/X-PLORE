@@ -1,0 +1,3 @@
+﻿-- Skins\Default\Skin.lua
+-- Default skin data (colors, fonts, textures)
+-- TODO: Implement

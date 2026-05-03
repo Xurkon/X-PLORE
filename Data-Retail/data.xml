@@ -1,0 +1,10 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <!-- Data-Retail/data.xml
+         Static data tables (quest IDs, dungeon lists, XP tables, etc.) -->
+    <Script file="Chains.lua"/>
+    <Script file="Dungeons.lua"/>
+    <Script file="Foglight.lua"/>
+    <Script file="XPTable.lua"/>
+    <Script file="GuideMenu-Featured.lua"/>
+    <Script file="GuideMenu-Home.lua"/>
+</Ui>

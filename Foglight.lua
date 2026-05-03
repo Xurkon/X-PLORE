@@ -1,0 +1,3 @@
+﻿-- Foglight.lua
+-- Map fog-of-war system
+-- TODO: Implement
