@@ -18,8 +18,6 @@ Thumbs.db
 
 # Development docs (export-ignore in .gitattributes — tracked but excluded from releases)
 .env.example
-CHANGELOG.md
-README.md
 PARITY_REPORT.md
 PROGRESS.md
 ViewerPlan.md
