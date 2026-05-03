@@ -32,7 +32,7 @@ Do not attempt to use this addon — it will not work correctly.
 
 **X-PLORE is incomplete and currently broken.** This repository is published for transparency and progress tracking purposes only. The addon is not loadable in-game. Features are partially implemented, UI is non-functional, and the codebase is under active development.
 
-If you are looking for a working guide addon, use [ZygorGuides](https://www.zygorguides.com/).
+If you are looking for a working guide addon, use the reference implementation: [ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer).
 
 ---
 
@@ -201,6 +201,7 @@ Private — All rights reserved.
 
 ## Links
 
+- **[ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer)** — reference implementation (WotLK 3.3.5a)
 - **[!X-Libs](https://github.com/Xurkon/-X-Libs)** — Required dependency
 - **[PE-ElvUI](https://github.com/Xurkon/PE-ElvUI)** — Related Ebonhold UI project
 - **[Patreon](https://www.patreon.com/Xurkon)** — Support development
