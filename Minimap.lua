@@ -189,11 +189,13 @@ function MM:CreateButton()
     icon:SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas (first of 4 cells)
     icon:SetTexture(ICON_PATH)
     -- AddMaskTexture was introduced in WoW 8.0 (BFA). On WotLK (3.3.5a)
-    -- the older SetMaskTexture API exists but accepts only one mask.
+    -- the older TextureBase:SetMask(filePath) API applies a mask file directly
+    -- to the texture (no separate mask texture object needed). SetMask takes a
+    -- file path string, NOT a texture object.
     if icon.AddMaskTexture then
         icon:AddMaskTexture(mask)
-    elseif icon.SetMaskTexture then
-        icon:SetMaskTexture(mask)
+    else
+        icon:SetMask("Interface\\Minimap\\UI-Minimap-ZoomButton-Mask")
     end
     self._icon = icon
 
