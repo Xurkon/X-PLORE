@@ -17,7 +17,7 @@ XP.Minimap = MM
 local BUTTON_SIZE   = 31          -- diameter of the minimap button
 local BUTTON_RADIUS = 80          -- orbital radius from minimap centre
 local DEFAULT_ANGLE = 45          -- default starting angle (degrees, clockwise from top)
-local ICON_PATH     = XP.TEXTURE_PATH .. "ui\\minimap_button.tga"
+local ICON_PATH     = XP.TEXTURE_PATH .. "minimap_button.tga"
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Angle ↔ Position helpers
