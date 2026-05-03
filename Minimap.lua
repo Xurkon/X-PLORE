@@ -178,16 +178,17 @@ function MM:CreateButton()
     -- Circular mask for the icon
     btn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
 
-    -- Icon texture
+    -- Circular mask — clip the icon to the button's round shape
+    local mask = btn:CreateTexture(nil, "MASK")
+    mask:SetAllPoints()
+    mask:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Mask")
+
+    -- Icon texture — fill the button and clip to the circular mask
     local icon = btn:CreateTexture(nil, "BACKGROUND")
     icon:SetAllPoints()
-    -- Try the custom icon first; fall back to a WoW built-in compass icon.
+    icon:SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas (first of 4 cells)
     icon:SetTexture(ICON_PATH)
-    if icon:GetObjectType() == "Texture" then
-        -- SetTexture is always silent; do a size check to detect a missing/zero-byte file.
-        -- There is no reliable cross-version way, so we just set it and it will default
-        -- to the missing-texture checker pattern if the file is absent.
-    end
+    icon:AddMaskTexture(mask)
     self._icon = icon
 
     -- Circular border texture (optional cosmetic)

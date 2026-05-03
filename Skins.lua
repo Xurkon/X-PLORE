@@ -959,7 +959,7 @@ end
 
 function XP:SetSkin(skinID, styleID)
     -- Handle combined "skinID-styleID" format from GetSkinList
-    if skinID and styleID == nil and skinID:match(".-%-(.+)") then
+    if type(skinID) == "string" and styleID == nil and skinID:match(".-%-(.+)") then
         skinID, styleID = skinID:match("([^%-]+)%-(.+)")
     end
     
