@@ -16,9 +16,23 @@ Thumbs.db
 *.bak
 *.tmp
 
-# Binary assets
+# Development docs (export-ignore in .gitattributes — tracked but excluded from releases)
+.env.example
+CHANGELOG.md
+README.md
+PARITY_REPORT.md
+PROGRESS.md
+ViewerPlan.md
+test_skins.lua
+
+# Binary assets (gitignored — not tracked)
 *.png
 *.tga
 *.ttf
 *.woff
 *.woff2
+*.blp
+*.ogg
+
+# Untracked skin assets
+Skins/Default/Midnight/
