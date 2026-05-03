@@ -1,10 +1,14 @@
-# Test Changelog Entry
 
-## Changes in v0.0.5
-- Added new feature: user authentication
-- Fixed bug: login timeout issue
-- Improved performance of database queries
-- Updated dependencies
+## Changes in v0.0.6
 
-## Breaking Changes
-- Removed deprecated API endpoint /old-login
+### Added
+- New command: /status shows bot uptime
+- Rate limiting for API requests
+
+### Changed  
+- Updated Discord.js to v14.11
+- Refactored event handler architecture
+
+### Fixed
+- Memory leak in message cache
+- Race condition in worker pool
