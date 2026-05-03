@@ -45,7 +45,7 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 - **Zygor-compatible guide format** — parse and display guides in the same format Zygor uses
 - **Universal WoW version support** — one codebase, all expansions, with proper version shims
 - **Guide Info Bar** — the next major component being implemented
-- **Full skin system** — multiple visual themes (Default, Midnight, Starlight, Stealth, and variants)
+- **Full skin system** — multiple visual themes (Stealth and Starlight are functional; more coming)
 - **Arrow & waypoint navigation** — in-game directional arrows and map waypoints
 - **Goal & quest tracking** — step-by-step goal progress with auto-accept/turn-in logic
 
@@ -167,12 +167,12 @@ X-PLORE includes a multi-skin system. Currently available:
 
 | Skin | Status |
 |------|--------|
-| Default | ⚙️ Partial |
-| Midnight | ⚙️ Partial |
-| Starlight | ⚙️ Partial |
-| Starlight-glass | ⚙️ Partial |
-| Stealth | ⚙️ Partial |
-| Stealth-glass | ⚙️ Partial |
+| Stealth | ✅ Working |
+| Starlight | ✅ Working |
+| Default | 🔜 Coming |
+| Midnight | 🔜 Coming |
+| Starlight-glass | 🔜 Coming |
+| Stealth-glass | 🔜 Coming |
 
 ---
 
