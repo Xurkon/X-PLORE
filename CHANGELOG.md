@@ -4,7 +4,27 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — Session 31 — 2026-05-02
+## [Unreleased] — Session 33 — 2026-05-03
+
+### Summary
+
+**Relay Changelog Diff Test Entry.** Test push to verify Discord changelog thread displays actual git diff output in markdown code block format rather than just a commit summary link.
+
+### Bugs Fixed
+
+1. **Test dummy entry** (`CHANGELOG.md:1`) — This is a test entry to confirm the GitHub Compare API diff formatter is posting actual markdown changelog content to the `#changelog` Discord thread.
+
+### Features Added
+
+1. **Changelog diff formatter** (`github-discord-relay.py`) — New `format_changelog_diff_payload()` function that extracts `files[].patch` from GitHub Compare API, formats as unified diff, truncates at 3800 chars, posts as `diff` code block.
+
+### Files Modified
+
+- `CHANGELOG.md` — Test session entry
+
+---
+
+## Session 31 — 2026-05-02
 
 ### Summary
 
