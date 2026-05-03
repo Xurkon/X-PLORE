@@ -25,12 +25,9 @@ test_skins.lua
 
 # Binary assets (gitignored — not tracked)
 *.png
-*.tga
 *.ttf
 *.woff
 *.woff2
-*.blp
-*.ogg
 
-# Untracked skin assets
+# Untracked skin assets (not used by addon)
 Skins/Default/Midnight/
