@@ -175,44 +175,20 @@ function MM:CreateButton()
     btn:SetFrameStrata("MEDIUM")
     btn:SetFrameLevel(8)
 
-    -- Circular mask for the icon
-    btn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
+    -- Minimap button icon — use the classic Button widget texture API which
+    -- works on ALL WoW versions (WotLK 3.3.5a through Retail).
+    -- SetNormalTexture sets the icon directly on the button; no mask needed.
+    btn:SetNormalTexture(ICON_PATH)
+    btn:GetNormalTexture():SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas
 
-    -- Circular mask — clip the icon to the button's round shape
-    local mask = btn:CreateTexture(nil, "MASK")
-    mask:SetAllPoints()
-    mask:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Mask")
+    -- Highlight (mouseover glow)
+    btn:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 
-    -- Icon texture — fill the button and clip to the circular mask
-    local icon = btn:CreateTexture(nil, "BACKGROUND")
-    icon:SetAllPoints()
-    icon:SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas (first of 4 cells)
-    icon:SetTexture(ICON_PATH)
+    -- Pushed state (cosmetic)
+    btn:SetPushedTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 
-    -- AddMaskTexture (WoW 8.0+) stacks mask textures. The older
-    -- TextureBase:SetMask(filePath) does NOT exist — SetMask is a Minimap
-    -- method only. On WotLK there is no mask API for generic textures.
-    -- Safe universal approach: only apply masking when both the API and
-    -- the mask texture itself are confirmed available.
-    local maskSupported = false
-    if icon.AddMaskTexture and mask and mask.GetObjectType then
-        pcall(function()
-            icon:AddMaskTexture(mask)
-            maskSupported = true
-        end)
-    end
-
-    -- Fallback for Retail (8.0+): if AddMaskTexture failed (should not
-    -- happen), the icon renders as a square. On WotLK no mask is applied.
-    self._icon = icon
-    self._maskApplied = maskSupported
-
-    -- Circular border texture (optional cosmetic)
-    local border = btn:CreateTexture(nil, "OVERLAY")
-    border:SetSize(BUTTON_SIZE + 4, BUTTON_SIZE + 4)
-    border:SetPoint("CENTER")
-    border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
-    self._border = border
+    -- Store reference for potential texture swaps
+    self._icon = btn:GetNormalTexture()
 
     -- Tooltip
     btn:SetScript("OnEnter", function(self)
