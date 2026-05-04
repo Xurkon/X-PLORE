@@ -4,6 +4,45 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 38 — 2026-05-04
+
+### Summary
+
+**Arrow theme system implemented.** The Options.lua arrow theme selector now works — five arrow variants are available (Modern, Classic, Minimal, Circular, Waypoint). Fixed namespace mismatch between `XP.Waypoints:` calls from Options.lua and the `XP:` function definitions in Waypoints.lua. Added `SetArrowScale` and fixed `ToggleArrow` to accept an enabled boolean.
+
+### Changes
+
+#### Arrow Theme System (Waypoints.lua)
+
+1. **`XP:GetArrowThemes()`** — Returns a table of 5 available themes:
+   - `MODERN` → `XPArrow.tga`
+   - `CLASSIC` → `XPArrow2.tga`
+   - `MINIMAL` → `XPArrow3.tga`
+   - `CIRCULAR` → `XPArrow.tga` with circular mask via `AddMaskTexture`
+   - `WAYPOINT` → `waypoint_arrow.tga`
+
+2. **`XP:SetArrowTheme(themeID)`** — Applies the selected theme:
+   - Sets arrow texture
+   - Creates/removes circular mask texture (using WoW `Interface/Common/RoundFrame`)
+   - Saves selection to `XP.db.profile.arrow.theme`
+   - Updates `Waypoint.currentTheme`
+
+3. **`XP:SetArrowScale(scale)`** — Sets arrow frame scale and persists to `XP.db.profile.arrow.scale`.
+
+4. **`XP:ToggleArrow(enabled)`** — Now accepts an explicit `enabled` boolean (previously toggle-only). `nil` = toggle.
+
+5. **`XP.Waypoints:` proxy** — Created to bridge Options.lua's `XP.Waypoints:Method()` calls to actual `XP:Method()` implementations:
+   - `GetArrowThemes`, `SetArrowTheme`, `ToggleArrow`, `SetArrowScale`, `RefreshWaypointArrow`, `UpdateArrowSettings`
+
+6. **Theme auto-load on creation** — `CreateWaypointArrow()` now calls `XP:SetArrowTheme(savedTheme)` if `XP.db.profile.arrow.theme` is set.
+
+#### Background
+
+- Init.lua has `XP.Waypoint = {}` (singular) but Options.lua calls `XP.Waypoints:` (plural) — the proxy resolves this without renaming anything.
+- Functions were already on `XP:` not `XP.Waypoint:` — Options.lua was calling the wrong namespace entirely.
+
+---
+
 ## Session 37 — 2026-05-04
 
 ### Summary

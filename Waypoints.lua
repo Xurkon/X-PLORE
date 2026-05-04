@@ -29,6 +29,21 @@ local LibRover = LibStub and LibStub("LibRover-1.0", true)
 -- Local state
 -----------------------------------------------------------------------
 local Waypoint = XP.Waypoint    -- table from Init.lua
+
+---------------------------------------------------------------------------------------------------------------------------------------
+-- XP.Waypoints proxy (Options.lua calls XP.Waypoints:SomeMethod())
+-- All functions live on XP: to match the existing XP:FunctionName() convention.
+-- Create a lightweight proxy so both XP:Method() and XP.Waypoints:Method() work.
+---------------------------------------------------------------------------------------------------------------------------------------
+XP.Waypoints = {
+    GetArrowThemes = function() return XP:GetArrowThemes() end,
+    SetArrowTheme = function(_, themeID) XP:SetArrowTheme(themeID) end,
+    ToggleArrow = function(_, enabled) XP:ToggleArrow(enabled) end,
+    SetArrowScale = function(_, scale) XP:SetArrowScale(scale) end,
+    RefreshWaypointArrow = function() XP:RefreshWaypointArrow() end,
+    UpdateArrowSettings = function() XP:UpdateArrowSettings() end,
+}
+
 local PI2 = math.pi * 2
 local ARROW_UPDATE_INTERVAL = 0.05  -- 20fps updates
 local ARRIVAL_RADIUS = 8           -- yards, same as Zygor's WAYPOINT_RADIUS_GUIDE_GROUND
@@ -188,6 +203,12 @@ function XP:CreateWaypointArrow()
     local arrowPath = XP.TEXTURE_PATH .. "XPArrow.tga"
     arrow:SetTexture(arrowPath)
     frame.Arrow = arrow
+
+    -- Apply saved arrow theme (if any)
+    local savedTheme = XP.db.profile.arrow and XP.db.profile.arrow.theme
+    if savedTheme then
+        XP:SetArrowTheme(savedTheme)
+    end
 
     frame.arrowAngle = 0
     frame.smoothAngle = 0
@@ -1064,20 +1085,47 @@ function XP:ShowCorpseArrow()
 -- DEBUG: EXIT XP:ShowCorpseArrow()
 end
 
------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------
 -- Toggle arrow visibility
------------------------------------------------------------------------
 -- DEBUG: ENTER XP:ToggleArrow()
-function XP:ToggleArrow()
+-- DEBUG: PARAM enabled = [enabled]
+function XP:ToggleArrow(enabled)
     if not Waypoint.frame then return end
-    if Waypoint.frame:IsShown() then
-        Waypoint.frame:Hide()
+    -- If enabled is explicitly passed (true/false), use it; otherwise toggle
+    if enabled ~= nil then
+        if enabled then
+            if #Waypoint.waypoints > 0 then
+                Waypoint.frame:Show()
+            end
+        else
+            Waypoint.frame:Hide()
+        end
     else
-        if #Waypoint.waypoints > 0 then
-            Waypoint.frame:Show()
+        -- Toggle current state
+        if Waypoint.frame:IsShown() then
+            Waypoint.frame:Hide()
+        else
+            if #Waypoint.waypoints > 0 then
+                Waypoint.frame:Show()
+            end
         end
     end
 -- DEBUG: EXIT XP:ToggleArrow()
+end
+
+---------------------------------------------------------------------------------------------------------------------------------------
+-- Set arrow scale
+---------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:SetArrowScale()
+-- DEBUG: PARAM scale = [scale]
+function XP:SetArrowScale(scale)
+    if not Waypoint.frame then return end
+    Waypoint.frame:SetScale(scale)
+    -- Also update stored profile
+    if XP.db and XP.db.profile and XP.db.profile.arrow then
+        XP.db.profile.arrow.scale = scale
+    end
+-- DEBUG: EXIT XP:SetArrowScale()
 end
 
 -----------------------------------------------------------------------
@@ -1167,9 +1215,90 @@ end
 
 -----------------------------------------------------------------------
 -- Get current waypoint index
------------------------------------------------------------------------
 -- DEBUG: ENTER XP:GetCurrentWaypointIndex()
+-- DEBUG: PARAM delta = [delta]
 function XP:GetCurrentWaypointIndex()
     return Waypoint.currentIndex
 -- DEBUG: EXIT XP:GetCurrentWaypointIndex()
+end
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- Arrow Theme System
+-- Themes: MODERN (XPArrow), CLASSIC (XPArrow2), MINIMAL (XPArrow3), CIRCULAR (XPArrow4), WAYPOINT (waypoint_arrow)
+-- Each theme has a texture + optional circular mask
+------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:GetArrowThemes()
+function XP:GetArrowThemes()
+    return {
+        MODERN = {
+            name = "Modern",
+            texture = XP.TEXTURE_PATH .. "XPArrow.tga",
+            circular = false,
+        },
+        CLASSIC = {
+            name = "Classic",
+            texture = XP.TEXTURE_PATH .. "XPArrow2.tga",
+            circular = false,
+        },
+        MINIMAL = {
+            name = "Minimal",
+            texture = XP.TEXTURE_PATH .. "XPArrow3.tga",
+            circular = false,
+        },
+        CIRCULAR = {
+            name = "Circular",
+            texture = XP.TEXTURE_PATH .. "XPArrow.tga",
+            circular = true,
+        },
+        WAYPOINT = {
+            name = "Waypoint",
+            texture = XP.TEXTURE_PATH .. "waypoint_arrow.tga",
+            circular = false,
+        },
+    }
+-- DEBUG: EXIT XP:GetArrowThemes()
+end
+
+-- DEBUG: ENTER XP:SetArrowTheme()
+-- DEBUG: PARAM themeID = [themeID]
+function XP:SetArrowTheme(themeID)
+    local themes = XP:GetArrowThemes()
+    local theme = themes[themeID]
+    if not theme then return end
+
+    local frame = Waypoint.frame
+    if not frame then return end
+
+    local arrow = frame.Arrow
+    if not arrow then return end
+
+    -- Apply texture
+    arrow:SetTexture(theme.texture)
+
+    -- Handle circular mask
+    if frame._arrowMask then
+        frame._arrowMask:Hide()
+        frame._arrowMask = nil
+    end
+
+    if theme.circular then
+        -- Create circular mask for arrow texture
+        local mask = frame:CreateMaskTexture()
+        mask:SetSize(frame.Arrow:GetSize())
+        mask:SetPoint("CENTER", frame.Arrow, "CENTER", 0, 0)
+        -- Use a circle mask texture from WoW's built-in UI media
+        mask:SetTexture("Interface/Common/RoundFrame", "CLAMP", "CLAMP")
+        mask:SetTexCoord(0, 1, 0, 1)
+        arrow:AddMaskTexture(mask)
+        frame._arrowMask = mask
+    end
+
+    -- Update stored theme
+    Waypoint.currentTheme = themeID
+
+    -- Save to profile
+    if XP.db and XP.db.profile and XP.db.profile.arrow then
+        XP.db.profile.arrow.theme = themeID
+    end
+-- DEBUG: EXIT XP:SetArrowTheme()
 end

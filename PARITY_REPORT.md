@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-05-04 (Session 37)  
+**Last Updated:** 2026-05-04 (Session 38)  
 **Based on:** ZygorGuidesViewer screenshot analysis + codebase audit  
 **Goal:** 1:1 parity with ZygorGuidesViewer for all WoW versions (Retail, WotLK, TBC, Classic)
 
@@ -73,7 +73,7 @@
 | **Steps List** | Right panel numbered | ⚠️ Combined in scroll | ⚠️ Partial | Low |
 | **Progress Bar** | ✅ Bottom with label | ✅ Implemented | DONE | - |
 | **Navigation** | << Prev / Next >> | ✅ < / > | DONE | - |
-| **Waypoint Arrow** | ✅ Circular styled | ⚠️ Basic | ⚠️ Needs polish | Medium |
+| **Waypoint Arrow** | ✅ Circular styled | ⚠️ Basic + themes wired | ⚠️ Themes wired, circular pending | Medium |
 | **Minimap Integration** | ✅ Icon + blob | ⚠️ Basic dots | ⚠️ Partial | Medium |
 | **Close Button** | ✅ Sprite sheet | ✅ Fixed | DONE | - |
 | **Menu Button** | Hamburger icon | ⚠️ Map icon | ⚠️ Needs fix | Low |
@@ -205,12 +205,18 @@
 ### ⚠️ PARTIAL (Needs Refinement)
 
 #### 1. Waypoint Arrow
-- **Current:** Basic arrow with title, distance, ETA
-- **Missing:**
-  - Circular arrow styling (Zygor uses circular arrow)
-  - Ant trail dots (Zygor shows path dots)
+- **Current:** Basic arrow with title, distance, ETA + theme system wired
+- **Completed (Session 38):**
+  - `XP:GetArrowThemes()` — returns 5 themes: MODERN, CLASSIC, MINIMAL, CIRCULAR, WAYPOINT
+  - `XP:SetArrowTheme(themeID)` — applies texture + circular mask; saves to `XP.db.profile.arrow.theme`
+  - `XP:SetArrowScale(scale)` — applies scale to arrow frame; saves to profile
+  - `XP:ToggleArrow(enabled)` — accepts boolean param (was toggle-only)
+  - `XP.Waypoints:` proxy — bridges `XP.Waypoints:Method()` calls from Options.lua to `XP:Method()`
+  - Arrow creation (`CreateWaypointArrow`) loads saved theme from profile
+- **Still missing:**
   - Quest blob on minimap
-  - Arrow themes (MODERN, CLASSIC, etc.)
+  - Ant trail wiring into OnUpdate
+  - CIRCULAR theme actual circular mask texture (uses WoW `Interface/Common/RoundFrame`)
 - **Priority:** Medium
 - **Files:** `Waypoints.lua`
 
