@@ -1275,22 +1275,32 @@ function XP:SetArrowTheme(themeID)
     -- Apply texture
     arrow:SetTexture(theme.texture)
 
-    -- Handle circular mask
+    -- Handle circular mask / shape
     if frame._arrowMask then
         frame._arrowMask:Hide()
         frame._arrowMask = nil
     end
 
     if theme.circular then
-        -- Create circular mask for arrow texture
-        local mask = frame:CreateMaskTexture()
-        mask:SetSize(frame.Arrow:GetSize())
-        mask:SetPoint("CENTER", frame.Arrow, "CENTER", 0, 0)
-        -- Use a circle mask texture from WoW's built-in UI media
-        mask:SetTexture("Interface/Common/RoundFrame", "CLAMP", "CLAMP")
-        mask:SetTexCoord(0, 1, 0, 1)
-        arrow:AddMaskTexture(mask)
-        frame._arrowMask = mask
+        -- CIRCULAR THEME: mask the arrow to a filled circle using AddMaskTexture.
+        -- The arrow texture is square (256x256); we mask it to a circle.
+        -- UI-Minimap-ZoomButton-Mask IS a filled circle (outer radius ~0.5, inner 0),
+        -- perfect for clipping the arrow. RoundFrame is an annulus — wrong shape.
+        -- AddMaskTexture exists on Retail and WotLK 3.3.5+. On older clients
+        -- the mask call is skipped and the arrow renders square (acceptable fallback).
+        if frame.Arrow.AddMaskTexture then
+            local mask = frame:CreateTexture(nil, "MASK")
+            mask:SetAllPoints(frame.Arrow)
+            mask:SetTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Mask")
+            frame.Arrow:AddMaskTexture(mask)
+            frame._arrowMask = mask
+        else
+            frame._arrowMask = nil
+        end
+    else
+        -- Reset to full texture for non-circular themes
+        frame.Arrow:SetTexCoord(0, 1, 0, 1)
+        frame._arrowMask = nil
     end
 
     -- Update stored theme
