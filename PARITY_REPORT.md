@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-05-04 (Session 36)  
+**Last Updated:** 2026-05-04 (Session 37)  
 **Based on:** ZygorGuidesViewer screenshot analysis + codebase audit  
 **Goal:** 1:1 parity with ZygorGuidesViewer for all WoW versions (Retail, WotLK, TBC, Classic)
 
@@ -182,6 +182,24 @@
 - **Step completion state** now correctly distinguishes complete/active/upcoming based on goal state
 - **Debug infrastructure** — 1,831 commented DEBUG markers (ENTER/PARAM/EXIT/EVENT) added across 25 code files for future troubleshooting
 
+#### 13. TALK/USE Goal Handlers (Session 37) — **NEWLY COMPLETED**
+- **TALK handler** — `GOSSIP_SHOW` event + `UnitGUID("npc")` to extract npcID, matches against watched TALK goals
+  - Two-cache system: `_talkGoalsByNpcID` (numeric) and `_talkGoalsByName` (name-based fallback)
+  - `RebuildTalkCache()` rebuilds on `QUEST_ACCEPTED` and guide load
+  - `CheckTalkGoals(npcID, npcName)` matches both ID and name
+- **USE handler** — `UNIT_SPELLCAST_SUCCEEDED` event for "use on target" scenarios (e.g. First Aid Kit on soldiers)
+  - Dual-index cache: `_useGoalsBySpellID` and `_useGoalsByItemID`
+  - `GetItemSpellID(itemID)` resolves itemID → spellID via `GetItemInfo`
+  - `CheckUseGoals(itemID, spellID)` checks both caches
+  - `BAG_UPDATE_DELAYED` also triggers USE goal checks for consumed items
+- **`Parser.lua`** — `use` parser updated to extract spellID and pass both itemID and spellID to `TrackGoal`
+- **Real usage confirmed:** `talk Llane Beswell##823` and `use First Aid Kit##68897` found in active guide data
+
+#### 14. Guide40.lua Added (Session 37) — **NEWLY COMPLETED**
+- Copied from Zygor3.3.5 repo: `ZygorGuidesViewer/Guides/Guide40.lua`
+- 133KB, 4,497 lines — Western Plaguelands leveling guide
+- First guide file added under new `ZygorGuidesViewer/Guides/` directory structure
+
 ---
 
 ### ⚠️ PARTIAL (Needs Refinement)
@@ -296,7 +314,7 @@
   - `GetQuestLogTitle` scan (Vanilla/TBC fallback)
 - New functions: `Guide:GetCompletedSteps()`, `Guide:GetFirstIncompleteStep()`, `Goal:IsQuestInLog()`
 - Progress percent now reflects actual completion state, not position index
-- Goal types implemented: `accept`, `turnin`, `complete`, `achieve`, `rep`, `skill`, `level`, `spell`
+- Goal types implemented: `accept`, `turnin`, `complete`, `kill`, `collect`, `talk`, `use`, `achieve`, `rep`, `skill`, `level`, `spell`
 
 ### Phase 4: Polish
 7. **Foglight/Map Reveal** — Area exploration

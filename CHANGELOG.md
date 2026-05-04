@@ -4,6 +4,60 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 37 — 2026-05-04
+
+### Summary
+
+**TALK/USE goal handlers, selene error resolution, Guide40.lua added.** Implemented two missing goal type handlers (TALK and USE) that were confirmed in active guide data. Resolved all 266 selene errors down to 0. Added Guide40.lua from Zygor3.3.5 repo.
+
+### Changes
+
+#### TALK Goal Handler (commit `3f931f8`)
+
+1. **`OnGossipShow()`** (`GoalTracker.lua`) — New event handler for `GOSSIP_SHOW` event. Extracts npcID from `UnitGUID("npc")` by parsing bits 6-10 of the GUID string, matches against watched TALK goals.
+
+2. **`_talkGoalsByNpcID`, `_talkGoalsByName` caches** (`GoalTracker.lua`) — Two-cache system: npcID-based matching for numeric IDs and name-based matching as fallback.
+
+3. **`RebuildTalkCache()`** (`GoalTracker.lua`) — Rebuilds TALK goal cache on `QUEST_ACCEPTED` and guide load events.
+
+4. **`CheckTalkGoals(npcID, npcName)`** (`GoalTracker.lua`) — Checks both npcID and npcName against watched TALK goals.
+
+#### USE Goal Handler (commit `3f931f8`)
+
+5. **`OnItemUsed(spellID, spellName)`** (`GoalTracker.lua`) — New handler for `UNIT_SPELLCAST_SUCCEEDED`. Matches spellID against `_useGoalsBySpellID` and itemID caches. Handles "use on target" scenarios (e.g. First Aid Kit on soldiers).
+
+6. **`_useGoalsBySpellID`, `_useGoalsByItemID` caches** (`GoalTracker.lua`) — Dual-index cache for USE goals: spellID-based (primary for cast events) and itemID-based (for item consumption events).
+
+7. **`GetItemSpellID(itemID)`** (`GoalTracker.lua`) — Resolves itemID → spellID via `GetItemInfo`. For items where itemID == spellID (most consumables), returns itemID directly.
+
+8. **`RebuildUseCache()`** (`GoalTracker.lua`) — Populates both spellID and itemID indexes when a goal is tracked.
+
+9. **`CheckUseGoals(itemID, spellID)`** (`GoalTracker.lua`) — Checks both caches when an item is used or consumed.
+
+10. **`OnEvent` dispatch** (`GoalTracker.lua`) — Extended to handle `GOSSIP_SHOW` and `UNIT_SPELLCAST_SUCCEEDED` events.
+
+#### USE Parser Update (commit `3f931f8`)
+
+11. **`use` parser** (`Parser.lua`) — Updated to extract spellID via `GetItemSpellID` and pass both itemID and spellID to `TrackGoal`.
+
+#### Selene Error Resolution (commit `baf84a2`)
+
+12. **`Skins.lua` fixes** — Fixed two copy-paste bugs: `AssignToTexture` used undefined `name` instead of `icon`; `AssignToButton` used undefined `name` instead of `texture`.
+
+13. **`Core.lua` if_same_then_else fixes** — Consolidated duplicate `self:ResetFrames()` call; added `allComplete = false` + inner `else` to match branch structure.
+
+14. **`GoalTracker.lua` if_same_then_else fix** — Merged duplicate `goal.complete = true` branches for `IsQuestCompleted` and `IsQuestInLog`.
+
+15. **`selene.toml`** — Created with `[lints]` section and `incorrect_standard_library_use = "allow"` to handle variadic WoW API calls with flexible arg counts.
+
+16. **`wow_classic.yml` globals** — Added `XP`, `CombatLogGetCurrentEventInfo`, `X_Plore_L`, `format`, `UnitIsVisible`, `UnitGUID`, `C_QuestLog`, `C_AchievementInfo`, `GameFontNormalSmall`. All use `property: new-fields` (NOT `type: global`).
+
+#### Guide40.lua Added (commit `baf84a2`)
+
+17. **Guide40.lua** — Copied from Zygor3.3.5 repo (`ZygorGuidesViewer/Guides/Guide40.lua`). 133KB, 4,497 lines of guide data.
+
+---
+
 ## Session 36 — 2026-05-04
 
 ### Summary
