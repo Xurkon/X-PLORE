@@ -25,10 +25,6 @@ local guideRows       = {}         -- reusable row frames
 local categoryButtons = {}         -- sidebar category buttons
 local MAX_GUIDE_ROWS  = 20
 
--- Inline options pending-change tracking
-local hasPendingChanges = false
-local savedSettings     = nil      -- deep copy of settings snapshot taken on first edit
-
 -- Resolve icon name to full texture path (local or WoW built-in).
 local function ResolveIconPath(iconName)
     if not iconName then return nil end
@@ -1231,8 +1227,8 @@ function XP:CreateInlineOptions(parent)
     local contentScrollW = 440
     local contentScroll = CreateFrame("ScrollFrame", nil, contentArea)
     contentScroll:SetPoint("TOPLEFT", sectionHeader, "BOTTOMLEFT", 0, -1)
-    contentScroll:SetPoint("BOTTOMLEFT", contentArea, "BOTTOMLEFT", 0, 58)  -- 48px btn row + 10px margin
-    contentScroll:SetPoint("BOTTOMRIGHT", contentArea, "BOTTOMRIGHT", -20, 58)
+    contentScroll:SetPoint("BOTTOMLEFT", contentArea, "BOTTOMLEFT", 0, 10)
+    contentScroll:SetPoint("BOTTOMRIGHT", contentArea, "BOTTOMRIGHT", -20, 10)
     contentScroll:EnableMouseWheel(true)
     parent.ContentScroll = contentScroll
 
@@ -1275,138 +1271,8 @@ function XP:CreateInlineOptions(parent)
     end)
     parent.ContentScrollBar = contentScrollBar
 
-    -- ===== ACTION BUTTONS =====
-    local btnRow = CreateFrame("Frame", nil, contentArea)
-    btnRow:SetSize(440, 48)
-    btnRow:SetPoint("BOTTOMLEFT", contentScroll, "BOTTOMLEFT", 0, 0)
-    btnRow:SetPoint("BOTTOMRIGHT", contentScroll, "BOTTOMRIGHT", 0, 0)
-    parent.ActionButtonRow = btnRow
-
-    local function MakeActionButton(name, text, anchorFrame, relativePoint, xOff)
-        local btn = CreateFrame("Button", name, btnRow)
-        btn:SetSize(72, 24)
-        btn:SetPoint(relativePoint, anchorFrame, relativePoint, xOff, 0)
-
-        local bg = btn:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints()
-        XP.SetTexColor(bg, XP:ColorRGBA("bg_deep"))
-
-        local border = btn:CreateTexture(nil, "BORDER")
-        border:SetAllPoints()
-        border:SetTexture(0.2, 0.6, 0.8, 0.6)
-        border:SetDrawLayer("BORDER", -1)
-
-        local ft = btn:CreateFontString(nil, "OVERLAY")
-        ft:SetAllPoints()
-        XP:ApplyFont(ft, "normal", "text_normal")
-        ft:SetText(text)
-        ft:SetJustifyH("CENTER")
-        ft:SetJustifyV("MIDDLE")
-        btn:SetFontString(ft)
-
-        btn:SetScript("OnEnter", function()
-            border:SetTexture(0.3, 0.8, 1.0, 0.9)
-        end)
-        btn:SetScript("OnLeave", function()
-            border:SetTexture(0.2, 0.6, 0.8, 0.6)
-        end)
-        return btn
-    end
-
-    local cancelBtn = MakeActionButton(nil, "Cancel", btnRow, "BOTTOMRIGHT", -16)
-    local applyBtn  = MakeActionButton(nil, "Apply",  cancelBtn, "LEFT", -8)
-    local okBtn     = MakeActionButton(nil, "OK",     applyBtn, "LEFT", -8)
-
-    parent.CancelBtn = cancelBtn
-    parent.ApplyBtn  = applyBtn
-    parent.OKBtn     = okBtn
-
-    -- ===== DEEP COPY / RESTORE HELPERS =====
-    local function DeepCopySettings()
-        local function copy(t)
-            if type(t) ~= "table" then return t end
-            local new = {}
-            for k, v in pairs(t) do new[k] = copy(v) end
-            return new
-        end
-        return copy(XP.db.profile)
-    end
-
-    local function RestoreSettings(snapshot)
-        local function copyFrom(src, dst)
-            for k, v in pairs(src) do
-                if type(v) == "table" then
-                    if dst[k] == nil then dst[k] = {} end
-                    copyFrom(v, dst[k])
-                else
-                    dst[k] = v
-                end
-            end
-        end
-        copyFrom(snapshot, XP.db.profile)
-    end
-
-    -- ===== PENDING-CHANGE TRACKING =====
-    local hasPendingChanges = false
-    local savedSettings     = nil
-
-    local function MarkPendingChange()
-        if not hasPendingChanges then
-            hasPendingChanges = true
-            savedSettings = DeepCopySettings()
-        end
-    end
-
-    local function ClearPendingChanges()
-        hasPendingChanges = false
-        savedSettings = nil
-    end
-
-    -- pendingSkin is stored on parent so it persists across tab switches.
-    -- (locals inside RefreshOptionsTab's theme branch get reset on every call)
-    parent.PendingSkin = nil
-
-    -- Apply button: commit pending skin change, then refresh
-    applyBtn:SetScript("OnClick", function()
-        -- If a skin change is pending, commit it to the profile and apply it
-        if parent.PendingSkin then
-            XP.db.profile.skin = parent.PendingSkin
-            XP:SetSkin(parent.PendingSkin)
-            parent.PendingSkin = nil
-        end
-        hasPendingChanges = false
-        savedSettings = nil
-        XP:RefreshOptionsTab(parent, XP.ActiveOptionsTab or "display")
-    end)
-
-    -- OK button: apply and close (same as Apply for skin, refreshes tab)
-    okBtn:SetScript("OnClick", function()
-        if parent.PendingSkin then
-            XP.db.profile.skin = parent.PendingSkin
-            XP:SetSkin(parent.PendingSkin)
-            parent.PendingSkin = nil
-        end
-        hasPendingChanges = false
-        savedSettings = nil
-        XP:RefreshOptionsTab(parent, XP.ActiveOptionsTab or "display")
-    end)
-
-    -- Cancel button: revert pending skin selection and restore saved settings
-    cancelBtn:SetScript("OnClick", function()
-        local revertedSkin = savedSettings and savedSettings.skin
-        if hasPendingChanges and savedSettings then
-            RestoreSettings(savedSettings)
-            hasPendingChanges = false
-            savedSettings = nil
-        end
-        -- Re-apply the skin that was reverted by RestoreSettings
-        XP:SetSkin(revertedSkin or XP.db.profile.skin or "default")
-        parent.PendingSkin = nil
-        XP:RefreshOptionsTab(parent, XP.ActiveOptionsTab or "display")
-    end)
-
-    -- Expose MarkPendingChange so controls can call it
-    XP.MarkPendingChange = MarkPendingChange
+    -- No-op stub so existing callers (controls, skin preview) don't break
+    XP.MarkPendingChange = function() end
 
     -- ===== SIDEBAR ICON BUTTONS =====
     -- Icon mapping: tab id -> { icon = path, label = display name }
@@ -2746,8 +2612,7 @@ function XP:RefreshOptionsTab(parent, tabId)
         local skinButtons = {}
 
         local function RefreshSkinButtons()
-            -- Show pending selection as active; fall back to the committed profile value
-            local active = parent.PendingSkin or (XP.db and XP.db.profile.skin) or "default"
+            local active = (XP.db and XP.db.profile.skin) or "default"
             for _, btn in ipairs(skinButtons) do
                 if btn.skinID == active then
                     if btn.SetBackdropBorderColor then
@@ -2783,11 +2648,11 @@ function XP:RefreshOptionsTab(parent, tabId)
             btn.Text = lbl
             btn.skinID = entry.id
 
-            -- Preview the skin on click but don't commit until Apply
+            -- Apply skin immediately on click
             btn:SetScript("OnClick", function()
-                parent.PendingSkin = entry.id
+                XP.db.profile.skin = entry.id
+                XP:SetSkin(entry.id)
                 RefreshSkinButtons()
-                if XP.MarkPendingChange then XP:MarkPendingChange() end
             end)
             btn:SetScript("OnEnter", function()
                 if btn.SetBackdropBorderColor then
