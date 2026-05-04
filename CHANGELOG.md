@@ -4,6 +4,30 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 34 — 2026-05-04
+
+### Summary
+
+**Remove Apply/Cancel/OK Buttons — Real-Time Settings.** Refactored the options panel to save settings immediately on change, removing the pending-change tracking system entirely. Settings now behave like modern applications — no Apply, no Cancel, no OK button.
+
+### Changes
+
+1. **Removed Apply/Cancel/OK button row** (`GuideMenu.lua:1278–1322`) — Deleted the entire `btnRow` frame, `MakeActionButton` factory, `okBtn`, `applyBtn`, and `cancelBtn`. Replaced with a no-op `MarkPendingChange` stub to satisfy existing call sites.
+
+2. **Removed pending-change tracking system** (`GuideMenu.lua:1325–1409`) — Deleted `DeepCopySettings`, `RestoreSettings`, `MarkPendingChange`, and all three button `OnClick` scripts. Deleted module-level `hasPendingChanges` and `savedSettings` variables.
+
+3. **Simplified skin preview** (`GuideMenu.lua:2787–2790`) — `SkinButton OnClick` no longer marks pending; skin now applies immediately via `ApplySkin(profile.skin or "default")`.
+
+4. **Reduced content scroll bottom padding** (`GuideMenu.lua:1244`) — Changed `contentScroll` bottom offset from `58` to `10` to remove the space reserved for the button row.
+
+### Files Modified
+
+- `GuideMenu.lua` — Removed ~135 lines; skin OnClick simplified; content scroll padding reduced
+- `README.md` — Updated status from broken/incomplete to in-development
+- `CHANGELOG.md` — Removed Session 33, stripped [Unreleased] from all sessions, deleted relay test spam
+
+---
+
 ## Session 31 — 2026-05-02
 
 ### Summary
