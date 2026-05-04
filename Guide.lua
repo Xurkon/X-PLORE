@@ -160,39 +160,79 @@ end
 -----------------------------------------------------------------------
 function Goal:CheckQuestAccepted()
     if not self.questID then return false end
-    -- Check if quest is in quest log
-    if XP.IsVanilla or XP.IsTBC then
+
+    -- Check if quest is currently in the player's quest log (accepted).
+    -- Method 1: Retail/WotLK+ — C_QuestLog.GetQuest returns quest data if in log
+    if C_QuestLog and C_QuestLog.GetQuest then
+        local quest = C_QuestLog.GetQuest(self.questID)
+        return quest ~= nil
+    end
+
+    -- Method 2: Vanilla/TBC — scan GetQuestLogTitle
+    if GetNumQuestLogEntries then
         for i = 1, GetNumQuestLogEntries() do
-            local qTitle, _, _, _, _, _, _, questID = GetQuestLogTitle(i)
+            local _, _, _, _, _, _, _, questID = GetQuestLogTitle(i)
             if questID == self.questID then return true end
         end
-    else
-        -- C_QuestLog for WotLK+
-        if C_QuestLog and C_QuestLog.GetQuest then
-            local quest = C_QuestLog.GetQuest(self.questID)
-            return quest ~= nil
-        end
     end
+
     return false
 end
 
 function Goal:CheckQuestTurnin()
     if not self.questID then return false end
-    -- Quest turnin is tracked by checking if quest is complete but not in log
-    -- This is typically handled by the goal tracker
-    return self.complete or false
+
+    -- Method 1: Retail+ (MoP Remix, Dragonflight, etc.)
+    -- C_QuestLog.IsQuestFlaggedCompleted returns true for completed quests
+    if C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted then
+        return C_QuestLog.IsQuestFlaggedCompleted(self.questID)
+    end
+
+    -- Method 2: WotLK+ (has IsQuestComplete)
+    -- IsQuestComplete is safe on WotLK/TBC/Vanilla
+    if IsQuestComplete then
+        return IsQuestComplete(self.questID) == true
+    end
+
+    return false
+end
+
+-- Checks if a quest is currently in the player's quest log (any state).
+-- Returns: questLogEntry (table) or nil
+function Goal:IsQuestInLog()
+    if not self.questID then return nil end
+
+    if C_QuestLog and C_QuestLog.GetQuest then
+        -- Retail/WotLK+
+        return C_QuestLog.GetQuest(self.questID)
+    end
+
+    -- Vanilla/TBC fallback — scan GetQuestLogTitle
+    if GetNumQuestLogEntries then
+        for i = 1, GetNumQuestLogEntries() do
+            local qTitle, _, _, _, _, _, _, questID = GetQuestLogTitle(i)
+            if questID == self.questID then
+                return true
+            end
+        end
+    end
+
+    return nil
 end
 
 function Goal:CheckQuestCompletion()
     if not self.questID then return nil end
-    -- Check if quest is complete (for turnin steps)
-    if XP.IsVanilla or XP.IsTBC then
-        return IsQuestComplete(self.questID)
-    else
-        if C_QuestLog and C_QuestLog.IsQuestComplete then
-            return C_QuestLog.IsQuestComplete(self.questID)
-        end
+
+    -- Method 1: Retail+ — C_QuestLog.IsQuestFlaggedCompleted is reliable for all expansions
+    if C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted then
+        return C_QuestLog.IsQuestFlaggedCompleted(self.questID)
     end
+
+    -- Method 2: WotLK/TBC/Vanilla — IsQuestComplete
+    if IsQuestComplete then
+        return IsQuestComplete(self.questID) == true
+    end
+
     return nil
 end
 
@@ -386,6 +426,7 @@ end
 -----------------------------------------------------------------------
 -- Step Completion
 -- Returns: isComplete, state ("complete"|"active"|"upcoming"|"skipped")
+-- Uses event-driven goal completion (WoW API), not position.
 -----------------------------------------------------------------------
 function Step:IsComplete()
     for _, goal in ipairs(self.goals) do
@@ -394,36 +435,25 @@ function Step:IsComplete()
     return #self.goals > 0
 end
 
-function Step:GetCompletionState(currentStepNum)
-    -- If this step is before current step, check if it should be complete
-    if self.index < currentStepNum then
-        -- Check if all goals are complete
-        local allComplete = true
-        local anyPossible = false
-        for _, goal in ipairs(self.goals) do
-            local isC, isP = goal:IsComplete()
-            if isC then
-                anyPossible = true
-            elseif isP then
-                anyPossible = true
-                allComplete = false
-            else
-                allComplete = false
-            end
-        end
-
-        if allComplete then
-            return "complete"
-        elseif self.noComplete or self.manual then
-            return "skipped"
-        else
-            return "upcoming"  -- Was missed but still visible
-        end
-    elseif self.index == currentStepNum then
-        return "active"
-    else
-        return "upcoming"
+-- Returns completion state for this step.
+-- activeStepNum: the step index of the first non-complete step (determines "active" marker).
+-- Uses event-driven completion, not position.
+function Step:GetCompletionState(activeStepNum)
+    if self:IsComplete() then
+        return "complete"
     end
+
+    -- "active" = this is the first non-complete step
+    if activeStepNum and self.index == activeStepNum then
+        return "active"
+    end
+
+    -- All steps before the active step that aren't complete = skipped
+    if activeStepNum and self.index < activeStepNum then
+        return "skipped"
+    end
+
+    return "upcoming"
 end
 
 function Step:GetTitle()
@@ -593,11 +623,27 @@ function Guide:GetProgress(currentStep)
     return currentStep, self.numSteps
 end
 
+-- Returns how many steps have ALL goals complete (event-driven completion).
+function Guide:GetCompletedSteps()
+    self:Parse()
+    local count = 0
+    for i = 1, self.numSteps do
+        local step = self.steps[i]
+        if step and step:IsComplete() then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 function Guide:GetProgressPercent(currentStep)
     self:Parse()
     if self.numSteps == 0 then return 0 end
-    currentStep = currentStep or 1
-    return math.floor((currentStep / self.numSteps) * 100)
+    -- Use event-driven completed step count for progress, fall back to position
+    local completed = self:GetCompletedSteps()
+    -- Cap at 100% once current step is reached
+    local pct = math.floor((completed / self.numSteps) * 100)
+    return math.min(pct, 100)
 end
 
 function Guide:GetStep(index)

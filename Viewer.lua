@@ -607,6 +607,18 @@ function XP:UpdateViewer()
     local currentStep = self.CurrentStep or 1
     local numSteps = guide:GetNumSteps()  -- triggers Parse() if not yet parsed
 
+    -- Event-driven: find the first non-complete step (this is the "active" step)
+    local activeStepNum = nil
+    for i = 1, numSteps do
+        local s = guide:GetStep(i)
+        if s and not s:IsComplete() then
+            activeStepNum = i
+            break
+        end
+    end
+    -- Fall back to currentStep if all steps are somehow complete
+    activeStepNum = activeStepNum or currentStep
+
     -- Update Guide Info Bar
     frame.InfoGuideName:SetText(guide.titleShort or guide.title)
     -- Level range: show startLevel-endLevel if available, or just startLevel, or nothing
@@ -618,18 +630,19 @@ function XP:UpdateViewer()
         frame.InfoLevel:SetText("")
     end
     -- Active step name
-    local step = guide:GetStep(currentStep)
+    local step = guide:GetStep(activeStepNum)
     frame.InfoStep:SetText(step and step:GetTitle() or "")
 
-    -- Update toolbar
-    frame.StepNum:SetText("Step " .. currentStep .. " / " .. numSteps)
+    -- Update toolbar — show completed count / total
+    local completedSteps = guide:GetCompletedSteps()
+    frame.StepNum:SetText("Step " .. activeStepNum .. " / " .. numSteps .. "  (" .. completedSteps .. " done)")
     frame.GuideName:SetText(guide.titleShort or guide.title)
 
-    -- Update progress
-    local pct = guide:GetProgressPercent(currentStep)
+    -- Update progress — based on actually-completed steps, not position
+    local pct = guide:GetProgressPercent(activeStepNum)
     frame.ProgressPercent:SetText(pct .. "%")
     frame.ProgressBar:SetMinMaxValues(0, numSteps)
-    frame.ProgressBar:SetValue(currentStep)
+    frame.ProgressBar:SetValue(completedSteps)
 
     -- Auto-sync indicator color
     if self.db.profile.autoAdvance then
@@ -690,24 +703,26 @@ function XP:UpdateViewer()
         end
         line.Icon:SetTexture(iconPath)
 
-        -- Style based on status
-        if i < currentStep then
-            -- Completed step
+        -- Style based on ACTUAL goal completion (event-driven), not position
+        local stepComplete = step:IsComplete()
+        local state = step:GetCompletionState(activeStepNum)
+        if state == "complete" then
+            -- Completed step — all goals done
             self:ApplyBackdrop(line, "panel", "step_complete", "border_dim")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("green"))
             line.Title:SetTextColor(XP:ColorRGBA("green"))
             line.StepNum2:SetTextColor(XP:ColorRGBA("green"))
             line.Status:SetText(OK_CHAR)
             line.Status:SetTextColor(XP:ColorRGBA("green"))
-        elseif i == currentStep then
-            -- Active step (highlighted)
+        elseif state == "active" then
+            -- Active step (highlighted) — first non-complete step
             self:ApplyBackdrop(line, "panel", "step_active", "cyan")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("cyan"))
             line.Title:SetTextColor(XP:ColorRGBA("text_bright"))
             line.StepNum2:SetTextColor(XP:ColorRGBA("cyan"))
             line.Status:SetText("")
         else
-            -- Upcoming step
+            -- Skipped or Upcoming — not yet reached or was missed
             self:ApplyBackdrop(line, "panel", "step_upcoming", "border_dim")
             XP.SetTexColor(line.Edge, XP:ColorRGBA("text_dim"))
             line.Title:SetTextColor(XP:ColorRGBA("text_muted"))

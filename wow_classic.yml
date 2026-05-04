@@ -1,7 +1,3 @@
-# WoW Classic / WotLK Standard Library for Selene
-# Usage: std = "wow_classic" in selene.toml
-# Place in project root or parent dir of files being linted
----
 base: lua51
 name: wow_classic
 globals:
@@ -20,36 +16,36 @@ globals:
   GameTooltip.SetPoint:
     method: true
     args:
-      - type: string
-      - type: any
-      - type: string
-      - type: any
-      - type: string
+    - type: string
+    - type: any
+    - type: string
+    - type: any
+    - type: string
   GameTooltip.SetOwner:
     method: true
     args:
-      - type: any
-      - type: string
+    - type: any
+    - type: string
   GameTooltip.AddDoubleLine:
     method: true
     args:
-      - type: any
-      - type: any
-      - type: any
-      - type: any
-      - required: false
-        type: any
+    - type: any
+    - type: any
+    - type: any
+    - type: any
+    - required: false
+      type: any
   GameTooltip.AddLine:
     method: true
     args:
-      - type: any
-      - type: any
-      - required: false
-        type: any
-      - required: false
-        type: any
-      - required: false
-        type: any
+    - type: any
+    - type: any
+    - required: false
+      type: any
+    - required: false
+      type: any
+    - required: false
+      type: any
   GameTooltip.Show:
     method: true
     args: []
@@ -58,41 +54,41 @@ globals:
     args: []
   CreateFrame:
     args:
-      - type: string
-      - type: any
-      - required: false
-        type: any
+    - type: string
+    - type: any
+    - required: false
+      type: any
   UnitName:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitHealth:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitHealthMax:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitPower:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitPowerMax:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitExists:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitIsPlayer:
     args:
-      - type: string
+    - type: string
     must_use: true
   UnitGUID:
     args:
-      - type: string
+    - type: string
     must_use: true
   IsShiftKeyDown:
     args: []
@@ -102,19 +98,19 @@ globals:
     args: []
   print:
     args:
-      - type: "..."
+    - type: '...'
   DEFAULT_CHAT_FRAME:
     property: new-fields
   DEFAULT_CHAT_FRAME.AddMessage:
     method: true
     args:
-      - type: any
-      - type: any
-      - required: false
-        type: any
-      - type: any
-      - required: false
-        type: any
+    - type: any
+    - type: any
+    - required: false
+      type: any
+    - type: any
+    - required: false
+      type: any
   math:
     property: new-fields
   string:
@@ -123,33 +119,33 @@ globals:
     property: new-fields
   select:
     args:
-      - type: any
-      - type: "..."
+    - type: any
+    - type: '...'
   GetGameTime:
     args: []
   date:
     args:
-      - type: string
-      - required: false
-        type: number
+    - type: string
+    - required: false
+      type: number
     must_use: true
   time:
     args:
-      - required: false
-        type: any
+    - required: false
+      type: any
   RegisterEvent:
     args:
-      - type: any
-      - type: function
+    - type: any
+    - type: function
   UnregisterEvent:
     args:
-      - type: any
-      - type: function
+    - type: any
+    - type: function
   RegisterUnitEvent:
     args:
-      - type: any
-      - type: string
-      - type: any
+    - type: any
+    - type: string
+    - type: any
   SlashCmdList:
     property: new-fields
   SLASH_:
@@ -158,15 +154,15 @@ globals:
     args: []
   PickupItem:
     args:
-      - type: any
+    - type: any
   PlaceItem:
     args:
-      - type: any
-      - type: any
+    - type: any
+    - type: any
   GetAddOnMetadata:
     args:
-      - type: any
-      - type: string
+    - type: any
+    - type: string
     must_use: true
   GetLocale:
     args: []
@@ -174,474 +170,51 @@ globals:
     args: []
   GetItemInfo:
     args:
-      - type: any
+    - type: any
     must_use: true
   GetContainerItemInfo:
     args:
-      - type: any
-      - type: any
+    - type: any
+    - type: any
     must_use: true
   PickupContainerItem:
     args:
-      - type: any
-      - type: any
+    - type: any
+    - type: any
   ContainerIDToInventoryID:
     args:
-      - type: any
+    - type: any
     must_use: true
   GetSpellInfo:
     args:
-      - type: any
+    - type: any
     must_use: true
   GetActionInfo:
     args:
-      - type: any
+    - type: any
     must_use: true
   GetActionText:
     args:
-      - type: any
+    - type: any
     must_use: true
-
-XP:
-  type: global
-
-GameFontNormalSmall:
-  type: global
-
-GameFontHighlightSmall:
-  type: global
-
-UIDropDownMenu_Initialize:
-  args:
-    - type: table
-    - type: function
-  must_use: true
-
-UIDropDownMenu_AddButton:
-  args:
-    - type: table
+  C_QuestLog:
+    property: new-fields
+  IsQuestComplete:
+    args:
     - type: number
-  must_use: true
-
-C_Timer:
-  args:
+    must_use: true
+  GetQuestLogTitle:
+    args:
     - type: number
-    - type: function
-
-LibStub:
-  args:
-    - type: string
-  must_use: true
-
-StaticPopupDialogs:
-  type: global
-
-MinimapCluster:
-  type: global
-
-GetMouseFocus:
-  args: []
-  must_use: true
-
-IsInInstance:
-  args: []
-  must_use: true
-
-IsShiftKeyDown:
-  args: []
-  must_use: true
-
-IsControlKeyDown:
-  args: []
-  must_use: true
-
-IsAltKeyDown:
-  args: []
-  must_use: true
-
-IsModifiedClick:
-  args:
-    - type: string
-  must_use: true
-
-GetNumGlyphSocketFilters:
-  args: []
-  must_use: true
-
-GetAction:
-  args:
+    must_use: false
+  GetNumQuestLogEntries:
+    args: []
+    must_use: true
+  C_AchievementInfo:
+    property: new-fields
+  GameFontNormalSmall:
+    property: new-fields
+  GetAchievementNumCriteria:
+    args:
     - type: number
-  must_use: true
-
-GetActionText:
-  args:
-    - type: number
-  must_use: true
-
-GetActionInfo:
-  args:
-    - type: number
-  must_use: true
-
-GetBindingKey:
-  args:
-    - type: string
-  must_use: true
-
-GetCurrentResolution:
-  args: []
-  must_use: true
-
-GetCVar:
-  args:
-    - type: string
-  must_use: true
-
-GetSpellBookItemName:
-  args:
-    - type: number
-    - type: number
-  must_use: true
-
-GetScreenResolutions:
-  args: []
-  must_use: true
-
-GetFramerate:
-  args: []
-  must_use: true
-
-GetNetStats:
-  args: []
-  must_use: true
-
-UnitFactionGroup:
-  args:
-    - type: string
-  must_use: true
-
-UnitClass:
-  args:
-    - type: string
-  must_use: true
-
-GetLocale:
-  args: []
-  must_use: true
-
-UnitLevel:
-  args:
-    - type: string
-  must_use: true
-
-UnitSex:
-  args:
-    - type: string
-  must_use: true
-
-GetRealZoneText:
-  args: []
-  must_use: true
-
-GetZoneText:
-  args: []
-  must_use: true
-
-GetSubZoneText:
-  args: []
-  must_use: true
-
-IsQuestComplete:
-  args:
-    - type: number
-  must_use: true
-
-GetContainerNumSlots:
-  args:
-    - type: number
-  must_use: true
-
-GetContainerItemLink:
-  args:
-    - type: number
-    - type: number
-  must_use: true
-
-GetItemInfo:
-  args:
-    - type: any
-  must_use: true
-
-GetItemCount:
-  args:
-    - type: any
-  must_use: true
-
-SetMapToCurrentZone:
-  args: []
-  must_use: true
-
-GetMinimapZoneText:
-  args: []
-  must_use: true
-
-GetBestMapForUnit:
-  args:
-    - type: string
-  must_use: true
-
-GetScreenWidth:
-  args: []
-  must_use: true
-
-GetScreenHeight:
-  args: []
-  must_use: true
-
-HasVehicleMoveFrameFunc:
-  args: []
-  must_use: true
-
-CloseDropDownMenus:
-  args: []
-  must_use: true
-
-ToggleDropDownMenu:
-  args:
-    - type: number
-    - type: number
-    - type: table
-    - type: string
-    - type: string
-    - type: number
-    - type: number
-    - type: number
-
-GetDropDownBtn:
-  args:
-    - type: number
-  must_use: true
-
-CreateFont:
-  args: []
-  must_use: true
-
-IsStealthed:
-  args: []
-  must_use: true
-
-IsResting:
-  args: []
-  must_use: true
-
-IsFlying:
-  args: []
-  must_use: true
-
-IsSwimming:
-  args: []
-  must_use: true
-
-IsIndoors:
-  args: []
-  must_use: true
-
-IsOutdoors:
-  args: []
-  must_use: true
-
-InCombatLockdown:
-  args: []
-  must_use: true
-
-HasAction:
-  args:
-    - type: number
-  must_use: true
-
-IsMouseButtonDown:
-  args:
-    - type: string
-  must_use: true
-
-GetCorpseRecoveryDelay:
-  args: []
-  must_use: true
-
-GetDifficultyInfo:
-  args:
-    - type: number
-  must_use: true
-
-GetNumQuestLogEntries:
-  args: []
-  must_use: true
-
-SelectQuestLogEntry:
-  args:
-    - type: number
-  must_use: true
-
-GetQuestLogTitle:
-  args:
-    - type: number
-  must_use: true
-
-GetQuestLeaderBoard:
-  args:
-    - type: number
-  must_use: true
-
-GetNumQuestLeaderBoards:
-  args:
-    - type: number
-  must_use: true
-
-GetNumCompletedQuests:
-  args: []
-  must_use: true
-
-GetQuestCompleted:
-  args:
-    - type: number
-  must_use: true
-
-CanCompleteQuest:
-  args:
-    - type: number
-  must_use: true
-
-CompleteQuest:
-  args: []
-  must_use: true
-
-GetGossipActiveQuests:
-  args: []
-  must_use: true
-
-GetGossipOptions:
-  args: []
-  must_use: true
-
-GetAvailableQuest:
-  args: []
-  must_use: true
-
-GetActionBarPage:
-  args: []
-  must_use: true
-
-GetSpellLink:
-  args:
-    - type: number
-    - type: number
-  must_use: true
-
-GetMacroInfo:
-  args:
-    - type: number
-  must_use: true
-
-GetInventorySlotInfo:
-  args:
-    - type: string
-  must_use: true
-
-GetItemIcon:
-  args:
-    - type: number
-  must_use: true
-
-GetAchievementInfo:
-  args:
-    - type: number
-  must_use: true
-
-GetClassColorInfoTable:
-  args:
-    - type: number
-  must_use: true
-
-GetSpecialization:
-  args:
-    - type: boolean
-  must_use: true
-
-GetNumSpecializations:
-  args:
-    - type: boolean
-  must_use: true
-
-C_Map:
-  type: global
-
-C_FriendList:
-  type: global
-
-BNGetToonInfo:
-  args:
-    - type: number
-  must_use: true
-
-BNGetGameAccountInfo:
-  args:
-    - type: number
-  must_use: true
-
-BNFeatures:
-  args: []
-  must_use: true
-
-GuildRoster:
-  args: []
-  must_use: true
-
-IsInGuild:
-  args: []
-  must_use: true
-
-CanEditGuildEvent:
-  args: []
-  must_use: true
-
-GetGuildInfo:
-  args:
-    - type: number
-  must_use: true
-
-GetNumGuildMembers:
-  args:
-    - type: boolean
-  must_use: true
-
-GuildRosterSetOfficerNote:
-  args:
-    - type: number
-    - type: string
-  must_use: true
-
-GetCurrentKeybind:
-  args: []
-  must_use: true
-
-SetBinding:
-  args:
-    - type: string
-    - type: string
-  must_use: true
-
-SetBindingClick:
-  args:
-    - type: string
-    - type: string
-    - type: string
-  must_use: true
-
-GetBindingStyle:
-  args: []
-  must_use: true
-
-TaxiNodeOnButtonBeingClicked:
-  args:
-    - type: any
-  must_use: true
+    must_use: true
