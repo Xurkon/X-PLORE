@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-05-04 (Session 38)  
+**Last Updated:** 2026-05-04 (Session 39)  
 **Based on:** ZygorGuidesViewer screenshot analysis + codebase audit  
 **Goal:** 1:1 parity with ZygorGuidesViewer for all WoW versions (Retail, WotLK, TBC, Classic)
 
@@ -73,7 +73,7 @@
 | **Steps List** | Right panel numbered | ⚠️ Combined in scroll | ⚠️ Partial | Low |
 | **Progress Bar** | ✅ Bottom with label | ✅ Implemented | DONE | - |
 | **Navigation** | << Prev / Next >> | ✅ < / > | DONE | - |
-| **Waypoint Arrow** | ✅ Circular styled | ⚠️ Basic + themes wired | ⚠️ Themes wired, circular pending | Medium |
+| **Waypoint Arrow** | ✅ Circular styled | ✅ Circular mask applied | ✅ Circular mask applied | Done |
 | **Minimap Integration** | ✅ Icon + blob | ⚠️ Basic dots | ⚠️ Partial | Medium |
 | **Close Button** | ✅ Sprite sheet | ✅ Fixed | DONE | - |
 | **Menu Button** | Hamburger icon | ⚠️ Map icon | ⚠️ Needs fix | Low |
@@ -216,7 +216,7 @@
 - **Still missing:**
   - Quest blob on minimap
   - Ant trail wiring into OnUpdate
-  - CIRCULAR theme actual circular mask texture (uses WoW `Interface/Common/RoundFrame`)
+  - CIRCULAR theme mask: `UI-Minimap-ZoomButton-Mask` applied (06a8282); AddMaskTexture guarded for pre-3.3.5
 - **Priority:** Medium
 - **Files:** `Waypoints.lua`
 

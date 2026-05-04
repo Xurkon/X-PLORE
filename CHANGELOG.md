@@ -4,6 +4,24 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 39 — 2026-05-04
+
+### Summary
+
+**CIRCULAR theme mask fixed.** The circular arrow theme now uses `UI-Minimap-ZoomButton-Mask` (a filled circle) instead of `Interface/Common/RoundFrame` (which is an annulus/ring). Added `AddMaskTexture` availability guard for pre-WotLK 3.3.5 clients.
+
+### Changes
+
+#### CIRCULAR Theme Fix (Waypoints.lua)
+
+1. **Mask texture corrected** — `UI-Minimap-ZoomButton-Mask` is a filled circle; `Interface/Common/RoundFrame` is a ring/annulus — wrong shape for clipping a waypoint arrow to a circle
+2. **WotLK compatibility guard** — `AddMaskTexture` method existence checked before use; pre-3.3.5 clients fall back to square arrow (no crash)
+3. **Reset on non-circular** — `SetTexCoord(0,1,0,1)` now properly resets arrow UV when switching away from CIRCULAR theme
+
+**Commit:** `06a8282`
+
+---
+
 ## Session 38 — 2026-05-04
 
 ### Summary
