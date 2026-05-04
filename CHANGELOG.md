@@ -4,26 +4,6 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — Session 33 — 2026-05-03
-
-### Summary
-
-**Relay Changelog Diff Test Entry.** Test push to verify Discord changelog thread displays actual git diff output in markdown code block format rather than just a commit summary link.
-
-### Bugs Fixed
-
-1. **Test dummy entry** (`CHANGELOG.md:1`) — This is a test entry to confirm the GitHub Compare API diff formatter is posting actual markdown changelog content to the `#changelog` Discord thread.
-
-### Features Added
-
-1. **Changelog diff formatter** (`github-discord-relay.py`) — New `format_changelog_diff_payload()` function that extracts `files[].patch` from GitHub Compare API, formats as unified diff, truncates at 3800 chars, posts as `diff` code block.
-
-### Files Modified
-
-- `CHANGELOG.md` — Test session entry
-
----
-
 ## Session 31 — 2026-05-02
 
 ### Summary
@@ -52,7 +32,7 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — Session 27 — 2026-04-29
+## Session 27 — 2026-04-29
 
 ### Summary
 
@@ -74,7 +54,7 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — Session 26 — 2026-04-29
+## Session 26 — 2026-04-29
 
 ### Summary
 
@@ -169,7 +149,7 @@ Implements `XP.ViewerFrame:ApplySkin()` — the critical missing link between th
 
 ---
 
-## [Unreleased] — Session 25 — 2026-04-25
+## Session 25 — 2026-04-25
 
 ### Summary
 
@@ -184,7 +164,7 @@ Implements `XP.ViewerFrame:ApplySkin()` — the critical missing link between th
 
 ---
 
-## [Unreleased] — Session 24 — 2026-04-16
+## Session 24 — 2026-04-16
 
 ### Summary
 
@@ -221,7 +201,7 @@ In-depth audit comparing Zygor screenshot (Screenshot 2026-04-14 170458) against
 
 ---
 
-## [Unreleased] — Session 23 — 2026-04-16
+## Session 23 — 2026-04-16
 
 ### Summary
 
@@ -254,7 +234,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 22 — 2026-04-15
+## Session 22 — 2026-04-15
 
 ### GuideMenu Navigation & Views
 
@@ -277,7 +257,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 21 — 2026-04-15
+## Session 21 — 2026-04-15
 
 ### Viewer & Step Completion System
 
@@ -302,7 +282,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 19 — 2026-04-15
+## Session 19 — 2026-04-15
 
 ### Full Zygor Skin System Parity
 
@@ -327,7 +307,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 18 — 2026-04-14
+## Session 18 — 2026-04-14
 
 ### Color & Icon Fixes
 
@@ -370,7 +350,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 17 — 2026-04-14
+## Session 17 — 2026-04-14
 
 ### Skin System — GuideMenu Row/Header Audit Fixes + Viewer Step Line Audit Fixes
 
@@ -421,7 +401,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 16 — 2026-04-14
+## Session 16 — 2026-04-14
 
 ### Skin System — Selection Highlights, Tab Decoration, Re-skin Audit
 
@@ -477,7 +457,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 15 — 2026-04-14
+## Session 15 — 2026-04-14
 
 ### Bug Fixes / Skin System Completion
 
@@ -512,7 +492,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 14 — 2026-04-14
+## Session 14 — 2026-04-14
 
 ### Bug Fixes
 
@@ -540,7 +520,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 13 — 2026-04-14
+## Session 13 — 2026-04-14
 
 ### Bug Fixes
 
@@ -569,7 +549,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 12 — 2026-04-14
+## Session 12 — 2026-04-14
 
 ### Bug Fixes
 
@@ -588,7 +568,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 11 — 2026-04-13
+## Session 11 — 2026-04-13
 
 ### New Files / Directories
 
@@ -636,7 +616,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 10 — 2026-04-13
+## Session 10 — 2026-04-13
 
 ### New Files
 
@@ -758,7 +738,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 8 — 2026-04-13
+## Session 8 — 2026-04-13
 
 ### New / Expanded
 
@@ -797,7 +777,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 7 — 2026-04-13
+## Session 7 — 2026-04-13
 
 ### Bug Fixes (from second in-game test on WotLK 3.3.5a)
 
@@ -825,7 +805,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 6 — 2026-04-13
+## Session 6 — 2026-04-13
 
 ### Bug Fixes
 
@@ -846,7 +826,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 5 — 2026-04-13
+## Session 5 — 2026-04-13
 
 ### Bug Fixes
 
@@ -867,7 +847,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 4 — 2026-04-13
+## Session 4 — 2026-04-13
 
 ### New Files
 
@@ -907,7 +887,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 3 — 2026-04-13
+## Session 3 — 2026-04-13
 
 ### Changed
 
@@ -934,7 +914,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 2 — 2026-04-13
+## Session 2 — 2026-04-13
 
 ### Bug Fixes
 
@@ -947,7 +927,7 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 
 ---
 
-## [Unreleased] — Session 1 — 2026-04-13
+## Session 1 — 2026-04-13
 
 ### New Files (complete rewrite from scratch)
 
@@ -967,38 +947,3 @@ Fixed the close button to use Zygor's proper titlebuttons-thin sprite sheet inst
 ### Removed
 
 - All files from prior XPV_Main/XPV_Guide/XPV_Sorting iteration (16 files deleted).
-
-
-## test changelog push Sat May  2 22:44:35 CDT 2026
-
-
-## Force push test 2026-05-02T22:45:33-05:00
-
-
-## Real test push 2026-05-02T22:48:46-05:00
-
-
-## Final relay test 2026-05-02T22:49:31-05:00
-
-- Test changelog diff entry [22:59:47]
-
-## Session 32 — May 02, 2026
-
-- Real changelog entry test with actual diff formatting
-
-
-- Test entry with longer content to verify diff formatting works correctly
-
-- Changelog diff formatting test 23:13
-- worker tail test
-- tail log test Sun May  3 02:42:43 CDT 2026
-- re-test Sun May  3 02:45:02 CDT 2026
-- redeploy test Sun May  3 02:46:39 CDT 2026
-test Sun May  3 02:56:03 CDT 2026
-
-## [9.2.7] - 2026-05-03
-### Changed
-- Test changelog diff verification
-
-- Another test line for tail verification
-- tail test 05:08:53
