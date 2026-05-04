@@ -1,3 +1,3 @@
-﻿-- UiWidgets\ScrollBar.lua
+-- UiWidgets\ScrollBar.lua
 -- Scroll bar widget
 -- TODO: Implement

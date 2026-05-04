@@ -1,3 +1,3 @@
-﻿-- ErrorLogger.lua
+-- ErrorLogger.lua
 -- Error logging and reporting
 -- TODO: Implement

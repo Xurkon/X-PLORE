@@ -1,3 +1,3 @@
-﻿-- GoldUI\Goldguide-Crafting.lua
+-- GoldUI\Goldguide-Crafting.lua
 -- Crafting gold guide
 -- TODO: Implement

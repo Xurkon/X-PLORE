@@ -1,3 +1,3 @@
-﻿-- UiWidgets\Frame.lua
+-- UiWidgets\Frame.lua
 -- Base frame widget
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- Arrows\Stealth\Arrow.lua
+-- Arrows\Stealth\Arrow.lua
 -- Stealth arrow skin implementation
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- Widgets\worldbosses.lua
+-- Widgets\worldbosses.lua
 -- Game-feature widget: worldbosses
 -- TODO: Implement

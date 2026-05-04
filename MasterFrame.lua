@@ -1,3 +1,3 @@
-﻿-- MasterFrame.lua
+-- MasterFrame.lua
 -- Root frame anchor
 -- TODO: Implement

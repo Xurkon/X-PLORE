@@ -1,3 +1,3 @@
-﻿-- MacroGuide.lua
+-- MacroGuide.lua
 -- Macro-based guide steps
 -- TODO: Implement

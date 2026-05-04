@@ -1,3 +1,3 @@
-﻿-- Poi.lua
+-- Poi.lua
 -- Point-of-interest pin system
 -- TODO: Implement

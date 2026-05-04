@@ -1,3 +1,3 @@
-﻿-- UiWidgets\ActionButton.lua
+-- UiWidgets\ActionButton.lua
 -- Action button widget
 -- TODO: Implement

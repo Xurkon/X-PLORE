@@ -1,3 +1,3 @@
-﻿-- Inventory.lua
+-- Inventory.lua
 -- Bag and inventory management
 -- TODO: Implement

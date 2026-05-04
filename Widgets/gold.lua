@@ -1,3 +1,3 @@
-﻿-- Widgets\gold.lua
+-- Widgets\gold.lua
 -- Game-feature widget: gold
 -- TODO: Implement

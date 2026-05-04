@@ -1,3 +1,3 @@
-﻿-- UiWidgets\ScrollItems.lua
+-- UiWidgets\ScrollItems.lua
 -- Scroll items widget
 -- TODO: Implement

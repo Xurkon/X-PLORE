@@ -1,3 +1,3 @@
-﻿-- UiWidgets\Button.lua
+-- UiWidgets\Button.lua
 -- Base button widget
 -- TODO: Implement

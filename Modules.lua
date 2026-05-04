@@ -1,3 +1,3 @@
-﻿-- Modules.lua
+-- Modules.lua
 -- Module registration system
 -- TODO: Implement

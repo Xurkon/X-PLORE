@@ -1,3 +1,3 @@
-﻿-- Widgets\zygormessage.lua
+-- Widgets\zygormessage.lua
 -- Game-feature widget: zygormessage
 -- TODO: Implement

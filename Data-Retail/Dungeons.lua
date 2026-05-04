@@ -1,3 +1,3 @@
-﻿-- Data-Retail\Dungeons.lua
+-- Data-Retail\Dungeons.lua
 -- Dungeon data tables
 -- TODO: Implement

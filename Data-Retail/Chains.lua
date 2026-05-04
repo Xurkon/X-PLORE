@@ -1,3 +1,3 @@
-﻿-- Data-Retail\Chains.lua
+-- Data-Retail\Chains.lua
 -- Quest chain data
 -- TODO: Implement

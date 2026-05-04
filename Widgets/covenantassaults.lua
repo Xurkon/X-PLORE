@@ -1,3 +1,3 @@
-﻿-- Widgets\covenantassaults.lua
+-- Widgets\covenantassaults.lua
 -- Game-feature widget: covenantassaults
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- UiWidgets\Multiselect.lua
+-- UiWidgets\Multiselect.lua
 -- Multi-select widget
 -- TODO: Implement

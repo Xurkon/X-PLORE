@@ -1,3 +1,3 @@
-﻿-- Functions.lua
+-- Functions.lua
 -- Utility function library (170+ functions)
 -- TODO: Implement

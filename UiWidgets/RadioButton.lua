@@ -1,3 +1,3 @@
-﻿-- UiWidgets\RadioButton.lua
+-- UiWidgets\RadioButton.lua
 -- Radio button widget
 -- TODO: Implement

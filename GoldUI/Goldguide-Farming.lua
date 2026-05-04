@@ -1,3 +1,3 @@
-﻿-- GoldUI\Goldguide-Farming.lua
+-- GoldUI\Goldguide-Farming.lua
 -- Farming gold guide
 -- TODO: Implement

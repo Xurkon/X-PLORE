@@ -1,3 +1,3 @@
-﻿-- GoldUI\Goldguide-Info.lua
+-- GoldUI\Goldguide-Info.lua
 -- Gold guide info panel
 -- TODO: Implement

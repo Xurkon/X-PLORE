@@ -1,3 +1,3 @@
-﻿-- UiWidgets\DropDownFork.lua
+-- UiWidgets\DropDownFork.lua
 -- Dropdown fork (multi-column) widget
 -- TODO: Implement

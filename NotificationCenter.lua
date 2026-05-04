@@ -1,3 +1,3 @@
-﻿-- NotificationCenter.lua
+-- NotificationCenter.lua
 -- Notification popup system
 -- TODO: Implement

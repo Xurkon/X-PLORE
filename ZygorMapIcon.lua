@@ -1,3 +1,3 @@
-﻿-- ZygorMapIcon.lua
+-- ZygorMapIcon.lua
 -- World map icon system
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- Widgets\guidehistory.lua
+-- Widgets\guidehistory.lua
 -- Game-feature widget: guidehistory
 -- TODO: Implement

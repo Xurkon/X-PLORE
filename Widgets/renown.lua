@@ -1,3 +1,3 @@
-﻿-- Widgets\renown.lua
+-- Widgets\renown.lua
 -- Game-feature widget: renown
 -- TODO: Implement

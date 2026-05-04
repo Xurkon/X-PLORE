@@ -1,3 +1,3 @@
-﻿-- UiWidgets\SuggestBox.lua
+-- UiWidgets\SuggestBox.lua
 -- Suggest/autocomplete box widget
 -- TODO: Implement

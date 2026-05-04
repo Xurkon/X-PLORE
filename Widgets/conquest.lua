@@ -1,3 +1,3 @@
-﻿-- Widgets\conquest.lua
+-- Widgets\conquest.lua
 -- Game-feature widget: conquest
 -- TODO: Implement

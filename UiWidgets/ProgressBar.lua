@@ -1,3 +1,3 @@
-﻿-- UiWidgets\ProgressBar.lua
+-- UiWidgets\ProgressBar.lua
 -- Progress bar widget
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- Widgets\weekly.lua
+-- Widgets\weekly.lua
 -- Game-feature widget: weekly
 -- TODO: Implement

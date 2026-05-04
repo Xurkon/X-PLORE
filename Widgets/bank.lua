@@ -1,3 +1,3 @@
-﻿-- Widgets\bank.lua
+-- Widgets\bank.lua
 -- Game-feature widget: bank
 -- TODO: Implement

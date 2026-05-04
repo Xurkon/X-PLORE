@@ -1,3 +1,3 @@
-﻿-- GoldUI\Goldguide-Auctions.lua
+-- GoldUI\Goldguide-Auctions.lua
 -- Auction house gold guide
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- GoldUI\Goldguide-Help.lua
+-- GoldUI\Goldguide-Help.lua
 -- Gold guide help
 -- TODO: Implement

@@ -1,3 +1,3 @@
-﻿-- Data-Retail\Foglight.lua
+-- Data-Retail\Foglight.lua
 -- Foglight map data
 -- TODO: Implement

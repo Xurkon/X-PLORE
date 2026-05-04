@@ -1,3 +1,3 @@
-﻿-- UiWidgets\ToggleButton.lua
+-- UiWidgets\ToggleButton.lua
 -- Toggle button widget
 -- TODO: Implement
