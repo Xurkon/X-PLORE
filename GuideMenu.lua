@@ -867,6 +867,7 @@ function XP:CreateGuideRows(parent)
         favBtn:SetNormalTexture(favTex)
 
         favBtn:SetScript("OnClick", function(self_btn)
+            local guide = self_btn:GetParent().guide
             if guide then
                 guide:ToggleFavourite()
                 local tex = self_btn:GetNormalTexture()
@@ -3342,6 +3343,9 @@ function XP:PopulateGuideList(guides)
                 tex:SetDesaturated(not isFav)
             end
         end
+
+        -- Store guide ref on row so favBtn callback can access it
+        row.guide = guide
 
         row:Show()
         yOffset = yOffset + rowHeight + 1

@@ -62,6 +62,15 @@ globals:
       - type: any
       - required: false
         type: any
+      - required: false
+        type: any
+      - required: false
+        type: any
+  CreateFont:
+    args:
+      - type: string
+      - required: false
+        type: any
   UnitName:
     args:
       - type: string
@@ -201,3 +210,293 @@ globals:
     args:
       - type: any
     must_use: true
+  ---
+
+  # Missing globals discovered via selene scan
+  LibStub:
+    args:
+      - type: string
+    must_use: true
+  C_Timer:
+    args:
+      - type: number
+      - type: function
+  InCombatLockdown:
+    args: []
+    must_use: true
+  HasAction:
+    args:
+      - type: any
+    must_use: true
+  IsInInstance:
+    args: []
+    must_use: true
+  IsFlying:
+    args: []
+    must_use: true
+  IsInGuild:
+    args: []
+    must_use: true
+  IsMouseButtonDown:
+    args: []
+    must_use: true
+  GetPlayerFacing:
+    args: []
+    must_use: true
+  GetUnitSpeed:
+    args:
+      - type: string
+    must_use: true
+  BASE_MOVEMENT_SPEED:
+    args: []
+  minimap:
+    property: new-fields
+  Minimap:
+    property: new-fields
+  MinimapCluster:
+    property: new-fields
+  IsQuestComplete:
+    args:
+      - type: any
+    must_use: true
+  SelectQuestLogEntry:
+    args:
+      - type: number
+  GetNumQuestLogEntries:
+    args: []
+    must_use: true
+  GetQuestLogTitle:
+    args:
+      - type: number
+    must_use: true
+  GetQuestLogLeaderBoard:
+    args:
+      - type: number
+      - type: number
+    must_use: true
+  GetRealZoneText:
+    args: []
+    must_use: true
+  GetZoneText:
+    args: []
+    must_use: true
+  GetFactionInfo:
+    args:
+      - type: number
+    must_use: true
+  GetFactionInfoByID:
+    args:
+      - type: number
+    must_use: true
+  GetNumFactions:
+    args: []
+    must_use: true
+  GetNumGroupMembers:
+    args: []
+    must_use: true
+  GetNumPartyMembers:
+    args: []
+    must_use: true
+  GetNumRaidMembers:
+    args: []
+    must_use: true
+  UnitClass:
+    args:
+      - type: string
+    must_use: true
+  UnitFactionGroup:
+    args:
+      - type: string
+    must_use: true
+  UnitLevel:
+    args:
+      - type: string
+    must_use: true
+  GetNumClasses:
+    args: []
+    must_use: true
+  GetClassInfo:
+    args:
+      - type: number
+    must_use: true
+  GetNumSpecializations:
+    args: []
+    must_use: true
+  GetSpecializationName:
+    args:
+      - type: number
+      - type: boolean
+    must_use: true
+  GetNumSpellTabs:
+    args: []
+    must_use: true
+  GetSpellTabInfo:
+    args:
+      - type: number
+    must_use: true
+  GetSpellBookItemName:
+    args:
+      - type: number
+      - type: string
+    must_use: true
+  GetNumSkillLines:
+    args: []
+    must_use: true
+  GetSkillLineInfo:
+    args:
+      - type: number
+    must_use: true
+  GetContainerNumSlots:
+    args:
+      - type: number
+    must_use: true
+  GetCorpsePosition:
+    args: []
+    must_use: true
+  GetCursorPosition:
+    args: []
+    must_use: true
+  GetTime:
+    args: []
+    must_use: true
+  GetAchievementNumCriteria:
+    args:
+      - type: number
+    must_use: true
+  C_AchievementInfo:
+    property: new-fields
+  C_QuestLog:
+    property: new-fields
+  C_Reputation:
+    property: new-fields
+  C_Spell:
+    property: new-fields
+  ChatEdit_ShowActiveWindow:
+    args: []
+  CloseDropDownForks:
+    args: []
+  CombatLogGetCurrentEventInfo:
+    args: []
+    must_use: true
+  CanGuildBankRepair:
+    args: []
+    must_use: true
+  ToggleDropDownMenu:
+    args:
+      - type: number
+      - type: number
+      - type: any
+      - type: any
+      - type: string
+      - type: string
+      - type: number
+      - type: any
+  UIDropDownMenu_AddButton:
+    args:
+      - type: any
+      - type: number
+  UIDropDownMenu_Initialize:
+    args:
+      - type: any
+      - type: function
+  UIDropDownMenu_SetSelectedID:
+    args:
+      - type: any
+      - type: number
+  UIDropDownMenu_SetWidth:
+    args:
+      - type: any
+      - type: number
+  UIDropDownMenu_CreateInfo:
+    property: new-fields
+  UIDropDownFork_SetAnchor:
+    args:
+      - type: number
+      - type: number
+      - type: any
+      - type: any
+      - type: string
+      - type: any
+      - type: any
+  DropDownForkList1:
+    property: new-fields
+  UIDropDownFork_separatorInfo:
+    property: new-fields
+  EasyFork:
+    property: new-fields
+  StaticPopupDialogs:
+    property: new-fields
+  StaticPopup_Show:
+    args:
+      - type: string
+      - type: any
+      - type: any
+      - type: any
+      - type: any
+      - type: any
+      - type: any
+  PlaySoundFile:
+    args:
+      - type: any
+      - type: string
+  SendChatMessage:
+    args:
+      - type: any
+      - type: string
+      - type: string
+      - type: string
+  ItemRefTooltip:
+    property: new-fields
+  ShoppingTooltip1:
+    property: new-fields
+  ShoppingTooltip2:
+    property: new-fields
+  BookType:
+    args:
+      - type: string
+  BOOKTYPE_SPELL:
+    args: []
+  BackdropTemplateMixin:
+    property: new-fields
+  NUM_BAG_SLOTS:
+    args: []
+  ---
+
+  # Global constants / enums
+  XP:
+    property: new-fields
+  XP_IsRetail:
+    args: []
+    must_use: true
+  XP_IsVanilla:
+    args: []
+    must_use: true
+  XP_IsWOTLK:
+    args: []
+    must_use: true
+  X_Plore_L:
+    property: new-fields
+  OKAY:
+    args: []
+  YES:
+    args: []
+  NO:
+    args: []
+  CANCEL:
+    args: []
+  max:
+    args:
+      - type: "..."
+  min:
+    args:
+      - type: "..."
+  tinsert:
+    args:
+      - type: any
+      - required: false
+        type: any
+  tremove:
+    args:
+      - type: any
+      - required: false
+        type: any
