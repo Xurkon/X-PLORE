@@ -117,12 +117,55 @@ function XP:CreateViewerFrame()
     frame.TitleDivider = self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
 
     ---------------------------------------------------------------
-    -- Tab Container (under title bar)
+    -- Guide Info Bar (between title bar and tabs)
+    -- Shows: Guide Name | Level Range | Active Step Name
+    ---------------------------------------------------------------
+    local INFO_HEIGHT = 28
+    local infoBarY = -(self:Size("titlebar_height") + 1)  -- starts below title divider
+
+    local infoBar = CreateFrame("Frame", nil, frame)
+    infoBar:SetHeight(INFO_HEIGHT)
+    infoBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, infoBarY)
+    infoBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, infoBarY)
+    frame.InfoBar = infoBar
+
+    -- Left side: Guide name (bold, left-aligned)
+    local infoGuideName = infoBar:CreateFontString(nil, "OVERLAY")
+    infoGuideName:SetPoint("LEFT", infoBar, "LEFT", 8, 0)
+    infoGuideName:SetPoint("RIGHT", infoBar, "CENTER", -4, 0)
+    infoGuideName:SetJustifyH("LEFT")
+    self:ApplyFont(infoGuideName, "bold", "text_bright")
+    infoGuideName:SetText("")
+    frame.InfoGuideName = infoGuideName
+
+    -- Center-right: Level range badge (e.g., "Lv 10-15" or just level)
+    local infoLevel = infoBar:CreateFontString(nil, "OVERLAY")
+    infoLevel:SetPoint("CENTER", infoBar, "CENTER", 0, 0)
+    infoLevel:SetJustifyH("CENTER")
+    self:ApplyFont(infoLevel, "small", "cyan")
+    infoLevel:SetText("")
+    frame.InfoLevel = infoLevel
+
+    -- Right side: Active step name (truncated)
+    local infoStep = infoBar:CreateFontString(nil, "OVERLAY")
+    infoStep:SetPoint("LEFT", infoBar, "CENTER", 4, 0)
+    infoStep:SetPoint("RIGHT", infoBar, "RIGHT", -8, 0)
+    infoStep:SetJustifyH("LEFT")
+    self:ApplyFont(infoStep, "small", "text_dim")
+    infoStep:SetText("")
+    frame.InfoStep = infoStep
+
+    -- Bottom border for info bar
+    frame.InfoBarDivider = self:CreateDivider(frame, infoBarY - INFO_HEIGHT, "border_dim")
+
+    ---------------------------------------------------------------
+    -- Tab Container (under info bar)
     ---------------------------------------------------------------
     local tabContainer = CreateFrame("Frame", nil, frame)
     tabContainer:SetHeight(self:Size("tab_height"))
-    tabContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -self:Size("titlebar_height") - 1)
-    tabContainer:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -self:Size("titlebar_height") - 1)
+    local tabY = infoBarY - INFO_HEIGHT - 1
+    tabContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, tabY)
+    tabContainer:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, tabY)
 
     frame.TabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
     frame.TabBg:SetAllPoints()
@@ -144,9 +187,9 @@ function XP:CreateViewerFrame()
 
     frame.TabContainer = tabContainer
 
-    -- Tab divider
-    local tabDivY = -(self:Size("titlebar_height") + self:Size("tab_height") + 1)
-    frame.TabDivider = self:CreateDivider(frame, tabDivY, "border_dim")
+    -- Tab divider (below tabs — accounts for info bar height)
+    local tabDivY = self:Size("titlebar_height") + INFO_HEIGHT + self:Size("tab_height") + 3
+    frame.TabDivider = self:CreateDivider(frame, -tabDivY, "border_dim")
 
     ---------------------------------------------------------------
     -- Toolbar (step navigation)
@@ -551,6 +594,9 @@ function XP:UpdateViewer()
         if frame.GuideName then frame.GuideName:SetText("") end
         if frame.ProgressPercent then frame.ProgressPercent:SetText("--") end
         if frame.ProgressBar then frame.ProgressBar:SetValue(0) end
+        if frame.InfoGuideName then frame.InfoGuideName:SetText("") end
+        if frame.InfoLevel then frame.InfoLevel:SetText("") end
+        if frame.InfoStep then frame.InfoStep:SetText("") end
         -- Clear step lines
         for _, line in ipairs(activeStepLines) do
             line:Hide()
@@ -560,6 +606,20 @@ function XP:UpdateViewer()
 
     local currentStep = self.CurrentStep or 1
     local numSteps = guide:GetNumSteps()  -- triggers Parse() if not yet parsed
+
+    -- Update Guide Info Bar
+    frame.InfoGuideName:SetText(guide.titleShort or guide.title)
+    -- Level range: show startLevel-endLevel if available, or just startLevel, or nothing
+    if guide.startLevel and guide.endLevel and guide.endLevel > guide.startLevel then
+        frame.InfoLevel:SetText("Lv " .. guide.startLevel .. "-" .. guide.endLevel)
+    elseif guide.startLevel then
+        frame.InfoLevel:SetText("Lv " .. guide.startLevel .. "+")
+    else
+        frame.InfoLevel:SetText("")
+    end
+    -- Active step name
+    local step = guide:GetStep(currentStep)
+    frame.InfoStep:SetText(step and step:GetTitle() or "")
 
     -- Update toolbar
     frame.StepNum:SetText("Step " .. currentStep .. " / " .. numSteps)
