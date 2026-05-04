@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-05-04 (Session 35)  
+**Last Updated:** 2026-05-04 (Session 36)  
 **Based on:** ZygorGuidesViewer screenshot analysis + codebase audit  
 **Goal:** 1:1 parity with ZygorGuidesViewer for all WoW versions (Retail, WotLK, TBC, Classic)
 
@@ -168,6 +168,20 @@
 - **0 errors** across all Lua files
 - All 87 Lua files had UTF-8 BOM stripped
 
+#### 12. Step Completion Tracking (Session 36) — **NEWLY COMPLETED**
+- **Was:** Position-based (`i < currentStep`) — step lines completed if their index was less than current step cursor
+- **Now:** Completion-based using `Goal:IsComplete()` per goal type via WoW quest/combat API chain
+- **API fallback chain:** `C_QuestLog.IsQuestFlaggedCompleted` (Retail) → `IsQuestComplete` (WotLK/TBC/Vanilla) → `GetQuestLogTitle` scan (Vanilla/TBC)
+- **New functions added:**
+  - `Guide:GetCompletedSteps()` — counts steps where all goals are complete
+  - `Guide:GetFirstIncompleteStep()` — returns index of first step with incomplete goals
+  - `Goal:IsQuestInLog()` — checks if a quest is in player's quest log
+  - `Goal:CheckQuestTurnin()` — full implementation with 3-tier API fallback
+  - `Goal:CheckQuestAccepted()` — reordered to check retail API first
+- **Progress percent** now reflects actual completion state, not cursor position
+- **Step completion state** now correctly distinguishes complete/active/upcoming based on goal state
+- **Debug infrastructure** — 1,831 commented DEBUG markers (ENTER/PARAM/EXIT/EVENT) added across 25 code files for future troubleshooting
+
 ---
 
 ### ⚠️ PARTIAL (Needs Refinement)
@@ -274,9 +288,15 @@
 6. **Dungeon System** — Party guide support
 
 ### Phase 3: Step Completion Tracking (New Priority)
-- Current: Position-based (`i < currentStep`)
-- Needed: Actual `Goal:IsComplete()` per goal type
-- Goal types: `accept`, `turnin`, `kill`, `collect`, `talk`, `gossip`, `use`, `equip`, `skill`, `rep`, `achieve`, `learn`, `cast`
+- **Status:** ✅ COMPLETED (Session 36)
+- Was: Position-based (`i < currentStep`)
+- Now: Actual `Goal:IsComplete()` per goal type via WoW API chain:
+  - `C_QuestLog.IsQuestFlaggedCompleted` (Retail)
+  - `IsQuestComplete` (WotLK/TBC/Vanilla)
+  - `GetQuestLogTitle` scan (Vanilla/TBC fallback)
+- New functions: `Guide:GetCompletedSteps()`, `Guide:GetFirstIncompleteStep()`, `Goal:IsQuestInLog()`
+- Progress percent now reflects actual completion state, not position index
+- Goal types implemented: `accept`, `turnin`, `complete`, `achieve`, `rep`, `skill`, `level`, `spell`
 
 ### Phase 4: Polish
 7. **Foglight/Map Reveal** — Area exploration
@@ -340,6 +360,16 @@ X-Plore/
 ---
 
 ## Changelog
+
+### Session 36 (2026-05-04)
+- **Step Completion Tracking** — Replaced position-based `i < currentStep` tracking with actual `Goal:IsComplete()` per goal type
+  - `Guide:GetCompletedSteps()`, `Guide:GetFirstIncompleteStep()`, `Goal:IsQuestInLog()`, `Goal:CheckQuestTurnin()`, `Goal:CheckQuestAccepted()`, `Goal:CheckQuestCompletion()`
+  - WoW API chain: `C_QuestLog.IsQuestFlaggedCompleted` (Retail) → `IsQuestComplete` (WotLK/TBC) → `GetQuestLogTitle` scan (Vanilla/TBC)
+  - `wow_classic.yml` additions: C_QuestLog, IsQuestFlaggedCompleted, IsQuestComplete, GetQuestLogTitle, GetNumQuestLogEntries, C_AchievementInfo, GetAchievementNumCriteria
+  - Viewer.lua step line styling now uses `step:IsComplete()` and `step:GetCompletionState(activeStepNum)` instead of cursor index
+- **Debug Markers** — 1,831 commented DEBUG markers (ENTER/PARAM/EXIT/EVENT) across 25 code files; zero runtime cost until enabled
+- **Files changed:** `Guide.lua`, `Viewer.lua`, `Goal.lua`, `wow_classic.yml`, `Options.lua`, `Parser.lua`, `GuideMenu.lua`, `Skins.lua`, `GoalTracker.lua`, `Core.lua`, + 18 more
+- **Commits:** `e7dbb02` (feat), `8668132` (debug)
 
 ### Session 35 (2026-05-04)
 - **Guide Info Bar** — New 28px bar between title bar and tabs showing guide name (left), level range (center), active step name (right)

@@ -4,6 +4,84 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 36 — 2026-05-04
+
+### Summary
+
+**Event-Driven Step Completion Tracking + Comprehensive Debug Infrastructure.** Two major improvements: (1) step progress now uses actual quest completion APIs instead of position-based tracking, and (2) 1,831 commented debug markers added across all 25 code files for future troubleshooting.
+
+### Changes
+
+#### Step Completion Tracking (commit `e7dbb02`)
+
+1. **`Guide:GetCompletedSteps()`** (`Guide.lua`) — Counts steps where all goals are complete, using `Goal:IsComplete()` per-goal assessment. Replaces position-based `currentStep` index.
+
+2. **`Guide:GetFirstIncompleteStep()`** (`Guide.lua`) — Scans from step 1 and returns the first step that has any incomplete goals. Used to auto-advance to the correct position when loading a guide.
+
+3. **`Guide:GetProgressPercent()`** (`Guide.lua`) — Now uses `GetCompletedSteps()` divided by `numSteps × 100` instead of the raw `currentStep` index. Reflects actual completion state.
+
+4. **`Step:GetCompletionState(activeStepNum)`** (`Guide.lua`) — Replaced stub with completion-based logic:
+   - `"complete"` — all goals done, or step index < first incomplete step
+   - `"active"` — step is the first incomplete step
+   - `"upcoming"` — future step with incomplete goals
+
+5. **`Goal:CheckQuestTurnin()`** (`Guide.lua`) — Full implementation with API fallback chain: `C_QuestLog.IsQuestFlaggedCompleted` (retail) → `IsQuestComplete` (WotLK/TBC/Vanilla) → `false` (fallback).
+
+6. **`Goal:IsQuestInLog()`** (`Goal.lua`) — New function: checks if a quest is in the player's quest log. Uses `C_QuestLog.GetLogIndexForQuestID` (retail) with `GetQuestLogTitle` scan fallback (Vanilla/TBC).
+
+7. **`Goal:CheckQuestAccepted()`** (`Goal.lua`) — Reordered to check retail API first (`C_QuestLog.GetLogIndexForQuestID`), then fallback scan.
+
+8. **`Goal:CheckQuestCompletion()`** (`Goal.lua`) — Updated to use `C_QuestLog.IsQuestFlaggedCompleted` (retail) → `IsQuestComplete` (WotLK/TBC/Vanilla).
+
+9. **`Viewer.lua:620`** — `UpdateViewer()` now calls `guide:GetFirstIncompleteStep()` to determine the active step for progress display.
+
+10. **`Viewer.lua:694`** — Step line styling now uses `step:IsComplete()` and `step:GetCompletionState(activeStepNum)` instead of `i < currentStep`.
+
+11. **Merged skipped/upcoming branches** (`Viewer.lua:724-738`) — `skipped` and `upcoming` had identical code; merged into single `else` block. Fixes `if_same_then_else` selene warning.
+
+12. **`wow_classic.yml` additions** — Added: `C_QuestLog` (property), `C_QuestLog.IsQuestFlaggedCompleted`, `IsQuestComplete`, `GetQuestLogTitle`, `GetNumQuestLogEntries`, `C_AchievementInfo`, `GameFontNormalSmall`, `GetAchievementNumCriteria`.
+
+#### Debug Markers (commit `8668132`)
+
+13. **Comprehensive debug infrastructure** — Added 1,831 commented debug markers across all 25 code files:
+
+| Method | Count | Purpose |
+|--------|-------|---------|
+| `ENTER` | 661 | Function entry points |
+| `PARAM` | 691 | Named parameter values |
+| `EXIT` | 461 | Function exit points |
+| `EVENT` | 18 | Event registrations |
+
+All markers are purely commented (zero runtime cost until enabled). Search with `grep -n 'DEBUG:'`.
+
+Files receiving markers: `Guide.lua`, `Viewer.lua`, `Options.lua`, `Parser.lua`, `GuideMenu.lua`, `Skins.lua`, `GoalTracker.lua`, `Waypoints.lua`, `Core.lua`, `UiWidgets/Main.lua`, `Tabs.lua`, `StaticPopups.lua`, `Minimap.lua`, `ActionBar.lua`, `AutoComplete.lua`, `Compat.lua`, `Tooltip.lua`, `Faction.lua`, `GuideLoader.lua`, `Announcements.lua`, `GuideSorting.lua`, `Keybinds.lua`, `Init.lua`, `Skins/Default/ViewerFrame.lua`, `Config.lua`.
+
+### Files Modified
+
+- `Guide.lua` — Completion tracking: `GetCompletedSteps()`, `GetFirstIncompleteStep()`, `GetProgressPercent()`, `Step:GetCompletionState()`, `Goal:CheckQuestTurnin()`, `IsQuestInLog()`, `CheckQuestAccepted()`, `CheckQuestCompletion()`; debug markers: +108
+- `Viewer.lua` — Active step detection, step line styling, merged skipped/upcoming branches; debug markers: +10
+- `wow_classic.yml` — Added C_QuestLog, IsQuestFlaggedCompleted, IsQuestComplete, GetQuestLogTitle, GetNumQuestLogEntries, C_AchievementInfo, GameFontNormalSmall, GetAchievementNumCriteria
+- `Goal.lua` — `IsQuestInLog()`, reordered `CheckQuestAccepted()`
+- `Options.lua` — Debug markers: +390
+- `Parser.lua` — Debug markers: +223
+- `GuideMenu.lua` — Debug markers: +211
+- `Skins.lua` — Debug markers: +196
+- `GoalTracker.lua` — Debug markers: +76 (incl. 12 EVENT markers)
+- `Core.lua` — Debug markers: +75 (incl. 10 EVENT markers)
+- `UiWidgets/Main.lua`, `Tabs.lua`, `StaticPopups.lua`, `Minimap.lua`, `ActionBar.lua`, `AutoComplete.lua`, `Compat.lua`, `Tooltip.lua`, `Faction.lua`, `GuideLoader.lua`, `Announcements.lua`, `GuideSorting.lua`, `Keybinds.lua`, `Init.lua`, `Skins/Default/ViewerFrame.lua`, `Config.lua` — Debug markers
+
+### Selene
+
+- `0 errors` on key files (Guide.lua, Viewer.lua, GoalTracker.lua, Step.lua)
+- 37 pre-existing warnings about missing WoW API globals (unchanged)
+
+### Commits
+
+- `e7dbb02` — `feat: event-driven step completion tracking with WoW API fallback`
+- `8668132` — `debug: comprehensive ENTER/EXIT/PARAM/EVENT markers across entire codebase`
+
+---
+
 ## Session 35 — 2026-05-04
 
 ### Summary
