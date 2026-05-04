@@ -4,6 +4,46 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 35 — 2026-05-04
+
+### Summary
+
+**Guide Info Bar.** Added a new info bar between the title bar and tabs that displays the currently loaded guide's name, level range, and active step title — matching Zygor's GuideInfo frame layout.
+
+### Changes
+
+1. **Added Guide Info Bar frame** (`Viewer.lua`) — New `InfoBar` frame (28px) positioned below the title divider and above the tab container. Three sub-elements:
+   - `InfoGuideName` (left, bold white, 40% width) — shows `guide.titleShort` or `guide.title`
+   - `InfoLevel` (center, cyan, 20% width) — shows `Lv X-Y` or `Lv X+` for range
+   - `InfoStep` (right, dim white, 40% width) — shows active step name via `step:GetTitle()` or `Step X / Y` fallback
+
+2. **Added `XP:UpdateInfoBar(frame)` method** (`Viewer.lua`) — Populates all three InfoBar fields when a guide is loaded; clears all fields when no guide is active.
+
+3. **Integrated into viewer update flow** (`Viewer.lua`) — `XP:UpdateViewer()` now calls `UpdateInfoBar()` after loading/unloading a guide.
+
+4. **Recalculated tab divider Y** (`Viewer.lua`) — Fixed `tabDivider` Y offset to account for the new info bar height (`INFO_HEIGHT = 28`).
+
+5. **Extended WoW stdlib** (`wow_classic.yml`) — Added 70+ missing WoW API globals (`GameFontNormalSmall`, `GameFontHighlightSmall`, `UIDropDownMenu_*`, `C_Timer.After`, `LibStub`, `StaticPopupDialogs`, `MinimapCluster`, `IsInInstance`, `IsShiftKeyDown`, `IsControlKeyDown`, `IsAltKeyDown`, `IsModifiedClick`, and many more) to achieve 0 selene errors across all Lua files.
+
+6. **Fixed nil guide bug** (`GuideMenu.lua:870`) — `favBtn OnClick` referenced undefined `guide` variable; fixed by storing `row.guide = guide` in `CreateGuideRow` scope and using `self_btn:GetParent().guide`.
+
+7. **Added selene config** (`selene.toml`) — Configured `std = "wow_classic"` for linting.
+
+### Files Modified
+
+- `Viewer.lua` — Guide Info Bar: 954 insertions, 303 deletions
+- `GuideMenu.lua` — Fixed nil guide bug
+- `wow_classic.yml` — Added 70+ WoW API globals
+- `selene.toml` — Added selene linter config
+- `wow_classic_additions.yml` — Created as supplemental stdlib (placeholder)
+
+### Selene
+
+- `0 errors` across all Lua files
+- All 87 Lua files had UTF-8 BOM stripped
+
+---
+
 ## Session 34 — 2026-05-04
 
 ### Summary
