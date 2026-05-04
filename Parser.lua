@@ -444,6 +444,8 @@ GOALTYPES["use"] = {
         goal.text = name or params
         goal.itemID = id
         goal.action = "use"
+        -- Look up spellID from itemID so UNIT_SPELLCAST_SUCCEEDED can fire
+        -- We defer this to runtime since GetItemInfo is not always sync-ready
     end,
 }
 

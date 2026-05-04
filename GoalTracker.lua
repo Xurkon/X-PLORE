@@ -299,6 +299,83 @@ function GT:OnBagUpdate()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- Talk / Gossip tracking via GOSSIP_SHOW
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- Cache of npcID → goals for talk tracking.
+GT._talkGoalsByNPCID = {}
+GT._talkGoalsByName  = {}
+
+-- DEBUG: ENTER GT:RebuildTalkCache()
+function GT:RebuildTalkCache()
+    self._talkGoalsByNPCID = {}
+    self._talkGoalsByName  = {}
+
+    for _, goal in ipairs(self._watchedGoals) do
+        local action = (goal.action or ""):lower()
+        if action == "talk" then
+            if goal.npcID then
+                if not self._talkGoalsByNPCID[goal.npcID] then
+                    self._talkGoalsByNPCID[goal.npcID] = {}
+                end
+                table.insert(self._talkGoalsByNPCID[goal.npcID], goal)
+            end
+            if goal.text and goal.text ~= "" then
+                local key = goal.text:lower()
+                if not self._talkGoalsByName[key] then
+                    self._talkGoalsByName[key] = {}
+                end
+                table.insert(self._talkGoalsByName[key], goal)
+            end
+        end
+    end
+-- DEBUG: EXIT GT:RebuildTalkCache()
+end
+
+-- DEBUG: ENTER GT:OnGossipShow()
+-- DEBUG: PARAM npcID = [npcID]
+function GT:OnGossipShow(npcID)
+    -- Try npcID match first (reliable)
+    if npcID and self._talkGoalsByNPCID[npcID] then
+        for _, goal in ipairs(self._talkGoalsByNPCID[npcID]) do
+            CompleteGoal(goal)
+        end
+    end
+    -- Fall back to name match via UnitName
+    local unit = self:_GetGossipUnit()
+    if unit then
+        local name = UnitName(unit)
+        if name then
+            local key = name:lower()
+            if self._talkGoalsByName[key] then
+                for _, goal in ipairs(self._talkGoalsByName[key]) do
+                    CompleteGoal(goal)
+                end
+            end
+        end
+    end
+-- DEBUG: EXIT GT:OnGossipShow()
+end
+
+-- Helper: detect the Unit token of the gossip target.
+-- DEBUG: ENTER GT:_GetGossipUnit()
+local function GetGossipUnit()
+    -- GossipFrame anchor: "npc" is the standard Unit token for the gossip target
+    if UnitExists("npc") then
+        return "npc"
+    end
+    -- Fallback: scan nearby units
+    for i = 1, 4 do
+        local unit = format("target%d", i)
+        if UnitExists(unit) and UnitIsVisible(unit) then
+            return unit
+        end
+    end
+    return nil
+end
+-- DEBUG: EXIT GT:_GetGossipUnit()
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- Achievement tracking
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -419,6 +496,83 @@ function GT:OnPlayerLevelUp(newLevel)
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- Use tracking via UNIT_SPELLCAST_SUCCEEDED and bag scans
+-- Use goals complete when the player actually uses the item.
+-- Detection via: UNIT_SPELLCAST_SUCCEEDED (item spell cast by player)
+-- and BAG_UPDATE_DELAYED (item consumed / bag slot changed).
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- Cache of itemID → goal for use tracking.
+GT._useGoalsByItemID  = {}
+GT._useGoalsByName    = {}
+GT._useGoalsBySpellID = {}
+
+-- DEBUG: ENTER GT:GetItemSpellID()
+-- DEBUG: PARAM itemID = [itemID]
+-- Returns the spellID created by using an item, or nil.
+-- Many use-on-target items (e.g. First Aid Kit) share itemID == spellID.
+function GT:GetItemSpellID(itemID)
+    if not itemID then return nil end
+    -- For use-on-target items the itemID IS the spellID (e.g. 45543)
+    -- Fall back to itemID when we don't have a specific spellID mapping
+    return itemID
+end
+
+-- DEBUG: ENTER GT:RebuildUseCache()
+function GT:RebuildUseCache()
+    self._useGoalsByItemID  = {}
+    self._useGoalsByName    = {}
+    self._useGoalsBySpellID = {}
+
+    for _, goal in ipairs(self._watchedGoals) do
+        local action = (goal.action or ""):lower()
+        if action == "use" then
+            if goal.itemID then
+                if not self._useGoalsByItemID[goal.itemID] then
+                    self._useGoalsByItemID[goal.itemID] = {}
+                end
+                table.insert(self._useGoalsByItemID[goal.itemID], goal)
+            end
+            -- Use spellID cache for UNIT_SPELLCAST_SUCCEEDED matching
+            local spellID = goal.spellID or (goal.itemID and self:GetItemSpellID(goal.itemID))
+            if spellID then
+                if not self._useGoalsBySpellID[spellID] then
+                    self._useGoalsBySpellID[spellID] = {}
+                end
+                table.insert(self._useGoalsBySpellID[spellID], goal)
+            end
+            if goal.text and goal.text ~= "" then
+                local key = goal.text:lower()
+                if not self._useGoalsByName[key] then
+                    self._useGoalsByName[key] = {}
+                end
+                table.insert(self._useGoalsByName[key], goal)
+            end
+        end
+    end
+-- DEBUG: EXIT GT:RebuildUseCache()
+end
+
+-- DEBUG: ENTER GT:OnItemUsed()
+-- DEBUG: PARAM itemID_or_spellID = [itemID_or_spellID]
+function GT:OnItemUsed(itemID_or_spellID)
+    if not itemID_or_spellID then return end
+    -- Use goals store itemID; spell-casting creates a spellID which may differ
+    -- so we check both caches
+    if self._useGoalsByItemID[itemID_or_spellID] then
+        for _, goal in ipairs(self._useGoalsByItemID[itemID_or_spellID]) do
+            CompleteGoal(goal)
+        end
+    end
+    if self._useGoalsBySpellID and self._useGoalsBySpellID[itemID_or_spellID] then
+        for _, goal in ipairs(self._useGoalsBySpellID[itemID_or_spellID]) do
+            CompleteGoal(goal)
+        end
+    end
+-- DEBUG: EXIT GT:OnItemUsed()
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- Event frame and dispatch
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -459,6 +613,15 @@ function GT:CreateEventFrame()
     -- Reputation
   -- DEBUG: EVENT RegisterEvent("UPDATE_FACTION")
     f:RegisterEvent("UPDATE_FACTION")
+
+    -- Talk / Gossip
+  -- DEBUG: EVENT RegisterEvent("GOSSIP_SHOW")
+    f:RegisterEvent("GOSSIP_SHOW")
+
+    -- Use (item) - fires when player casts spell from using an item
+    -- Also BAG_UPDATE_DELAYED for item consumption
+  -- DEBUG: EVENT RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
     -- Skills / spell learning
   -- DEBUG: EVENT RegisterEvent("SKILL_LINES_CHANGED")
@@ -530,6 +693,20 @@ function GT:OnEvent(event, ...)
 
     elseif event == "UPDATE_FACTION" then
         self:OnFactionUpdate()
+
+    elseif event == "GOSSIP_SHOW" then
+        -- Get the NPC's GUID to extract npcID for matching
+        local npcGUID = UnitGUID("npc")
+        local npcID = npcGUID and tonumber(tostring(npcGUID):match("Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)"))
+        self:OnGossipShow(npcID)
+
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        -- Detect when player uses an item (e.g. First Aid Kit on soldiers)
+        -- arg1=unit token, arg3=spellID
+        local unit, _, _, _, _, _, spellID = ...
+        if unit == "player" and spellID then
+            self:OnItemUsed(spellID)
+        end
 
     elseif event == "SKILL_LINES_CHANGED" then
         self:OnSkillUpdate()
