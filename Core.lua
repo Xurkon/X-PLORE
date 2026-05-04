@@ -236,9 +236,6 @@ function XP:SlashCommand(input)
     elseif input == "reset" then
         self:Print("Resetting frame positions...")
         self:ResetFrames()
-    else
-        -- Default: toggle the guide menu
-        self:ToggleMenu()
     end
 -- DEBUG: EXIT XP:SlashCommand()
 end
@@ -434,9 +431,6 @@ function XP:CheckAutoAdvance()
                 else
                     allComplete = false
                 end
-            else
-                -- Non-quest goals can't be auto-completed here
-                allComplete = false
             end
         end
     end

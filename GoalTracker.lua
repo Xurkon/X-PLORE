@@ -586,10 +586,7 @@ function GT:OnStepChanged(guide, stepIndex)
 
     -- Immediately re-check quest state for accept/turnin goals
     for _, goal in ipairs(self:GetGoalsByAction("accept")) do
-        if goal.questID and XP:IsQuestCompleted(goal.questID) then
-            goal.complete = true
-            goal.current  = 1
-        elseif goal.questID and XP:IsQuestInLog(goal.questID) then
+        if goal.questID and (XP:IsQuestCompleted(goal.questID) or XP:IsQuestInLog(goal.questID)) then
             goal.complete = true
             goal.current  = 1
         end

@@ -56,8 +56,10 @@ globals:
     args:
     - type: string
     - type: any
-    - required: false
-      type: any
+    - type: any
+    - type: any
+    - type: any
+    must_use: false
   UnitName:
     args:
     - type: string
@@ -218,3 +220,240 @@ globals:
     args:
     - type: number
     must_use: true
+  SendChatMessage:
+    args: []
+    must_use: false
+  GetRealZoneText:
+    args: []
+    must_use: false
+  ChatEdit_ShowActiveWindow:
+    args: []
+    must_use: false
+  GetNumGroupMembers:
+    args: []
+    must_use: false
+  GetNumRaidMembers:
+    args: []
+    must_use: false
+  GetNumPartyMembers:
+    args: []
+    must_use: false
+  UIDropDownMenu_SetSelectedID:
+    args: []
+    must_use: false
+  UIDropDownMenu_AddButton:
+    args: []
+    must_use: false
+  UIDropDownMenu_Initialize:
+    args: []
+    must_use: false
+  UIDropDownMenu_SetWidth:
+    args: []
+    must_use: false
+  UIDropDownMenu_CreateInfo:
+    args: []
+    must_use: false
+  UIDropDownFork_separatorInfo:
+    args: []
+    must_use: false
+  UIDropDownFork_SetAnchor:
+    args: []
+    must_use: false
+  ToggleDropDownMenu:
+    args: []
+    must_use: false
+  CloseDropDownForks:
+    args: []
+    must_use: false
+  DropDownForkList1:
+    property: new-fields
+  StaticPopupDialogs:
+    property: new-fields
+  StaticPopup_Show:
+    args: []
+    must_use: false
+  CreateFont:
+    args: []
+    must_use: false
+  LibStub:
+    args:
+    - type: string
+    - type: any
+    must_use: false
+  GetFactionInfoByID:
+    args:
+    - type: number
+    must_use: false
+  GetFactionInfo:
+    args:
+    - type: number
+    must_use: false
+  GetNumFactions:
+    args: []
+    must_use: false
+  C_Reputation:
+    property: new-fields
+  C_Timer:
+    property: new-fields
+  Minimap:
+    property: new-fields
+  MinimapCluster:
+    property: new-fields
+  IsInGuild:
+    args: []
+    must_use: false
+  UnitLevel:
+    args:
+    - type: string
+    must_use: false
+  UnitFactionGroup:
+    args: []
+    must_use: false
+  UnitClass:
+    args: []
+    must_use: false
+  IsInInstance:
+    args: []
+    must_use: false
+  IsFlying:
+    args: []
+    must_use: false
+  InCombatLockdown:
+    args: []
+    must_use: false
+  IsMouseButtonDown:
+    args: []
+    must_use: false
+  GetUnitSpeed:
+    args: []
+    must_use: false
+  GetPlayerFacing:
+    args: []
+    must_use: false
+  CanGuildBankRepair:
+    args: []
+    must_use: false
+  BASE_MOVEMENT_SPEED:
+    property: new-fields
+  C_Spell:
+    property: new-fields
+  GetSpellTabInfo:
+    args:
+    - type: number
+    must_use: false
+  GetSpellBookItemName:
+    args:
+    - type: number
+    - type: any
+    must_use: false
+  GetNumSpellTabs:
+    args: []
+    must_use: false
+  GetNumSkillLines:
+    args: []
+    must_use: false
+  GetSkillLineInfo:
+    args:
+    - type: number
+    must_use: false
+  HasAction:
+    args:
+    - type: number
+    must_use: false
+  BOOKTYPE_SPELL:
+    property: new-fields
+  LearnSpell:
+    args: []
+    must_use: false
+  GetSpecializationName:
+    args: []
+    must_use: false
+  GetNumSpecializations:
+    args: []
+    must_use: false
+  GetNumClasses:
+    args: []
+    must_use: false
+  GetClassInfo:
+    args: []
+    must_use: false
+  SelectQuestLogEntry:
+    args:
+    - type: number
+    must_use: false
+  GetQuestLogLeaderBoard:
+    args:
+    - type: number
+    must_use: false
+  GetContainerNumSlots:
+    args:
+    - type: number
+    must_use: false
+  NUM_BAG_SLOTS:
+    property: new-fields
+  ShoppingTooltip1:
+    property: new-fields
+  ShoppingTooltip2:
+    property: new-fields
+  ItemRefTooltip:
+    property: new-fields
+  GetCursorPosition:
+    args: []
+    must_use: false
+  GetCorpsePosition:
+    args: []
+    must_use: false
+  GetZoneText:
+    args: []
+    must_use: false
+  PlaySoundFile:
+    args:
+    - type: any
+    - type: any
+    must_use: false
+  GetTime:
+    args: []
+    must_use: false
+  'YES':
+    property: new-fields
+  'NO':
+    property: new-fields
+  OKAY:
+    property: new-fields
+  CANCEL:
+    property: new-fields
+  BackdropTemplateMixin:
+    property: new-fields
+  XP_IsRetail:
+    property: new-fields
+  XP_IsWOTLK:
+    property: new-fields
+  XP_IsVanilla:
+    property: new-fields
+  EasyFork:
+    property: new-fields
+  tremove:
+    args: []
+    must_use: false
+  tinsert:
+    args: []
+    must_use: false
+  min:
+    args: []
+    must_use: false
+  max:
+    args: []
+    must_use: false
+  ZygorGuidesViewer:
+    property: new-fields
+  ZGV:
+    property: new-fields
+  XP:
+    property: new-fields
+  CombatLogGetCurrentEventInfo:
+    args: []
+    must_use: false
+  X_Plore_L:
+    args:
+    - type: any
+    must_use: false

@@ -1544,7 +1544,7 @@ function XP:CreateIconSets()
         set.AssignToTexture = function(icon, texture)
             if not texture then return end
             texture:SetTexture(set.file)
-            local left, right, top, bottom = getTexCoord(set, name or set.default)
+            local left, right, top, bottom = set.getTexCoord(icon or set.default)
             texture:SetTexCoord(left, right, top, bottom)
         -- DEBUG: EXIT AssignToTexture()
         end
@@ -1744,7 +1744,7 @@ function XP:CreateButtonSets()
             if not button:GetHighlightTexture() then button:SetHighlightTexture("dummy") end
             if not button:GetDisabledTexture() then button:SetDisabledTexture("dummy") end
             
-            local coords = getTexCoords(set, name or set.default)
+            local coords = set.getTexCoords(set.default)
             local ntex = button:GetNormalTexture()
             if ntex then ntex:SetTexture(set.file); ntex:SetTexCoord(unpack(coords[1])) end
             local ptex = button:GetPushedTexture()
