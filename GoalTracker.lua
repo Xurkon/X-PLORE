@@ -34,25 +34,35 @@ GT._frame        = nil -- event listener frame
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Register all goals in the current step for event tracking.
+-- DEBUG: ENTER GT:RegisterStep()
+-- DEBUG: PARAM step = [step]
 function GT:RegisterStep(step)
     if not step or not step.goals then return end
     for _, goal in ipairs(step.goals) do
         self:RegisterGoal(goal)
     end
+-- DEBUG: EXIT GT:RegisterStep()
 end
 
 -- Register a single goal for event tracking.
+-- DEBUG: ENTER GT:RegisterGoal()
+-- DEBUG: PARAM goal = [goal]
 function GT:RegisterGoal(goal)
     if not goal then return end
     table.insert(self._watchedGoals, goal)
+-- DEBUG: EXIT GT:RegisterGoal()
 end
 
 -- Clear all tracked goals (called when guide is unloaded or step changes).
+-- DEBUG: ENTER GT:ClearGoals()
 function GT:ClearGoals()
     self._watchedGoals = {}
+-- DEBUG: EXIT GT:ClearGoals()
 end
 
 -- Returns a list of goals matching the given action type (lowercase).
+-- DEBUG: ENTER GT:GetGoalsByAction()
+-- DEBUG: PARAM action = [action]
 function GT:GetGoalsByAction(action)
     local result = {}
     for _, g in ipairs(self._watchedGoals) do
@@ -61,6 +71,7 @@ function GT:GetGoalsByAction(action)
         end
     end
     return result
+-- DEBUG: EXIT GT:GetGoalsByAction()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -68,6 +79,8 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Marks a goal complete and triggers auto-advance check.
+-- DEBUG: ENTER CompleteGoal()
+-- DEBUG: PARAM goal = [goal]
 local function CompleteGoal(goal)
     if goal.complete then return end
     goal.complete = true
@@ -87,9 +100,13 @@ local function CompleteGoal(goal)
             XP:UpdateViewer()
         end
     end
+-- DEBUG: EXIT CompleteGoal()
 end
 
 -- Increment a counted goal (kill / collect).
+-- DEBUG: ENTER IncrementGoal()
+-- DEBUG: PARAM goal = [goal]
+-- DEBUG: PARAM amount = [amount]
 local function IncrementGoal(goal, amount)
     if goal.complete then return end
     amount = amount or 1
@@ -100,26 +117,33 @@ local function IncrementGoal(goal, amount)
     else
         XP:UpdateViewer()
     end
+-- DEBUG: EXIT IncrementGoal()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Quest event handlers
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnQuestAccepted()
+-- DEBUG: PARAM questID = [questID]
 function GT:OnQuestAccepted(questID)
     for _, goal in ipairs(self:GetGoalsByAction("accept")) do
         if goal.questID == questID then
             CompleteGoal(goal)
         end
     end
+-- DEBUG: EXIT GT:OnQuestAccepted()
 end
 
+-- DEBUG: ENTER GT:OnQuestTurnedIn()
+-- DEBUG: PARAM questID = [questID]
 function GT:OnQuestTurnedIn(questID)
     for _, goal in ipairs(self:GetGoalsByAction("turnin")) do
         if goal.questID == questID then
             CompleteGoal(goal)
         end
     end
+-- DEBUG: EXIT GT:OnQuestTurnedIn()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -132,6 +156,7 @@ end
 GT._killGoalsByNPCID = {}
 GT._killGoalsByName  = {}
 
+-- DEBUG: ENTER GT:RebuildKillCache()
 function GT:RebuildKillCache()
     self._killGoalsByNPCID = {}
     self._killGoalsByName  = {}
@@ -154,10 +179,13 @@ function GT:RebuildKillCache()
             end
         end
     end
+-- DEBUG: EXIT GT:RebuildKillCache()
 end
 
 -- Extracts the NPC GUID creature ID from a full GUID string.
 -- GUID format: "Creature-0-XXXXX-XXXXX-XXXXX-NNNNN-..."
+-- DEBUG: ENTER GUIDToNPCID()
+-- DEBUG: PARAM guid = [guid]
 local function GUIDToNPCID(guid)
     if not guid then return nil end
     -- Guard: guid may arrive as a number (GUID type field) instead of string
@@ -165,8 +193,12 @@ local function GUIDToNPCID(guid)
     if type(guid) == "number" then return nil end
     local npcID = tonumber(tostring(guid):match("Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)"))
     return npcID
+-- DEBUG: EXIT GUIDToNPCID()
 end
 
+-- DEBUG: ENTER GT:OnUnitDied()
+-- DEBUG: PARAM destGUID = [destGUID]
+-- DEBUG: PARAM destName = [destName]
 function GT:OnUnitDied(destGUID, destName)
     -- Try npcID match first (reliable)
     local npcID = GUIDToNPCID(destGUID)
@@ -186,6 +218,7 @@ function GT:OnUnitDied(destGUID, destName)
             end
         end
     end
+-- DEBUG: EXIT GT:OnUnitDied()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -196,6 +229,7 @@ end
 GT._collectGoalsByItemID = {}
 GT._collectGoalsByName   = {}
 
+-- DEBUG: ENTER GT:RebuildCollectCache()
 function GT:RebuildCollectCache()
     self._collectGoalsByItemID = {}
     self._collectGoalsByName   = {}
@@ -218,9 +252,12 @@ function GT:RebuildCollectCache()
             end
         end
     end
+-- DEBUG: EXIT GT:RebuildCollectCache()
 end
 
 -- Counts how many of itemID the player currently has in their bags.
+-- DEBUG: ENTER CountItemInBags()
+-- DEBUG: PARAM itemID = [itemID]
 local function CountItemInBags(itemID)
     local total = 0
     for bag = 0, NUM_BAG_SLOTS or 4 do
@@ -235,8 +272,10 @@ local function CountItemInBags(itemID)
         end
     end
     return total
+-- DEBUG: EXIT CountItemInBags()
 end
 
+-- DEBUG: ENTER GT:OnBagUpdate()
 function GT:OnBagUpdate()
     for itemID, goals in pairs(self._collectGoalsByItemID) do
         local have = CountItemInBags(itemID)
@@ -256,12 +295,15 @@ function GT:OnBagUpdate()
             end
         end
     end
+-- DEBUG: EXIT GT:OnBagUpdate()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Achievement tracking
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnAchievementEarned()
+-- DEBUG: PARAM achievementID = [achievementID]
 function GT:OnAchievementEarned(achievementID)
     for _, goal in ipairs(self:GetGoalsByAction("achieve")) do
         if goal.achievementID == achievementID then
@@ -274,12 +316,14 @@ function GT:OnAchievementEarned(achievementID)
             CompleteGoal(goal)
         end
     end
+-- DEBUG: EXIT GT:OnAchievementEarned()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Reputation tracking
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnFactionUpdate()
 function GT:OnFactionUpdate()
     for _, goal in ipairs(self:GetGoalsByAction("rep")) do
         if not goal.complete and goal.factionID and goal.standing then
@@ -303,12 +347,14 @@ function GT:OnFactionUpdate()
             end
         end
     end
+-- DEBUG: EXIT GT:OnFactionUpdate()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Skill / Spell learning tracking
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnSkillUpdate()
 function GT:OnSkillUpdate()
     for _, goal in ipairs(self:GetGoalsByAction("skill")) do
         if not goal.complete and goal.skillName then
@@ -328,8 +374,11 @@ function GT:OnSkillUpdate()
             end
         end
     end
+-- DEBUG: EXIT GT:OnSkillUpdate()
 end
 
+-- DEBUG: ENTER GT:OnSpellLearned()
+-- DEBUG: PARAM spellID = [spellID]
 function GT:OnSpellLearned(spellID)
     for _, goal in ipairs(self:GetGoalsByAction("learn")) do
         if not goal.complete then
@@ -348,12 +397,15 @@ function GT:OnSpellLearned(spellID)
             CompleteGoal(goal)
         end
     end
+-- DEBUG: EXIT GT:OnSpellLearned()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Level goal
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnPlayerLevelUp()
+-- DEBUG: PARAM newLevel = [newLevel]
 function GT:OnPlayerLevelUp(newLevel)
     for _, goal in ipairs(self:GetGoalsByAction("level")) do
         if not goal.complete then
@@ -363,12 +415,14 @@ function GT:OnPlayerLevelUp(newLevel)
             end
         end
     end
+-- DEBUG: EXIT GT:OnPlayerLevelUp()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Event frame and dispatch
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:CreateEventFrame()
 function GT:CreateEventFrame()
     if self._frame then return end
 
@@ -378,39 +432,54 @@ function GT:CreateEventFrame()
     end)
 
     -- Quest events
+  -- DEBUG: EVENT RegisterEvent("QUEST_ACCEPTED")
     f:RegisterEvent("QUEST_ACCEPTED")
+  -- DEBUG: EVENT RegisterEvent("QUEST_LOG_UPDATE")
     f:RegisterEvent("QUEST_LOG_UPDATE")
     if XP.isRetail then
+  -- DEBUG: EVENT RegisterEvent("QUEST_TURNED_IN")
         f:RegisterEvent("QUEST_TURNED_IN")
     else
+  -- DEBUG: EVENT RegisterEvent("QUEST_COMPLETE")
         f:RegisterEvent("QUEST_COMPLETE")
     end
 
     -- Combat log (kill tracking)
+  -- DEBUG: EVENT RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
     -- Inventory (collect tracking)
+  -- DEBUG: EVENT RegisterEvent("BAG_UPDATE_DELAYED")
     f:RegisterEvent("BAG_UPDATE_DELAYED")
 
     -- Achievement
+  -- DEBUG: EVENT RegisterEvent("ACHIEVEMENT_EARNED")
     f:RegisterEvent("ACHIEVEMENT_EARNED")
 
     -- Reputation
+  -- DEBUG: EVENT RegisterEvent("UPDATE_FACTION")
     f:RegisterEvent("UPDATE_FACTION")
 
     -- Skills / spell learning
+  -- DEBUG: EVENT RegisterEvent("SKILL_LINES_CHANGED")
     f:RegisterEvent("SKILL_LINES_CHANGED")
+  -- DEBUG: EVENT RegisterEvent("LEARNED_SPELL_IN_TAB")
     f:RegisterEvent("LEARNED_SPELL_IN_TAB")
     if XP.isRetail then
+  -- DEBUG: EVENT RegisterEvent("SPELLS_CHANGED")
         f:RegisterEvent("SPELLS_CHANGED")
     end
 
     -- Level
+  -- DEBUG: EVENT RegisterEvent("PLAYER_LEVEL_UP")
     f:RegisterEvent("PLAYER_LEVEL_UP")
 
     self._frame = f
+-- DEBUG: EXIT GT:CreateEventFrame()
 end
 
+-- DEBUG: ENTER GT:OnEvent()
+-- DEBUG: PARAM event = [event]
 function GT:OnEvent(event, ...)
     if event == "QUEST_ACCEPTED" then
         local _, questID = ...
@@ -489,6 +558,7 @@ function GT:OnEvent(event, ...)
         local newLevel = ...
         self:OnPlayerLevelUp(newLevel)
     end
+-- DEBUG: EXIT GT:OnEvent()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -496,6 +566,9 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Called when the current step changes. Re-registers watched goals.
+-- DEBUG: ENTER GT:OnStepChanged()
+-- DEBUG: PARAM guide = [guide]
+-- DEBUG: PARAM stepIndex = [stepIndex]
 function GT:OnStepChanged(guide, stepIndex)
     self:ClearGoals()
 
@@ -527,12 +600,15 @@ function GT:OnStepChanged(guide, stepIndex)
             goal.current  = 1
         end
     end
+-- DEBUG: EXIT GT:OnStepChanged()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Init (called from Core.lua OnEnable)
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER GT:OnEnable()
 function GT:OnEnable()
     self:CreateEventFrame()
+-- DEBUG: EXIT GT:OnEnable()
 end

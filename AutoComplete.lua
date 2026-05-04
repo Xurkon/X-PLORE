@@ -13,15 +13,21 @@ XP.AutoComplete = AC
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Returns true if questID is flagged completed in this character's history.
+-- DEBUG: ENTER IsQuestDone()
+-- DEBUG: PARAM questID = [questID]
 local function IsQuestDone(questID)
     if not questID or questID == 0 then return false end
     return XP:IsQuestCompleted(questID)
+-- DEBUG: EXIT IsQuestDone()
 end
 
 -- Returns true if questID is currently in the quest log (accepted but not done).
+-- DEBUG: ENTER IsQuestInLog()
+-- DEBUG: PARAM questID = [questID]
 local function IsQuestInLog(questID)
     if not questID or questID == 0 then return false end
     return XP:IsQuestInLog(questID)
+-- DEBUG: EXIT IsQuestInLog()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -33,6 +39,8 @@ end
 --   - It has at least one quest-type goal, AND
 --   - All quest-type goals reference quests that are already completed or
 --     are already in the log (for accept goals).
+-- DEBUG: ENTER StepShouldSkip()
+-- DEBUG: PARAM step = [step]
 local function StepShouldSkip(step)
     if not step or not step.goals or #step.goals == 0 then
         return false
@@ -76,6 +84,7 @@ local function StepShouldSkip(step)
     end
 
     return hasCheckable
+-- DEBUG: EXIT StepShouldSkip()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -86,6 +95,9 @@ end
 -- Scans from step 1 (or from currentStep if skipFromCurrent=true) and
 -- advances XP.CurrentStep to the first step that isn't already finished.
 -- Returns the new step index.
+-- DEBUG: ENTER AC:AutoAdvanceToFirstIncomplete()
+-- DEBUG: PARAM guide = [guide]
+-- DEBUG: PARAM skipFromCurrent = [skipFromCurrent]
 function AC:AutoAdvanceToFirstIncomplete(guide, skipFromCurrent)
     if not guide then return 1 end
 
@@ -109,6 +121,7 @@ function AC:AutoAdvanceToFirstIncomplete(guide, skipFromCurrent)
 
     -- All steps done (or nothing found) — park at last step
     return numSteps
+-- DEBUG: EXIT AC:AutoAdvanceToFirstIncomplete()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -122,6 +135,7 @@ AC._levelSuggestions = {}
 -- Rebuilds internal suggestion maps from all registered guides.
 -- Called once on enable (after guides are loaded) and whenever a new
 -- guide is registered.
+-- DEBUG: ENTER AC:BuildSuggestionMaps()
 function AC:BuildSuggestionMaps()
     self._zoneSuggestions  = {}
     self._levelSuggestions = {}
@@ -147,16 +161,22 @@ function AC:BuildSuggestionMaps()
             })
         end
     end
+-- DEBUG: EXIT AC:BuildSuggestionMaps()
 end
 
 -- Returns a list of guide IDs relevant to the given zone name (string).
+-- DEBUG: ENTER AC:GetZoneSuggestions()
+-- DEBUG: PARAM zoneName = [zoneName]
 function AC:GetZoneSuggestions(zoneName)
     if not zoneName then return {} end
     local key = zoneName:lower()
     return self._zoneSuggestions[key] or {}
+-- DEBUG: EXIT AC:GetZoneSuggestions()
 end
 
 -- Returns a list of guide IDs whose level range contains playerLevel.
+-- DEBUG: ENTER AC:GetLevelSuggestions()
+-- DEBUG: PARAM playerLevel = [playerLevel]
 function AC:GetLevelSuggestions(playerLevel)
     if not playerLevel then return {} end
     local results = {}
@@ -166,11 +186,13 @@ function AC:GetLevelSuggestions(playerLevel)
         end
     end
     return results
+-- DEBUG: EXIT AC:GetLevelSuggestions()
 end
 
 -- Returns the single "best" guide ID for the player's current state.
 -- Priority: zone + level match > level match only > zone match only
 -- Returns nil if no suggestions found.
+-- DEBUG: ENTER AC:GetBestSuggestion()
 function AC:GetBestSuggestion()
     local zone  = GetRealZoneText and GetRealZoneText() or ""
     local level = UnitLevel and UnitLevel("player") or 1
@@ -201,6 +223,7 @@ function AC:GetBestSuggestion()
     end
 
     return nil
+-- DEBUG: EXIT AC:GetBestSuggestion()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -211,6 +234,8 @@ end
 -- Guards against showing the same guide multiple times per session.
 AC._suggested = {}
 
+-- DEBUG: ENTER AC:ShowSuggestion()
+-- DEBUG: PARAM guideID = [guideID]
 function AC:ShowSuggestion(guideID)
     if not guideID then return end
     if self._suggested[guideID] then return end
@@ -224,6 +249,7 @@ function AC:ShowSuggestion(guideID)
         "Suggested guide for your zone/level: |cff00e5ff%s|r — type |cff00e5ff/xp|r to open.",
         name
     ))
+-- DEBUG: EXIT AC:ShowSuggestion()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -232,6 +258,7 @@ end
 
 -- Called from XP:OnEnable() after guides are loaded.
 -- Registers a one-time delayed check for zone/level suggestion.
+-- DEBUG: ENTER AC:OnEnable()
 function AC:OnEnable()
     self:BuildSuggestionMaps()
 
@@ -246,10 +273,13 @@ function AC:OnEnable()
             end
         end)
     end
+-- DEBUG: EXIT AC:OnEnable()
 end
 
 -- Called from XP:LoadGuide() after setting CurrentGuide / CurrentStep.
 -- Returns the recommended starting step (auto-advances past done quests).
+-- DEBUG: ENTER AC:OnGuideLoaded()
+-- DEBUG: PARAM guide = [guide]
 function AC:OnGuideLoaded(guide)
     if not guide then return 1 end
 
@@ -263,9 +293,11 @@ function AC:OnGuideLoaded(guide)
     end
 
     return XP.CurrentStep or 1
+-- DEBUG: EXIT AC:OnGuideLoaded()
 end
 
 -- Called from XP:OnZoneEvent() — re-check suggestion on zone change.
+-- DEBUG: ENTER AC:OnZoneChanged()
 function AC:OnZoneChanged()
     if XP.CurrentGuide then return end  -- already have a guide, no suggestion needed
 
@@ -273,4 +305,5 @@ function AC:OnZoneChanged()
     if suggested then
         self:ShowSuggestion(suggested)
     end
+-- DEBUG: EXIT AC:OnZoneChanged()
 end

@@ -73,25 +73,36 @@ local NUM_DIRECTIONS = 64
 -----------------------------------------------------------------------
 -- Helper: normalize angle to [0, 2PI)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER NormalizeAngle()
+-- DEBUG: PARAM angle = [angle]
 local function NormalizeAngle(angle)
     angle = angle % PI2
     if angle < 0 then angle = angle + PI2 end
     return angle
+-- DEBUG: EXIT NormalizeAngle()
 end
 
 -----------------------------------------------------------------------
 -- Helper: calculate distance between two world points (yards)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER WorldDistance()
+-- DEBUG: PARAM x1 = [x1]
+-- DEBUG: PARAM y1 = [y1]
+-- DEBUG: PARAM x2 = [x2]
+-- DEBUG: PARAM y2 = [y2]
 local function WorldDistance(x1, y1, x2, y2)
     if not x1 or not y1 or not x2 or not y2 then return 999999 end
     local dx = x2 - x1
     local dy = y2 - y1
     return math.sqrt(dx * dx + dy * dy)
+-- DEBUG: EXIT WorldDistance()
 end
 
 -----------------------------------------------------------------------
 -- Helper: format distance for display
 -----------------------------------------------------------------------
+-- DEBUG: ENTER FormatDistance()
+-- DEBUG: PARAM dist = [dist]
 local function FormatDistance(dist)
     if not dist or dist >= 999999 then
         return "---"
@@ -100,11 +111,14 @@ local function FormatDistance(dist)
     else
         return string.format("%d yds", math.floor(dist + 0.5))
     end
+-- DEBUG: EXIT FormatDistance()
 end
 
 -----------------------------------------------------------------------
 -- Helper: format ETA
 -----------------------------------------------------------------------
+-- DEBUG: ENTER FormatETA()
+-- DEBUG: PARAM seconds = [seconds]
 local function FormatETA(seconds)
     if not seconds or seconds <= 0 then return "" end
     if seconds < 60 then
@@ -114,11 +128,13 @@ local function FormatETA(seconds)
     else
         return string.format("%dh %dm", math.floor(seconds / 3600), math.floor((seconds % 3600) / 60))
     end
+-- DEBUG: EXIT FormatETA()
 end
 
 -----------------------------------------------------------------------
 -- Create the Waypoint Arrow Frame
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateWaypointArrow()
 function XP:CreateWaypointArrow()
     if Waypoint.frame then return end
     if not (self.db and self.db.profile and self.db.profile.arrow and self.db.profile.arrow.enabled) then return end
@@ -409,6 +425,7 @@ function XP:CreateWaypointArrow()
     end)
 
     Waypoint.frame = frame
+-- DEBUG: EXIT XP:CreateWaypointArrow()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -420,6 +437,9 @@ end
 local SPEED_SAMPLES = 10
 local BASE_MOVEMENT_SPEED = BASE_MOVEMENT_SPEED or 7.0  -- ~7 yds/sec for normal ground walk
 
+-- DEBUG: ENTER XP:CalculateSpeed()
+-- DEBUG: PARAM frame = [frame]
+-- DEBUG: PARAM dist = [dist]
 function XP:CalculateSpeed(frame, dist)
     if not frame.lastDist then
         frame.lastDist = dist
@@ -459,6 +479,7 @@ function XP:CalculateSpeed(frame, dist)
     end
 
     return total / frame.speedCount
+-- DEBUG: EXIT XP:CalculateSpeed()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -466,6 +487,9 @@ end
 -- Uses rolling average of speed samples and recalculates every ~0.9s.
 -- Returns 0 if ETA cannot be meaningfully estimated.
 ---------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:CalculateETA()
+-- DEBUG: PARAM speed = [speed]
+-- DEBUG: PARAM dist = [dist]
 function XP:CalculateETA(speed, dist)
     etacalc_elapsed = etacalc_elapsed + (Waypoint.frame and Waypoint.frame.elapsed or 0)
     if etacalc_elapsed < ETA_CALC_INTERVAL then
@@ -491,6 +515,7 @@ function XP:CalculateETA(speed, dist)
     last_eta = dist / avg
     etacalc_elapsed = 0
     return last_eta
+-- DEBUG: EXIT XP:CalculateETA()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -501,6 +526,10 @@ end
 --   - Dist <= 100 yards → ding once
 --   - Heading off-course (targetangle far from forward): warning beep every 2s
 ---------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:DoAudioCues()
+-- DEBUG: PARAM frame = [frame]
+-- DEBUG: PARAM playerangle = [playerangle]
+-- DEBUG: PARAM dist = [dist]
 function XP:DoAudioCues(frame, playerangle, dist)
     local t = GetTime()
     if lastplayerangle ~= playerangle then lastturntime = t end
@@ -542,12 +571,14 @@ function XP:DoAudioCues(frame, playerangle, dist)
     end
 
     lastplayerangle = playerangle
+-- DEBUG: EXIT XP:DoAudioCues()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 -- ShowWarning: flash the arrow red briefly (Zygor parity)
 -- Called when player is flying but heading is significantly off-course.
 ---------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:ShowWarning()
 function XP:ShowWarning()
     local frame = Waypoint and Waypoint.frame
     if not frame then return end
@@ -559,19 +590,27 @@ function XP:ShowWarning()
     arrow:SetVertexColor(1.0, 0.3, 0.3)
     frame._warningTimer = 0.5  -- seconds to show red
     frame._warningActive = true
+-- DEBUG: EXIT XP:ShowWarning()
 end
 
 -----------------------------------------------------------------------
 -- Tex coord rotation fallback
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:SetArrowTexCoordsByAngle()
+-- DEBUG: PARAM tex = [tex]
+-- DEBUG: PARAM angle = [angle]
 function XP:SetArrowTexCoordsByAngle(tex, angle)
     local cos, sin = math.cos(angle), math.sin(angle)
     local cx, cy = 0.5, 0.5
 
+    -- DEBUG: ENTER Rotate()
+    -- DEBUG: PARAM x = [x]
+    -- DEBUG: PARAM y = [y]
     local function Rotate(x, y)
         local rx = cx + (x - cx) * cos - (y - cy) * sin
         local ry = cy + (x - cx) * sin + (y - cy) * cos
         return rx, ry
+    -- DEBUG: EXIT Rotate()
     end
 
     local ULx, ULy = Rotate(0, 0)
@@ -580,11 +619,17 @@ function XP:SetArrowTexCoordsByAngle(tex, angle)
     local LRx, LRy = Rotate(1, 1)
 
     tex:SetTexCoord(ULx, ULy, LLx, LLy, URx, URy, LRx, LRy)
+-- DEBUG: EXIT XP:SetArrowTexCoordsByAngle()
 end
 
 -----------------------------------------------------------------------
 -- Add a waypoint to the queue
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:AddWaypoint()
+-- DEBUG: PARAM mapID = [mapID]
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
+-- DEBUG: PARAM data = [data]
 function XP:AddWaypoint(mapID, x, y, data)
     data = data or {}
     
@@ -609,11 +654,13 @@ function XP:AddWaypoint(mapID, x, y, data)
     end
 
     return wp
+-- DEBUG: EXIT XP:AddWaypoint()
 end
 
 -----------------------------------------------------------------------
 -- Clear all waypoints
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ClearWaypoints()
 function XP:ClearWaypoints()
     Waypoint.waypoints = {}
     Waypoint.currentIndex = 1
@@ -625,18 +672,23 @@ function XP:ClearWaypoints()
     self:RemoveMinimapDots()
     self:RemoveAntDots()
     self:HideAntLine()
+-- DEBUG: EXIT XP:ClearWaypoints()
 end
 
 -----------------------------------------------------------------------
 -- Alias for backward compatibility
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ClearWaypoint()
 function XP:ClearWaypoint()
     self:ClearWaypoints()
+-- DEBUG: EXIT XP:ClearWaypoint()
 end
 
 -----------------------------------------------------------------------
 -- Cycle through waypoints
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CycleWaypoint()
+-- DEBUG: PARAM delta = [delta]
 function XP:CycleWaypoint(delta)
     if #Waypoint.waypoints <= 1 then return end
     
@@ -652,11 +704,13 @@ function XP:CycleWaypoint(delta)
     
     self:RefreshWaypointArrow()
     self:RefreshMinimapDots()
+-- DEBUG: EXIT XP:CycleWaypoint()
 end
 
 -----------------------------------------------------------------------
 -- Refresh arrow display for current waypoint
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:RefreshWaypointArrow()
 function XP:RefreshWaypointArrow()
     local wp = Waypoint.waypoints[Waypoint.currentIndex]
     if not wp then
@@ -683,19 +737,27 @@ function XP:RefreshWaypointArrow()
             Waypoint.frame:Show()
         end
     end
+-- DEBUG: EXIT XP:RefreshWaypointArrow()
 end
 
 -----------------------------------------------------------------------
 -- Set waypoint (single, clears existing)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:SetWaypoint()
+-- DEBUG: PARAM mapID = [mapID]
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
+-- DEBUG: PARAM data = [data]
 function XP:SetWaypoint(mapID, x, y, data)
     self:ClearWaypoints()
     return self:AddWaypoint(mapID, x, y, data)
+-- DEBUG: EXIT XP:SetWaypoint()
 end
 
 -----------------------------------------------------------------------
 -- Update waypoint from current guide step
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateWaypoint()
 function XP:UpdateWaypoint()
     if not self.CurrentGuide then
         self:ClearWaypoints()
@@ -758,11 +820,17 @@ function XP:UpdateWaypoint()
         self:RefreshWaypointArrow()
         self:RefreshMinimapDots()
     end
+-- DEBUG: EXIT XP:UpdateWaypoint()
 end
 
 -----------------------------------------------------------------------
 -- Minimap dot management
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:AddMinimapDot()
+-- DEBUG: PARAM mapID = [mapID]
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
+-- DEBUG: PARAM data = [data]
 function XP:AddMinimapDot(mapID, x, y, data)
     if not HBDPins then return end
     
@@ -796,8 +864,10 @@ function XP:AddMinimapDot(mapID, x, y, data)
     table.insert(Waypoint.minimapDots, dot)
     
     return dot
+-- DEBUG: EXIT XP:AddMinimapDot()
 end
 
+-- DEBUG: ENTER XP:RemoveMinimapDots()
 function XP:RemoveMinimapDots()
     if not HBDPins then return end
     
@@ -808,8 +878,10 @@ function XP:RemoveMinimapDots()
     end
     
     Waypoint.minimapDots = {}
+-- DEBUG: EXIT XP:RemoveMinimapDots()
 end
 
+-- DEBUG: ENTER XP:RefreshMinimapDots()
 function XP:RefreshMinimapDots()
     self:RemoveMinimapDots()
     
@@ -825,6 +897,7 @@ function XP:RefreshMinimapDots()
             dot:SetSize(16, 16)
         end
     end
+-- DEBUG: EXIT XP:RefreshMinimapDots()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -836,6 +909,13 @@ end
 -- Texture used for the ant line; 1px wide yellow-orange gradient stripe
 local ANT_LINE_TEXTURE_PATH = "Interface\\AddOns\\!X-Libs\\media\\antline"
 
+-- DEBUG: ENTER XP:UpdateAntLine()
+-- DEBUG: PARAM fromX = [fromX]
+-- DEBUG: PARAM fromY = [fromY]
+-- DEBUG: PARAM fromMap = [fromMap]
+-- DEBUG: PARAM toX = [toX]
+-- DEBUG: PARAM toY = [toY]
+-- DEBUG: PARAM toMap = [toMap]
 function XP:UpdateAntLine(fromX, fromY, fromMap, toX, toY, toMap)
     -- Guard: need HBD for coordinate conversion and HBDPins for world line sprite
     if not HBD or not HBDPins then return end
@@ -892,17 +972,27 @@ function XP:UpdateAntLine(fromX, fromY, fromMap, toX, toY, toMap)
         -- Fallback: hide the line; individual ant dots remain functional
         line:Hide()
     end
+-- DEBUG: EXIT XP:UpdateAntLine()
 end
 
+-- DEBUG: ENTER XP:HideAntLine()
 function XP:HideAntLine()
     if Waypoint.antLine then
         Waypoint.antLine:Hide()
     end
+-- DEBUG: EXIT XP:HideAntLine()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 -- Ant trail dots (original dot-based approach, kept as fallback)
 ---------------------------------------------------------------------------------------------------------------------------------------
+-- DEBUG: ENTER XP:AddAntDots()
+-- DEBUG: PARAM fromX = [fromX]
+-- DEBUG: PARAM fromY = [fromY]
+-- DEBUG: PARAM fromMap = [fromMap]
+-- DEBUG: PARAM toX = [toX]
+-- DEBUG: PARAM toY = [toY]
+-- DEBUG: PARAM toMap = [toMap]
 function XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
     if not HBD then return end
 
@@ -940,8 +1030,10 @@ function XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
 
         table.insert(Waypoint.antDots, ant)
     end
+-- DEBUG: EXIT XP:AddAntDots()
 end
 
+-- DEBUG: ENTER XP:RemoveAntDots()
 function XP:RemoveAntDots()
     if not HBDPins then return end
 
@@ -952,11 +1044,13 @@ function XP:RemoveAntDots()
     end
 
     Waypoint.antDots = {}
+-- DEBUG: EXIT XP:RemoveAntDots()
 end
 
 -----------------------------------------------------------------------
 -- Corpse arrow support
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ShowCorpseArrow()
 function XP:ShowCorpseArrow()
     local corpseX, corpseY = GetCorpsePosition()
     if not corpseX or not corpseY then return end
@@ -967,11 +1061,13 @@ function XP:ShowCorpseArrow()
         title = "Corpse",
         type = "corpse",
     })
+-- DEBUG: EXIT XP:ShowCorpseArrow()
 end
 
 -----------------------------------------------------------------------
 -- Toggle arrow visibility
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ToggleArrow()
 function XP:ToggleArrow()
     if not Waypoint.frame then return end
     if Waypoint.frame:IsShown() then
@@ -981,11 +1077,13 @@ function XP:ToggleArrow()
             Waypoint.frame:Show()
         end
     end
+-- DEBUG: EXIT XP:ToggleArrow()
 end
 
 -----------------------------------------------------------------------
 -- Update arrow settings
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateArrowSettings()
 function XP:UpdateArrowSettings()
     if not Waypoint.frame then return end
     local frame = Waypoint.frame
@@ -1053,6 +1151,7 @@ function XP:UpdateArrowSettings()
     elseif #Waypoint.waypoints > 0 then
         frame:Show()
     end
+-- DEBUG: EXIT XP:UpdateArrowSettings()
 end
 
 ----------------------------------------------------------------------
@@ -1060,13 +1159,17 @@ end
 -----------------------------------------------------------------------
 -- Get current waypoint count
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:GetWaypointCount()
 function XP:GetWaypointCount()
     return #Waypoint.waypoints
+-- DEBUG: EXIT XP:GetWaypointCount()
 end
 
 -----------------------------------------------------------------------
 -- Get current waypoint index
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:GetCurrentWaypointIndex()
 function XP:GetCurrentWaypointIndex()
     return Waypoint.currentIndex
+-- DEBUG: EXIT XP:GetCurrentWaypointIndex()
 end

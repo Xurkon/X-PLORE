@@ -31,8 +31,11 @@ StaticPopupDialogs["XPLORE_DEFAULT"] = {
     text = "%s",
     button1 = OKAY,
     button2 = nil,
+    -- DEBUG: ENTER OnAccept()
     OnAccept = function()
     end,
+    -- DEBUG: ENTER OnShow()
+    -- DEBUG: PARAM self = [self]
     OnShow = function(self)
         -- no-op
     end,
@@ -47,6 +50,9 @@ StaticPopupDialogs["XPLORE_CONFIRM_REDIRECT"] = {
     text = "Open this URL in your browser?\n%s",
     button1 = YES or "Open",
     button2 = CANCEL,
+    -- DEBUG: ENTER OnAccept()
+    -- DEBUG: PARAM self = [self]
+    -- DEBUG: PARAM url = [url]
     OnAccept = function(self, url)
         -- Handled in Init.lua: XP:OpenURL via StaticPopup_Hook
         -- Just store the URL for the hook to pick up
@@ -56,6 +62,8 @@ StaticPopupDialogs["XPLORE_CONFIRM_REDIRECT"] = {
             XP.OnRedirectConfirmed(url)
         end
     end,
+    -- DEBUG: ENTER OnShow()
+    -- DEBUG: PARAM self = [self]
     OnShow = function(self)
         -- Reset state
     end,
@@ -81,11 +89,16 @@ StaticPopupDialogs["XPLORE_NEXTGUIDE"] = {
     text = "%s",
     button1 = YES or "Yes",
     button2 = NO or "No",
+    -- DEBUG: ENTER OnAccept()
+    -- DEBUG: PARAM self = [self]
     OnAccept = function(self)
         if XP and XP.LoadNextGuide then
             XP:LoadNextGuide()
         end
     end,
+    -- DEBUG: ENTER OnCancel()
+    -- DEBUG: PARAM self = [self]
+    -- DEBUG: PARAM reason = [reason]
     OnCancel = function(self, reason)
         -- user declined
     end,
@@ -100,11 +113,16 @@ StaticPopupDialogs["XPLORE_CHOICE"] = {
     text = "%s",
     button1 = YES or "Yes",
     button2 = NO or "No",
+    -- DEBUG: ENTER OnAccept()
+    -- DEBUG: PARAM self = [self]
     OnAccept = function(self)
         if self.acceptCallback then
             self:acceptCallback()
         end
     end,
+    -- DEBUG: ENTER OnCancel()
+    -- DEBUG: PARAM self = [self]
+    -- DEBUG: PARAM reason = [reason]
     OnCancel = function(self, reason)
         if self.cancelCallback then
             self:cancelCallback()
@@ -135,6 +153,11 @@ StaticPopupDialogs["XPLORE_INFO"] = {
 --   XP:StaticPopup_Show("XPLORE_CONFIRM_REDIRECT", url)
 --   XP:StaticPopup_Show("XPLORE_CHOICE", "Delete this?", callback, cancelCallback)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:StaticPopup_Show()
+-- DEBUG: PARAM name = [name]
+-- DEBUG: PARAM textOrData = [textOrData]
+-- DEBUG: PARAM dataOrCallback = [dataOrCallback]
+-- DEBUG: PARAM callback2 = [callback2]
 function XP:StaticPopup_Show(name, textOrData, dataOrCallback, callback2)
     local text, data, acceptCb, cancelCb
 
@@ -178,36 +201,60 @@ function XP:StaticPopup_Show(name, textOrData, dataOrCallback, callback2)
     end
 
     return popup
+-- DEBUG: EXIT XP:StaticPopup_Show()
 end
 
 -----------------------------------------------------------------------
 -- XP:StaticPopup_ShowChoice(text, acceptCallback, cancelCallback)
 -- Convenience: yes/no choice popup.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:StaticPopup_ShowChoice()
+-- DEBUG: PARAM text = [text]
+-- DEBUG: PARAM acceptCallback = [acceptCallback]
+-- DEBUG: PARAM cancelCallback = [cancelCallback]
 function XP:StaticPopup_ShowChoice(text, acceptCallback, cancelCallback)
     return self:StaticPopup_Show("XPLORE_CHOICE", text, acceptCallback, cancelCallback)
+-- DEBUG: EXIT XP:StaticPopup_ShowChoice()
 end
 
 -----------------------------------------------------------------------
 -- XP:StaticPopup_ShowRedirect(url)
 -- Show the URL redirect confirmation.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:StaticPopup_ShowRedirect()
+-- DEBUG: PARAM url = [url]
 function XP:StaticPopup_ShowRedirect(url)
     return self:StaticPopup_Show("XPLORE_CONFIRM_REDIRECT", url)
+-- DEBUG: EXIT XP:StaticPopup_ShowRedirect()
 end
 
 -----------------------------------------------------------------------
 -- XP:StaticPopup_ShowInfo(text)
 -- Show a simple OK info popup.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:StaticPopup_ShowInfo()
+-- DEBUG: PARAM text = [text]
 function XP:StaticPopup_ShowInfo(text)
     return self:StaticPopup_Show("XPLORE_INFO", text)
+-- DEBUG: EXIT XP:StaticPopup_ShowInfo()
 end
 
 -----------------------------------------------------------------------
 -- XP:StaticPopup_ShowError(text)
 -- Show a generic error/alert popup.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:StaticPopup_ShowError()
+-- DEBUG: PARAM text = [text]
 function XP:StaticPopup_ShowError(text)
     return self:StaticPopup_Show("XPLORE_DEFAULT", text)
+-- DEBUG: EXIT XP:StaticPopup_ShowError()
 end
+
+-- DEBUG: EXIT OnCancel() [EOF]
+-- DEBUG: EXIT OnAccept() [EOF]
+-- DEBUG: EXIT OnCancel() [EOF]
+-- DEBUG: EXIT OnAccept() [EOF]
+-- DEBUG: EXIT OnShow() [EOF]
+-- DEBUG: EXIT OnAccept() [EOF]
+-- DEBUG: EXIT OnShow() [EOF]
+-- DEBUG: EXIT OnAccept() [EOF]

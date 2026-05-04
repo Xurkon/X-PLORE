@@ -24,42 +24,59 @@ local ICON_PATH     = XP.TEXTURE_PATH .. "minimap_button.tga"
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Returns the minimap frame reference (handles both WotLK and Retail naming).
+-- DEBUG: ENTER GetMinimapFrame()
 local function GetMinimapFrame()
     return Minimap or MinimapCluster
+-- DEBUG: EXIT GetMinimapFrame()
 end
 
 -- Converts an angle (degrees, 0=top, clockwise) to an x,y offset
 -- at BUTTON_RADIUS from the minimap's centre.
+-- DEBUG: ENTER AngleToPos()
+-- DEBUG: PARAM angle = [angle]
 local function AngleToPos(angle)
     local rad = math.rad(angle)
     local x = BUTTON_RADIUS * math.cos(rad - math.pi / 2)
     local y = BUTTON_RADIUS * math.sin(rad - math.pi / 2)
     return x, y
+-- DEBUG: EXIT AngleToPos()
 end
 
 -- Converts a cursor position relative to the minimap centre back to an angle.
+-- DEBUG: ENTER PosToAngle()
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
 local function PosToAngle(x, y)
     local rad = math.atan2(y, x) + math.pi / 2
     return math.deg(rad) % 360
+-- DEBUG: EXIT PosToAngle()
 end
 
 -- Clamp an angle into [0, 360).
+-- DEBUG: ENTER NormalizeAngle()
+-- DEBUG: PARAM a = [a]
 local function NormalizeAngle(a)
     return a % 360
+-- DEBUG: EXIT NormalizeAngle()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Button placement
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER MM:PlaceButton()
+-- DEBUG: PARAM angle = [angle]
 function MM:PlaceButton(angle)
     if not self.button then return end
     local x, y = AngleToPos(angle)
     self.button:ClearAllPoints()
     self.button:SetPoint("CENTER", GetMinimapFrame(), "CENTER", x, y)
+-- DEBUG: EXIT MM:PlaceButton()
 end
 
 -- Persist the angle and reposition the button.
+-- DEBUG: ENTER MM:SetAngle()
+-- DEBUG: PARAM angle = [angle]
 function MM:SetAngle(angle)
     angle = NormalizeAngle(angle)
     if XP.db and XP.db.profile then
@@ -67,12 +84,15 @@ function MM:SetAngle(angle)
     end
     MM._angle = angle
     self:PlaceButton(angle)
+-- DEBUG: EXIT MM:SetAngle()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Context menu
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER ShowContextMenu()
+-- DEBUG: PARAM btn = [btn]
 local function ShowContextMenu(btn)
     -- Build a minimal dropdown-style context menu using UIDropDownMenu if available
     -- (works on WotLK). On Retail the same API still exists for now.
@@ -99,37 +119,44 @@ local function ShowContextMenu(btn)
         info = UIDropDownMenu_CreateInfo()
         info.text     = "Open Guide Menu"
         info.notCheckable = true
+        -- DEBUG: ENTER func()
         info.func     = function() XP:ToggleMenu() end
         UIDropDownMenu_AddButton(info)
 
         info = UIDropDownMenu_CreateInfo()
         info.text     = "Toggle Guide Viewer"
         info.notCheckable = true
+        -- DEBUG: ENTER func()
         info.func     = function() XP:ToggleViewer() end
         UIDropDownMenu_AddButton(info)
 
         info = UIDropDownMenu_CreateInfo()
         info.text     = "Options"
         info.notCheckable = true
+        -- DEBUG: ENTER func()
         info.func     = function()
             XP:ToggleMenu()
             -- Open the options tab in the menu (the menu must be open first)
             if XP.Menu and XP.Menu.ShowOptions then
                 XP.Menu:ShowOptions()
             end
+        -- DEBUG: EXIT func()
         end
         UIDropDownMenu_AddButton(info)
 
         info = UIDropDownMenu_CreateInfo()
         info.text     = "Reset Button Position"
         info.notCheckable = true
+        -- DEBUG: ENTER func()
         info.func     = function()
             MM:SetAngle(DEFAULT_ANGLE)
+        -- DEBUG: EXIT func()
         end
         UIDropDownMenu_AddButton(info)
     end, "MENU")
 
     ToggleDropDownMenu(1, nil, MM._dropDown, "cursor", 3, -3)
+-- DEBUG: EXIT ShowContextMenu()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -138,6 +165,8 @@ end
 
 local isDragging = false
 
+-- DEBUG: ENTER OnDragStart()
+-- DEBUG: PARAM btn = [btn]
 local function OnDragStart(btn)
     isDragging = true
     btn:SetScript("OnUpdate", function(self)
@@ -156,17 +185,22 @@ local function OnDragStart(btn)
         local angle = PosToAngle(cx - mx, cy - my)
         MM:SetAngle(angle)
     end)
+-- DEBUG: EXIT OnDragStart()
 end
 
+-- DEBUG: ENTER OnDragStop()
+-- DEBUG: PARAM btn = [btn]
 local function OnDragStop(btn)
     isDragging = false
     btn:SetScript("OnUpdate", nil)
+-- DEBUG: EXIT OnDragStop()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Button creation
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER MM:CreateButton()
 function MM:CreateButton()
     if self.button then return end
 
@@ -268,20 +302,26 @@ function MM:CreateButton()
     local angle = (XP.db and XP.db.profile and XP.db.profile.minimapAngle) or DEFAULT_ANGLE
     MM._angle = angle
     self:PlaceButton(angle)
+-- DEBUG: EXIT MM:CreateButton()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Show / Hide
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER MM:Show()
 function MM:Show()
     if self.button then self.button:Show() end
+-- DEBUG: EXIT MM:Show()
 end
 
+-- DEBUG: ENTER MM:Hide()
 function MM:Hide()
     if self.button then self.button:Hide() end
+-- DEBUG: EXIT MM:Hide()
 end
 
+-- DEBUG: ENTER MM:Toggle()
 function MM:Toggle()
     if self.button then
         if self.button:IsShown() then
@@ -290,12 +330,14 @@ function MM:Toggle()
             self:Show()
         end
     end
+-- DEBUG: EXIT MM:Toggle()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Init (called from Core.lua OnEnable)
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER MM:OnEnable()
 function MM:OnEnable()
     self:CreateButton()
 
@@ -310,4 +352,5 @@ function MM:OnEnable()
     else
         self:Hide()
     end
+-- DEBUG: EXIT MM:OnEnable()
 end

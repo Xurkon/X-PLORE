@@ -27,13 +27,18 @@ XP.ICON_PATH    = "Interface\\AddOns\\X-Plore\\Skins\\"
 XP.SOUND_PATH   = "Interface\\AddOns\\X-Plore\\sounds\\"
 
 -- Open a URL in the default browser (uses StaticPopup confirmation first)
+-- DEBUG: ENTER XP:OpenURL()
+-- DEBUG: PARAM url = [url]
 function XP:OpenURL(url)
     if url then
         XP:StaticPopup_ShowRedirect(url)
     end
+-- DEBUG: EXIT XP:OpenURL()
 end
 
 -- Callback fired when user confirms the URL redirect popup
+-- DEBUG: ENTER OnRedirectConfirmed()
+-- DEBUG: PARAM url = [url]
 XP.OnRedirectConfirmed = function(url)
     if url then
         local editbox = ChatEdit_ShowActiveWindow()
@@ -42,6 +47,7 @@ XP.OnRedirectConfirmed = function(url)
             editbox:HighlightText(0, #url)
         end
     end
+-- DEBUG: EXIT OnRedirectConfirmed()
 end
 
 -- Export to global and private table

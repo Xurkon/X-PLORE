@@ -29,6 +29,7 @@ Tabs.Dragging  = nil       -- Tab currently being dragged (or nil)
 -----------------------------------------------------------------------
 -- Initialize: called from XP:OnEnable()
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:InitTabs()
 function XP:InitTabs()
     -- Ensure ViewerFrame exists
     if not self.ViewerFrame then return end
@@ -103,11 +104,13 @@ function XP:InitTabs()
             Tabs:SaveTabState()
         end
     end)
+-- DEBUG: EXIT XP:InitTabs()
 end
 
 -----------------------------------------------------------------------
 -- Pool management
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:GetTabFromPool()
 function Tabs:GetTabFromPool()
     for _, tab in ipairs(Pool) do
         if not tab.guideID then
@@ -120,11 +123,13 @@ function Tabs:GetTabFromPool()
         return Pool[#Pool] -- reuse last
     end
     return Tabs:CreateTab()
+-- DEBUG: EXIT Tabs:GetTabFromPool()
 end
 
 -----------------------------------------------------------------------
 -- Create a single tab (Button + Icon + Close + text)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:CreateTab()
 function Tabs:CreateTab()
     local tabHeight = XP:Size("tab_height") - 2
     local index = #Pool + 1
@@ -208,11 +213,15 @@ function Tabs:CreateTab()
 
     Pool[index] = tab
     return tab
+-- DEBUG: EXIT Tabs:CreateTab()
 end
 
 -----------------------------------------------------------------------
 -- Assign a guide to this tab
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:AssignGuide()
+-- DEBUG: PARAM guideID = [guideID]
+-- DEBUG: PARAM step = [step]
 function Tabs:AssignGuide(guideID, step)
     local guide = XP.Guides[guideID]
     if not guide then
@@ -255,11 +264,13 @@ function Tabs:AssignGuide(guideID, step)
 
     Tabs:SaveTabState()
     Tabs:ReanchorTabs()
+-- DEBUG: EXIT Tabs:AssignGuide()
 end
 
 -----------------------------------------------------------------------
 -- Activate this tab: make it the current guide
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ActivateGuide()
 function Tabs:ActivateGuide()
     self:SetAsCurrent()
     if self.guideID then
@@ -271,11 +282,13 @@ function Tabs:ActivateGuide()
         end
         Tabs._loading = false
     end
+-- DEBUG: EXIT Tabs:ActivateGuide()
 end
 
 -----------------------------------------------------------------------
 -- Set as visually current tab (highlight + deactivate previous)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:SetAsCurrent()
 function Tabs:SetAsCurrent()
     -- Deactivate previous
     if Tabs.ActiveTab and Tabs.ActiveTab ~= self then
@@ -288,11 +301,13 @@ function Tabs:SetAsCurrent()
     self.isActive = true
     XP:ApplyBackdrop(self.Button, "panel", "bg_light", "cyan")
     self.Text:SetTextColor(XP:ColorRGBA("text_bright"))
+-- DEBUG: EXIT Tabs:SetAsCurrent()
 end
 
 -----------------------------------------------------------------------
 -- Handle a click on this tab
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:HandleClick()
 function Tabs:HandleClick()
     if self.isActive then
         -- If dropdown is already open, close it
@@ -307,11 +322,13 @@ function Tabs:HandleClick()
     else
         self:ActivateGuide()
     end
+-- DEBUG: EXIT Tabs:HandleClick()
 end
 
 --------------------------------------------------------------------
 -- Build and display the tab context menu (Zygor-style)
 --------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ShowTabMenu()
 function Tabs:ShowTabMenu()
     local menu = {}
     local active = {}
@@ -333,6 +350,7 @@ function Tabs:ShowTabMenu()
             if guide then
                 table.insert(menu, {
                     text = guide.titleShort or guide.title or v.title,
+                    -- DEBUG: ENTER func()
                     func = function()
                         self:AssignGuide(v.title)
                         self:ActivateGuide()
@@ -374,6 +392,7 @@ function Tabs:ShowTabMenu()
             if guide then
                 table.insert(menu, {
                     text = guide.titleShort or guide.title or guide.id,
+                    -- DEBUG: ENTER func()
                     func = function()
                         self:AssignGuide(guide.id)
                         self:ActivateGuide()
@@ -389,6 +408,7 @@ function Tabs:ShowTabMenu()
     -- New guide option
     table.insert(menu, {
         text = "Open New Guide",
+        -- DEBUG: ENTER func()
         func = function()
             XP:ToggleMenu()
         end,
@@ -398,11 +418,13 @@ function Tabs:ShowTabMenu()
     -- Position and show the dropdown
     UIDropDownFork_SetAnchor(Tabs.TabMenuFrame, 0, 0, "TOPLEFT", self.Button, "BOTTOMLEFT")
     EasyFork(menu, Tabs.TabMenuFrame, nil, 0, 0, "MENU", 10)
+-- DEBUG: EXIT Tabs:ShowTabMenu()
 end
 
 --------------------------------------------------------------------
 -- Show a basic right-click context menu
 --------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ShowContextMenu()
 function Tabs:ShowContextMenu()
     -- Right-click on inactive tab removes it
     if not self.isActive then
@@ -411,11 +433,13 @@ function Tabs:ShowContextMenu()
     end
     -- Right-click on active tab shows the tab menu
     self:ShowTabMenu()
+-- DEBUG: EXIT Tabs:ShowContextMenu()
 end
 
 -----------------------------------------------------------------------
 -- Hover interaction: show close button, lighten border
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ShowInteraction()
 function Tabs:ShowInteraction()
     if self.CloseBtn then
         self.CloseBtn:Show()
@@ -436,8 +460,10 @@ function Tabs:ShowInteraction()
         end
         GameTooltip:Show()
     end
+-- DEBUG: EXIT Tabs:ShowInteraction()
 end
 
+-- DEBUG: ENTER Tabs:HideInteraction()
 function Tabs:HideInteraction()
     if self.CloseBtn then
         self.CloseBtn:Hide()
@@ -450,11 +476,13 @@ function Tabs:HideInteraction()
         end
     end
     GameTooltip:Hide()
+-- DEBUG: EXIT Tabs:HideInteraction()
 end
 
 -----------------------------------------------------------------------
 -- Remove (close) this tab
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:RemoveTab()
 function Tabs:RemoveTab()
     self.Button:Hide()
 
@@ -510,17 +538,21 @@ function Tabs:RemoveTab()
 
     Tabs:SaveTabState()
     Tabs:ReanchorTabs()
+-- DEBUG: EXIT Tabs:RemoveTab()
 end
 
 -----------------------------------------------------------------------
 -- Drag support (reorder tabs)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:OnDragStart()
 function Tabs:OnDragStart()
     Tabs.Dragging = self
     self.Button:SetAlpha(0.5)
     self:HideInteraction()
+-- DEBUG: EXIT Tabs:OnDragStart()
 end
 
+-- DEBUG: ENTER Tabs:OnDragStop()
 function Tabs:OnDragStop()
     if not Tabs.Dragging then return end
 
@@ -551,11 +583,13 @@ function Tabs:OnDragStop()
 
     Tabs:SaveTabState()
     Tabs:ReanchorTabs()
+-- DEBUG: EXIT Tabs:OnDragStop()
 end
 
 -----------------------------------------------------------------------
 -- Layout: reposition and resize all visible tabs
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ReanchorTabs()
 function Tabs:ReanchorTabs()
     if not Tabs.container then return end
 
@@ -622,11 +656,14 @@ function Tabs:ReanchorTabs()
             end
         end
     end
+-- DEBUG: EXIT Tabs:ReanchorTabs()
 end
 
 -----------------------------------------------------------------------
 -- Update current tab when guide changes externally
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:UpdateCurrentTab()
+-- DEBUG: PARAM guide = [guide]
 function Tabs:UpdateCurrentTab(guide)
     if Tabs._loading then return end -- Prevent re-entrant loop
     if not guide then return end
@@ -649,11 +686,15 @@ function Tabs:UpdateCurrentTab(guide)
     local tab = Tabs:GetTabFromPool()
     tab:AssignGuide(guide.id, XP.CurrentStep or 1)
     tab:SetAsCurrent()
+-- DEBUG: EXIT Tabs:UpdateCurrentTab()
 end
 
 -----------------------------------------------------------------------
 -- Load a guide into a tab (public API called by GuideMenu)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:LoadGuideToTab()
+-- DEBUG: PARAM guideID = [guideID]
+-- DEBUG: PARAM step = [step]
 function Tabs:LoadGuideToTab(guideID, step)
     -- Check if already open
     for _, tab in ipairs(Pool) do
@@ -668,11 +709,14 @@ function Tabs:LoadGuideToTab(guideID, step)
     local tab = Tabs:GetTabFromPool()
     tab:AssignGuide(guideID, step or 1)
     tab:ActivateGuide()
+-- DEBUG: EXIT Tabs:LoadGuideToTab()
 end
 
 -----------------------------------------------------------------------
 -- Check if a guide is already in a tab
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:IsGuideTabbed()
+-- DEBUG: PARAM guideID = [guideID]
 function Tabs:IsGuideTabbed(guideID)
     for _, tab in ipairs(Pool) do
         if tab.guideID == guideID then
@@ -680,11 +724,13 @@ function Tabs:IsGuideTabbed(guideID)
         end
     end
     return false
+-- DEBUG: EXIT Tabs:IsGuideTabbed()
 end
 
 -----------------------------------------------------------------------
 -- Persist tab state to AceDB
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:SaveTabState()
 function Tabs:SaveTabState()
     if not XP.db then return end
     local saved = {}
@@ -697,15 +743,18 @@ function Tabs:SaveTabState()
         end
     end
     XP.db.char.tabGuides = saved
+-- DEBUG: EXIT Tabs:SaveTabState()
 end
 
 -----------------------------------------------------------------------
 -- Check inactive tabs for step completion (called periodically)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:CheckForStepCompletion()
 function Tabs:CheckForStepCompletion()
     for _, tab in ipairs(Pool) do
         if tab.guideID and not tab.isActive then
             -- TODO: check if the step has been completed and notify the user
         end
     end
+-- DEBUG: EXIT Tabs:CheckForStepCompletion()
 end

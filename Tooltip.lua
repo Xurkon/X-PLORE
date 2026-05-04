@@ -23,11 +23,16 @@ XP.Tooltip = TT
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Append a cyan prefix line plus plain body line to any tooltip.
+-- DEBUG: ENTER AppendHint()
+-- DEBUG: PARAM tooltip = [tooltip]
+-- DEBUG: PARAM prefix = [prefix]
+-- DEBUG: PARAM body = [body]
 local function AppendHint(tooltip, prefix, body)
     tooltip:AddLine("|cff00e5ff[X-Plore]|r " .. prefix, 1, 1, 1, true)
     if body and body ~= "" then
         tooltip:AddLine(body, 0.8, 0.9, 1.0, true)
     end
+-- DEBUG: EXIT AppendHint()
 end
 
 -- Build a simple lookup of { [name_lower] = { stepIndex, actionVerb, extraText } }
@@ -37,6 +42,7 @@ local stepNPCLookup   = {}   -- [lower(npcName)] = hint string
 local stepItemLookup  = {}   -- [lower(itemName)] = hint string
 local stepQuestLookup = {}   -- [lower(questName)] = hint string
 
+-- DEBUG: ENTER NormalizeStepGoals()
 local function NormalizeStepGoals()
     stepNPCLookup   = {}
     stepItemLookup  = {}
@@ -104,12 +110,15 @@ local function NormalizeStepGoals()
             end
         end
     end
+-- DEBUG: EXIT NormalizeStepGoals()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Unit tooltip hook
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER OnTooltipSetUnit()
+-- DEBUG: PARAM tooltip = [tooltip]
 local function OnTooltipSetUnit(tooltip)
     if not XP.CurrentGuide then return end
 
@@ -140,6 +149,7 @@ local function OnTooltipSetUnit(tooltip)
             tooltip:Show()
         end
     end
+-- DEBUG: EXIT OnTooltipSetUnit()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -148,6 +158,8 @@ end
 
 -- Extract the item name from a tooltip. GameTooltip:GetItem() returns (name, link)
 -- on Retail; on WotLK we fall back to reading the tooltip text line 1.
+-- DEBUG: ENTER GetTooltipItemName()
+-- DEBUG: PARAM tooltip = [tooltip]
 local function GetTooltipItemName(tooltip)
     if tooltip.GetItem then
         local name, link = tooltip:GetItem()
@@ -159,17 +171,23 @@ local function GetTooltipItemName(tooltip)
         return region:GetText(), nil
     end
     return nil, nil
+-- DEBUG: EXIT GetTooltipItemName()
 end
 
 -- Extract the item ID from an item link (e.g. "|cffffff00|Hitem:12345:0:0:...|h[Item]|h|r")
+-- DEBUG: ENTER GetItemIDFromLink()
+-- DEBUG: PARAM link = [link]
 local function GetItemIDFromLink(link)
     if link then
         local id = link:match("item:(%d+)")
         return id
     end
     return nil
+-- DEBUG: EXIT GetItemIDFromLink()
 end
 
+-- DEBUG: ENTER OnTooltipSetItem()
+-- DEBUG: PARAM tooltip = [tooltip]
 local function OnTooltipSetItem(tooltip)
     if not XP.CurrentGuide then return end
 
@@ -196,6 +214,7 @@ local function OnTooltipSetItem(tooltip)
             tooltip:Show()
         end
     end
+-- DEBUG: EXIT OnTooltipSetItem()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -204,6 +223,7 @@ end
 
 -- On WotLK, quest log items don't have a standard tooltip hook.
 -- We hook the QuestLogTitle buttons via OnEnter instead.
+-- DEBUG: ENTER HookQuestLogTitles()
 local function HookQuestLogTitles()
     -- Only try on WotLK where QuestLogTitle buttons exist
     if not _G.QuestLogTitle1 then return end
@@ -225,20 +245,24 @@ local function HookQuestLogTitles()
             end)
         end
     end
+-- DEBUG: EXIT HookQuestLogTitles()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Message listener: rebuild lookup tables when step changes
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER OnStepChanged()
 local function OnStepChanged()
     NormalizeStepGoals()
+-- DEBUG: EXIT OnStepChanged()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Init
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER TT:OnEnable()
 function TT:OnEnable()
     -- Hook unit tooltip
     if GameTooltip.HookScript then
@@ -265,6 +289,7 @@ function TT:OnEnable()
     if not XP.isRetail then
         -- QuestLogTitle buttons may not exist yet; hook after QUEST_LOG_UPDATE
         local frame = CreateFrame("Frame")
+  -- DEBUG: EVENT RegisterEvent("QUEST_LOG_UPDATE")
         frame:RegisterEvent("QUEST_LOG_UPDATE")
         frame:SetScript("OnEvent", function()
             HookQuestLogTitles()
@@ -284,11 +309,15 @@ function TT:OnEnable()
         -- Fallback: monkey-patch GoToStep to call us after navigation
         local origGoToStep = XP.GoToStep
         if origGoToStep then
+            -- DEBUG: ENTER GoToStep()
+            -- DEBUG: PARAM self = [self]
             XP.GoToStep = function(self, ...)
                 local result = origGoToStep(self, ...)
                 OnStepChanged()
                 return result
+            -- DEBUG: EXIT GoToStep()
             end
         end
     end
+-- DEBUG: EXIT TT:OnEnable()
 end

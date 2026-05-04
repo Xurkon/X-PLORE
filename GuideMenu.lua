@@ -26,6 +26,8 @@ local categoryButtons = {}         -- sidebar category buttons
 local MAX_GUIDE_ROWS  = 20
 
 -- Resolve icon name to full texture path (local or WoW built-in).
+-- DEBUG: ENTER ResolveIconPath()
+-- DEBUG: PARAM iconName = [iconName]
 local function ResolveIconPath(iconName)
     if not iconName then return nil end
     if iconName:match("Interface") then
@@ -36,10 +38,13 @@ local function ResolveIconPath(iconName)
         p = p .. ".tga"
     end
     return p
+-- DEBUG: EXIT ResolveIconPath()
 end
 
 -- Resolve a category's icon to sprite sheet path + texcoords.
 -- Returns: path, left, right, top, bottom
+-- DEBUG: ENTER GetCategoryIconPath()
+-- DEBUG: PARAM cat = [cat]
 local function GetCategoryIconPath(cat)
     if not cat then return nil end
     if cat.iconFull then
@@ -56,11 +61,13 @@ local function GetCategoryIconPath(cat)
         return path, l, r, t, b
     end
     return ResolveIconPath(cat.icon), 0, 1, 0, 1
+-- DEBUG: EXIT GetCategoryIconPath()
 end
 
 -----------------------------------------------------------------------
 -- Create the Guide Menu Frame
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateGuideMenu()
 function XP:CreateGuideMenu()
     if self.MenuFrame then return end
 
@@ -525,6 +532,8 @@ function XP:CreateGuideMenu()
     ---------------------------------------------------------------
     -- Skin application function
     ---------------------------------------------------------------
+    -- DEBUG: ENTER ApplySkinFunc()
+    -- DEBUG: PARAM f = [f]
     local function ApplySkinFunc(f)
         if not f then return end
 
@@ -649,6 +658,7 @@ function XP:CreateGuideMenu()
         if f.GuideCount then
             XP:ApplyFont(f.GuideCount, "small", "text_dim")
         end
+    -- DEBUG: EXIT ApplySkinFunc()
     end
 
     XP.ApplySkin = ApplySkinFunc
@@ -670,11 +680,14 @@ function XP:CreateGuideMenu()
         -- Re-navigate to refresh current view
         XP:MenuNavigate(currentView or "home")
     end)
+-- DEBUG: EXIT XP:CreateGuideMenu()
 end
 
 -----------------------------------------------------------------------
 -- Category Buttons (sidebar)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateCategoryButtons()
+-- DEBUG: PARAM sidebar = [sidebar]
 function XP:CreateCategoryButtons(sidebar)
     local categories = self:GetCategories()
     local yOffset = -55  -- below search box
@@ -793,11 +806,14 @@ function XP:CreateCategoryButtons(sidebar)
     end)
     XP.MenuFrame.OptionsBtn = optBtn
     XP.MenuFrame.OptionsBtnLabel = optText
+-- DEBUG: EXIT XP:CreateCategoryButtons()
 end
 
 -----------------------------------------------------------------------
 -- Guide Rows (reusable list items in center column)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateGuideRows()
+-- DEBUG: PARAM parent = [parent]
 function XP:CreateGuideRows(parent)
     for i = 1, MAX_GUIDE_ROWS do
         local row = XP.CreateBackdropFrame("Button", nil, parent)
@@ -906,11 +922,14 @@ function XP:CreateGuideRows(parent)
 
         guideRows[i] = row
     end
+-- DEBUG: EXIT XP:CreateGuideRows()
 end
 
 -----------------------------------------------------------------------
 -- Home View (welcome/overview when no category selected)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateHomeView()
+-- DEBUG: PARAM parent = [parent]
 function XP:CreateHomeView(parent)
     -- Title
     local homeTitle = parent:CreateFontString(nil, "OVERLAY")
@@ -988,11 +1007,14 @@ function XP:CreateHomeView(parent)
             end
         end
     end
+-- DEBUG: EXIT XP:CreateHomeView()
 end
 
 --------------------------------------------------------------------
 -- Featured View (shows curated guide showcases)
 --------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateFeaturedView()
+-- DEBUG: PARAM parent = [parent]
 function XP:CreateFeaturedView(parent)
     -- Title
     local title = parent:CreateFontString(nil, "OVERLAY")
@@ -1017,6 +1039,8 @@ function XP:CreateFeaturedView(parent)
             { value = "professions", text = "Profession Guides" },
         },
         selected = "leveling",
+        -- DEBUG: ENTER onChange()
+        -- DEBUG: PARAM value = [value]
         onChange = function(value)
             -- Refresh featured content when dropdown changes
             XP:PopulateFeaturedView(parent, value)
@@ -1041,8 +1065,12 @@ function XP:CreateFeaturedView(parent)
 
     -- Populate with initial featured content
     self:PopulateFeaturedView(parent, "leveling")
+-- DEBUG: EXIT XP:CreateFeaturedView()
 end
 
+-- DEBUG: ENTER XP:PopulateFeaturedView()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM dataset = [dataset]
 function XP:PopulateFeaturedView(parent, dataset)
     local scrollChild = parent.FeaturedScrollChild
     if not scrollChild then return end
@@ -1155,6 +1183,7 @@ function XP:PopulateFeaturedView(parent, dataset)
 
     -- Update scroll child height
     scrollChild:SetHeight(math.max(yOffset, 1))
+-- DEBUG: EXIT XP:PopulateFeaturedView()
 end
 
 -----------------------------------------------------------------------
@@ -1178,6 +1207,8 @@ local OPTIONS_TABS = {
     { id = "about",        name = "About" },
 }
 
+-- DEBUG: ENTER XP:CreateInlineOptions()
+-- DEBUG: PARAM parent = [parent]
 function XP:CreateInlineOptions(parent)
     -- Zygor-style layout: left sidebar of icon tabs, content area to the right.
     -- Sidebar fills the left portion of parent; content area fills the rest.
@@ -1273,6 +1304,7 @@ function XP:CreateInlineOptions(parent)
     parent.ContentScrollBar = contentScrollBar
 
     -- No-op stub so existing callers (controls, skin preview) don't break
+    -- DEBUG: ENTER MarkPendingChange()
     XP.MarkPendingChange = function() end
 
     -- ===== SIDEBAR ICON BUTTONS =====
@@ -1370,6 +1402,7 @@ function XP:CreateInlineOptions(parent)
 
         tabButtons[tabInfo.id] = btn
         previous_button = btn
+    -- DEBUG: EXIT MarkPendingChange()
     end
 
     -- Initial highlight
@@ -1381,9 +1414,13 @@ function XP:CreateInlineOptions(parent)
 
     -- Store for external access
     parent.TabButtons = tabButtons
+-- DEBUG: EXIT XP:CreateInlineOptions()
 end
 
 -- Highlight the active option button, dim the rest
+-- DEBUG: ENTER XP:HighlightOptionButtons()
+-- DEBUG: PARAM tabButtons = [tabButtons]
+-- DEBUG: PARAM activeTabId = [activeTabId]
 function XP:HighlightOptionButtons(tabButtons, activeTabId)
     for id, btn in pairs(tabButtons) do
         local isActive = (id == activeTabId)
@@ -1399,9 +1436,14 @@ function XP:HighlightOptionButtons(tabButtons, activeTabId)
             btn.Label:SetTextColor(XP:ColorRGBA("text_normal"))
         end
     end
+-- DEBUG: EXIT XP:HighlightOptionButtons()
 end
 
 -- Helper to add a section heading
+-- DEBUG: ENTER AddHeading()
+-- DEBUG: PARAM contentFrame = [contentFrame]
+-- DEBUG: PARAM yOffset = [yOffset]
+-- DEBUG: PARAM text = [text]
 local function AddHeading(contentFrame, yOffset, text)
     local h = contentFrame:CreateFontString(nil, "OVERLAY")
     h:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 16, yOffset)
@@ -1409,9 +1451,13 @@ local function AddHeading(contentFrame, yOffset, text)
     h:SetText(text)
     yOffset = yOffset - 24
     return yOffset
+-- DEBUG: EXIT AddHeading()
 end
 
 -- Helper to add a horizontal separator line within a tab content frame
+-- DEBUG: ENTER AddSeparator()
+-- DEBUG: PARAM contentFrame = [contentFrame]
+-- DEBUG: PARAM yOffset = [yOffset]
 local function AddSeparator(contentFrame, yOffset)
     local sep = CreateFrame("Frame", nil, contentFrame)
     sep:SetHeight(8)
@@ -1426,13 +1472,25 @@ local function AddSeparator(contentFrame, yOffset)
     XP.SetTexColor(line, 0.3, 0.3, 0.3, 0.5)
 
     return yOffset
+-- DEBUG: EXIT AddSeparator()
 end
 
 -- Helper to add vertical spacing within a tab content frame
+-- DEBUG: ENTER AddSpace()
+-- DEBUG: PARAM contentFrame = [contentFrame]
+-- DEBUG: PARAM yOffset = [yOffset]
+-- DEBUG: PARAM amount = [amount]
 local function AddSpace(contentFrame, yOffset, amount)
     return yOffset - (amount or 8)
+-- DEBUG: EXIT AddSpace()
 end
 -- Helper to add a checkbox option within a tab content frame
+-- DEBUG: ENTER AddCheckbox()
+-- DEBUG: PARAM contentFrame = [contentFrame]
+-- DEBUG: PARAM yOffset = [yOffset]
+-- DEBUG: PARAM labelText = [labelText]
+-- DEBUG: PARAM dbKey = [dbKey]
+-- DEBUG: PARAM subKey = [subKey]
 local function AddCheckbox(contentFrame, yOffset, labelText, dbKey, subKey)
     local row = CreateFrame("Frame", nil, contentFrame)
     row:SetHeight(26)
@@ -1449,12 +1507,16 @@ local function AddCheckbox(contentFrame, yOffset, labelText, dbKey, subKey)
     XP:ApplyFont(lbl, "normal", "text_normal")
     lbl:SetText(labelText)
 
+    -- DEBUG: ENTER GetVal()
     local function GetVal()
         if subKey then
             return XP.db.profile[dbKey] and XP.db.profile[dbKey][subKey]
         end
         return XP.db.profile[dbKey]
+    -- DEBUG: EXIT GetVal()
     end
+    -- DEBUG: ENTER SetVal()
+    -- DEBUG: PARAM v = [v]
     local function SetVal(v)
         if subKey then
             if XP.db.profile[dbKey] == nil then XP.db.profile[dbKey] = {} end
@@ -1462,6 +1524,7 @@ local function AddCheckbox(contentFrame, yOffset, labelText, dbKey, subKey)
         else
             XP.db.profile[dbKey] = v
         end
+    -- DEBUG: EXIT SetVal()
     end
 
     cb:SetChecked(GetVal() and true or false)
@@ -1471,9 +1534,20 @@ local function AddCheckbox(contentFrame, yOffset, labelText, dbKey, subKey)
     end)
 
     return yOffset
+-- DEBUG: EXIT AddCheckbox()
 end
 
 -- Helper to add a slider option within a tab content frame
+-- DEBUG: ENTER AddSlider()
+-- DEBUG: PARAM contentFrame = [contentFrame]
+-- DEBUG: PARAM yOffset = [yOffset]
+-- DEBUG: PARAM labelText = [labelText]
+-- DEBUG: PARAM dbKey = [dbKey]
+-- DEBUG: PARAM subKey = [subKey]
+-- DEBUG: PARAM minVal = [minVal]
+-- DEBUG: PARAM maxVal = [maxVal]
+-- DEBUG: PARAM step = [step]
+-- DEBUG: PARAM fmt = [fmt]
 local function AddSlider(contentFrame, yOffset, labelText, dbKey, subKey, minVal, maxVal, step, fmt)
     local row = CreateFrame("Frame", nil, contentFrame)
     row:SetHeight(40)
@@ -1492,23 +1566,28 @@ local function AddSlider(contentFrame, yOffset, labelText, dbKey, subKey, minVal
     slider:SetMinMaxValues(minVal, maxVal)
     slider:SetValueStep(step or 0.05)
 
+    -- DEBUG: ENTER GetVal()
     local function GetVal()
         if subKey then
             return (XP.db.profile[dbKey] and XP.db.profile[dbKey][subKey]) or minVal
         end
         return XP.db.profile[dbKey] or minVal
+    -- DEBUG: EXIT GetVal()
     end
     slider:SetValue(GetVal())
 
     local valText = row:CreateFontString(nil, "OVERLAY")
     valText:SetPoint("LEFT", slider, "RIGHT", 8, 0)
     XP:ApplyFont(valText, "small", "cyan")
+    -- DEBUG: ENTER RefreshText()
+    -- DEBUG: PARAM v = [v]
     local function RefreshText(v)
         if fmt then
             valText:SetText(string.format(fmt, v))
         else
             valText:SetText(string.format("%.2f", v))
         end
+    -- DEBUG: EXIT RefreshText()
     end
     RefreshText(GetVal())
 
@@ -1526,9 +1605,13 @@ local function AddSlider(contentFrame, yOffset, labelText, dbKey, subKey, minVal
     if slider.High then slider.High:SetText("") end
 
     return yOffset
+-- DEBUG: EXIT AddSlider()
 end
 
 -- Populate options for a specific tab
+-- DEBUG: ENTER XP:RefreshOptionsTab()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM tabId = [tabId]
 function XP:RefreshOptionsTab(parent, tabId)
     local contentFrame = parent.ContentChild
     if not contentFrame then return end
@@ -1667,6 +1750,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             for i = 1, 5 do
                 UIDropDownMenu_AddButton({
                     text = tostring(i),
+                    -- DEBUG: ENTER func()
                     func = function()
                         XP.db.profile.showcountsteps = i
                         UIDropDownMenu_SetSelectedID(stepsDD, i)
@@ -1726,11 +1810,14 @@ function XP:RefreshOptionsTab(parent, tabId)
         yOffset = AddSpace(contentFrame, yOffset, 4)
         local previewScales = {0.5, 0.7, 1.0, 1.2}
         local previewScaleLabels = {[0.5] = "Small", [0.7] = "Normal", [1.0] = "Large", [1.2] = "Full"}
+        -- DEBUG: ENTER GetPreviewScaleIdx()
         local function GetPreviewScaleIdx()
             local scale = XP.db.profile.preview_scale or 1.0
             for k, v in ipairs(previewScales) do if v == scale then return k end end
             return 2
+        -- DEBUG: EXIT GetPreviewScaleIdx()
         end
+        -- DEBUG: ENTER AddPreviewScaleDropdown()
         local function AddPreviewScaleDropdown()
             local row = CreateFrame("Frame", nil, contentFrame)
             row:SetHeight(26)
@@ -1750,6 +1837,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 for i, scale in ipairs(previewScales) do
                     UIDropDownMenu_AddButton({
                         text = previewScaleLabels[scale] or tostring(scale),
+                        -- DEBUG: ENTER func()
                         func = function()
                             XP.db.profile.preview_scale = scale
                             UIDropDownMenu_SetSelectedID(dd, i)
@@ -1759,9 +1847,12 @@ function XP:RefreshOptionsTab(parent, tabId)
                 end
             end)
             return yOffset
+        -- DEBUG: EXIT AddPreviewScaleDropdown()
         end
+        -- DEBUG: ENTER IsPreviewOn()
         local function IsPreviewOn()
             return XP.db.profile.preview == true
+        -- DEBUG: EXIT IsPreviewOn()
         end
         yOffset = AddPreviewScaleDropdown()
 
@@ -1769,11 +1860,14 @@ function XP:RefreshOptionsTab(parent, tabId)
         yOffset = AddSpace(contentFrame, yOffset, 4)
         local previewAlphas = {0.5, 0.7, 0.9, 1.0}
         local previewAlphaLabels = {[0.5] = "Low", [0.7] = "Normal", [0.9] = "High", [1.0] = "Opaque"}
+        -- DEBUG: ENTER GetPreviewAlphaIdx()
         local function GetPreviewAlphaIdx()
             local alpha = XP.db.profile.preview_alpha or 0.7
             for k, v in ipairs(previewAlphas) do if v == alpha then return k end end
             return 2
+        -- DEBUG: EXIT GetPreviewAlphaIdx()
         end
+        -- DEBUG: ENTER AddPreviewAlphaDropdown()
         local function AddPreviewAlphaDropdown()
             local row = CreateFrame("Frame", nil, contentFrame)
             row:SetHeight(26)
@@ -1793,6 +1887,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 for i, alpha in ipairs(previewAlphas) do
                     UIDropDownMenu_AddButton({
                         text = previewAlphaLabels[alpha] or tostring(alpha),
+                        -- DEBUG: ENTER func()
                         func = function()
                             XP.db.profile.preview_alpha = alpha
                             UIDropDownMenu_SetSelectedID(dd, i)
@@ -1802,6 +1897,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 end
             end)
             return yOffset
+        -- DEBUG: EXIT AddPreviewAlphaDropdown()
         end
         yOffset = AddPreviewAlphaDropdown()
 
@@ -1809,6 +1905,7 @@ function XP:RefreshOptionsTab(parent, tabId)
 
         -- Preview duration dropdown
         local previewDurations = { [0] = "Permanent", [3] = "3 sec", [5] = "5 sec", [10] = "10 sec" }
+        -- DEBUG: ENTER AddPreviewDurationDropdown()
         local function AddPreviewDurationDropdown()
             local row = CreateFrame("Frame", nil, contentFrame)
             row:SetHeight(26)
@@ -1831,6 +1928,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 for i, duration in ipairs({0, 3, 5, 10}) do
                     UIDropDownMenu_AddButton({
                         text = previewDurations[duration] or tostring(duration),
+                        -- DEBUG: ENTER func()
                         func = function()
                             XP.db.profile.preview_duration = duration
                             UIDropDownMenu_SetSelectedID(dd, i)
@@ -1840,11 +1938,13 @@ function XP:RefreshOptionsTab(parent, tabId)
                 end
             end)
             return yOffset
+        -- DEBUG: EXIT AddPreviewDurationDropdown()
         end
         yOffset = AddPreviewDurationDropdown()
 
         -- Preview control mode dropdown
         local previewControls = { manual = "Manual", step = "Auto-Step" }
+        -- DEBUG: ENTER AddPreviewControlDropdown()
         local function AddPreviewControlDropdown()
             local row = CreateFrame("Frame", nil, contentFrame)
             row:SetHeight(26)
@@ -1868,6 +1968,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 for i, ctrl in ipairs(ctrlList) do
                     UIDropDownMenu_AddButton({
                         text = previewControls[ctrl] or ctrl,
+                        -- DEBUG: ENTER func()
                         func = function()
                             XP.db.profile.preview_control = ctrl
                             UIDropDownMenu_SetSelectedID(dd, i)
@@ -1877,6 +1978,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                 end
             end)
             return yOffset
+        -- DEBUG: EXIT AddPreviewControlDropdown()
         end
         yOffset = AddPreviewControlDropdown()
 
@@ -1903,8 +2005,10 @@ function XP:RefreshOptionsTab(parent, tabId)
         subLbl:SetPoint("LEFT", subCb, "RIGHT", 6, 0)
         XP:ApplyFont(subLbl, "small", "text_normal")
         subLbl:SetText("Accept All Quests & Turn-Ins")
+        -- DEBUG: ENTER IsAutoAcceptOn()
         local function IsAutoAcceptOn()
             return XP.db.profile.autoacceptturnin == true
+        -- DEBUG: EXIT IsAutoAcceptOn()
         end
         subCb:SetChecked(XP.db.profile.autoacceptturninall == true)
         subCb:SetScript("OnClick", function()
@@ -1935,8 +2039,10 @@ function XP:RefreshOptionsTab(parent, tabId)
         -- Travel Automation
         yOffset = AddHeading(contentFrame, yOffset, "Travel Automation")
         -- autotaxi is disabled when pathfinding is off
+        -- DEBUG: ENTER IsPathfindingOn()
         local function IsPathfindingOn()
             return XP.db.profile.pathfinding == true
+        -- DEBUG: EXIT IsPathfindingOn()
         end
         local taxiRow = CreateFrame("Frame", nil, contentFrame)
         taxiRow:SetHeight(26)
@@ -1976,11 +2082,14 @@ function XP:RefreshOptionsTab(parent, tabId)
         -- Inventory Automation
         yOffset = AddHeading(contentFrame, yOffset, "Inventory Automation")
         -- autobuy, showgreysellbutton, autosell all disabled when vendor_tools off
+        -- DEBUG: ENTER IsVendorToolsOn()
         local function IsVendorToolsOn()
             return XP.db.profile.enable_vendor_tools == true
+        -- DEBUG: EXIT IsVendorToolsOn()
         end
         yOffset = AddCheckbox(contentFrame, yOffset, "Auto-Buy Guide Items", "autobuy", nil)
         -- Show grey sell button uses a special setter that also updates the button
+        -- DEBUG: ENTER AddGreySellCheckbox()
         local function AddGreySellCheckbox()
             local row = CreateFrame("Frame", nil, contentFrame)
             row:SetHeight(26)
@@ -1994,6 +2103,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             lbl:SetPoint("LEFT", cb, "RIGHT", 6, 0)
             XP:ApplyFont(lbl, "small", "text_normal")
             lbl:SetText("Show Grey Sell Button")
+            -- DEBUG: ENTER RefreshGreySell()
             local function RefreshGreySell()
                 local enabled = IsVendorToolsOn()
                 cb:SetEnabled(enabled)
@@ -2003,6 +2113,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                     lbl:SetTextColor(XP:ColorRGBA("text_normal"))
                 end
                 cb:SetChecked(XP.db.profile.showgreysellbutton == true)
+            -- DEBUG: EXIT RefreshGreySell()
             end
             cb:SetChecked(XP.db.profile.showgreysellbutton == true)
             cb:SetScript("OnClick", function()
@@ -2011,6 +2122,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             cb:SetScript("OnShow", RefreshGreySell)
             RefreshGreySell()
             return yOffset
+        -- DEBUG: EXIT AddGreySellCheckbox()
         end
         yOffset = AddGreySellCheckbox()
         yOffset = AddCheckbox(contentFrame, yOffset, "Auto-Sell Grey Items", "autosell", nil)
@@ -2050,8 +2162,10 @@ function XP:RefreshOptionsTab(parent, tabId)
             table.insert(repairOptions, "Own Gold if Possible, Else Guild")
         end
 
+        -- DEBUG: ENTER GetRepairSelected()
         local function GetRepairSelected()
             return XP.db.profile.autorepair or 1
+        -- DEBUG: EXIT GetRepairSelected()
         end
 
         UIDropDownMenu_SetSelectedID(repairDD, GetRepairSelected())
@@ -2060,6 +2174,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             for i, text in ipairs(repairOptions) do
                 UIDropDownMenu_AddButton({
                     text = text,
+                    -- DEBUG: ENTER func()
                     func = function()
                         XP.db.profile.autorepair = i
                         UIDropDownMenu_SetSelectedID(repairDD, i)
@@ -2069,6 +2184,11 @@ function XP:RefreshOptionsTab(parent, tabId)
         end)
 
         -- Warning: Not in guild
+        -- DEBUG: ENTER AddWarningLabel()
+        -- DEBUG: PARAM contentFrame = [contentFrame]
+        -- DEBUG: PARAM yOffset = [yOffset]
+        -- DEBUG: PARAM text = [text]
+        -- DEBUG: PARAM colorKey = [colorKey]
         local function AddWarningLabel(contentFrame, yOffset, text, colorKey)
             local warnRow = CreateFrame("Frame", nil, contentFrame)
             warnRow:SetHeight(20)
@@ -2080,6 +2200,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             XP:ApplyFont(warnLbl, "small", colorKey or "red")
             warnLbl:SetText(text)
             return yOffset
+        -- DEBUG: EXIT AddWarningLabel()
         end
 
         -- Show warning if not in guild and guild repair selected
@@ -2146,10 +2267,16 @@ function XP:RefreshOptionsTab(parent, tabId)
         local upgradeVal = XP.db.profile.upgradebest and 2 or 1
         UIDropDownMenu_SetSelectedID(upgradeDD, upgradeVal)
         UIDropDownMenu_Initialize(upgradeDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "All Upgrades", func = function()
                 XP.db.profile.upgradebest = false
                 UIDropDownMenu_SetSelectedID(upgradeDD, 1)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Best in Slot", func = function()
                 XP.db.profile.upgradebest = true
                 UIDropDownMenu_SetSelectedID(upgradeDD, 2)
@@ -2182,17 +2309,23 @@ function XP:RefreshOptionsTab(parent, tabId)
         UIDropDownMenu_SetWidth(classDD, 140)
         local _, classTag = UnitClass("player")
         local playerClassId = select(3, UnitClass("player"))
+        -- DEBUG: ENTER GetSelectedClassId()
         local function GetSelectedClassId()
             return XP.db.char.gear_selected_class or playerClassId or 1
+        -- DEBUG: EXIT GetSelectedClassId()
         end
         UIDropDownMenu_SetSelectedID(classDD, GetSelectedClassId())
         UIDropDownMenu_Initialize(classDD, function()
             for i = 1, GetNumClasses() do
                 local name, tag, id = GetClassInfo(i)
+                -- DEBUG: ENTER func()
+                -- DEBUG: PARAM { text = [{ text]
+                -- DEBUG: PARAM func = [func]
                 UIDropDownMenu_AddButton({ text = name, func = function()
                     XP.db.char.gear_selected_class = id
                     UIDropDownMenu_SetSelectedID(classDD, i)
                 end })
+            -- DEBUG: EXIT func()
             end
         end)
 
@@ -2212,8 +2345,10 @@ function XP:RefreshOptionsTab(parent, tabId)
         specDD:SetWidth(160)
         specDD:SetPoint("RIGHT", specRow, "RIGHT", 0, 0)
         UIDropDownMenu_SetWidth(specDD, 140)
+        -- DEBUG: ENTER GetSelectedSpec()
         local function GetSelectedSpec()
             return XP.db.char.gear_selected_spec or 1
+        -- DEBUG: EXIT GetSelectedSpec()
         end
         UIDropDownMenu_SetSelectedID(specDD, GetSelectedSpec())
         UIDropDownMenu_Initialize(specDD, function()
@@ -2224,12 +2359,16 @@ function XP:RefreshOptionsTab(parent, tabId)
                 for specNum = 1, maxSpecs do
                     local specName = GetSpecializationName(specNum)
                     if specName then
+                        -- DEBUG: ENTER func()
+                        -- DEBUG: PARAM { text = [{ text]
+                        -- DEBUG: PARAM func = [func]
                         UIDropDownMenu_AddButton({ text = specName, func = function()
                             XP.db.char.gear_selected_spec = specNum
                             UIDropDownMenu_SetSelectedID(specDD, specNum)
                         end })
                     end
                 end
+            -- DEBUG: EXIT func()
             end
         end)
 
@@ -2258,6 +2397,9 @@ function XP:RefreshOptionsTab(parent, tabId)
         UIDropDownMenu_SetSelectedID(gemDD, gemSelected)
         UIDropDownMenu_Initialize(gemDD, function()
             for i, quality in ipairs({0, 2, 3, 4}) do
+                -- DEBUG: ENTER func()
+                -- DEBUG: PARAM { text = [{ text]
+                -- DEBUG: PARAM func = [func]
                 UIDropDownMenu_AddButton({ text = gemLabels[quality], func = function()
                     XP.db.profile.gear_maxGem = quality
                     UIDropDownMenu_SetSelectedID(gemDD, i)
@@ -2292,10 +2434,18 @@ function XP:RefreshOptionsTab(parent, tabId)
         local goldFmtVal = XP.db.profile.gold_format or 1
         UIDropDownMenu_SetSelectedID(goldFmtDD, goldFmtVal)
         UIDropDownMenu_Initialize(goldFmtDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM 234g 56s 78c" = [234g 56s 78c"]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "1,234g 56s 78c", func = function()
                 XP.db.profile.gold_format = 1
                 UIDropDownMenu_SetSelectedID(goldFmtDD, 1)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM 234.56g" = [234.56g"]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "1,234.56g", func = function()
                 XP.db.profile.gold_format = 2
                 UIDropDownMenu_SetSelectedID(goldFmtDD, 2)
@@ -2335,14 +2485,20 @@ function XP:RefreshOptionsTab(parent, tabId)
         for i, v in ipairs({2000, 5000, 10000}) do if v == scanVal then scanSelected = i break end end
         UIDropDownMenu_SetSelectedID(scanDD, scanSelected)
         UIDropDownMenu_Initialize(scanDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
             UIDropDownMenu_AddButton({ text = "Low (2000)", func = function()
                 XP.db.profile.ahscanintensity = 2000
                 UIDropDownMenu_SetSelectedID(scanDD, 1)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
             UIDropDownMenu_AddButton({ text = "Default (5000)", func = function()
                 XP.db.profile.ahscanintensity = 5000
                 UIDropDownMenu_SetSelectedID(scanDD, 2)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
             UIDropDownMenu_AddButton({ text = "High (10000)", func = function()
                 XP.db.profile.ahscanintensity = 10000
                 UIDropDownMenu_SetSelectedID(scanDD, 3)
@@ -2393,10 +2549,16 @@ function XP:RefreshOptionsTab(parent, tabId)
         local ncSizeVal = XP.db.profile.nc_size or 2
         UIDropDownMenu_SetSelectedID(ncSizeDD, ncSizeVal)
         UIDropDownMenu_Initialize(ncSizeDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Compact", func = function()
                 XP.db.profile.nc_size = 1
                 UIDropDownMenu_SetSelectedID(ncSizeDD, 1)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Detailed", func = function()
                 XP.db.profile.nc_size = 2
                 UIDropDownMenu_SetSelectedID(ncSizeDD, 2)
@@ -2426,10 +2588,14 @@ function XP:RefreshOptionsTab(parent, tabId)
         UIDropDownMenu_SetSelectedID(ncDurDD, durSelected)
         UIDropDownMenu_Initialize(ncDurDD, function()
             for i, dur in ipairs(durList) do
+                -- DEBUG: ENTER func()
+                -- DEBUG: PARAM { text = [{ text]
+                -- DEBUG: PARAM func = [func]
                 UIDropDownMenu_AddButton({ text = dur .. "s", func = function()
                     XP.db.profile.nc_duration = dur
                     UIDropDownMenu_SetSelectedID(ncDurDD, i)
                 end })
+            -- DEBUG: EXIT func()
             end
         end)
 
@@ -2454,14 +2620,23 @@ function XP:RefreshOptionsTab(parent, tabId)
         local ncPosVal = XP.db.profile.nc_position or 1
         UIDropDownMenu_SetSelectedID(ncPosDD, ncPosVal)
         UIDropDownMenu_Initialize(ncPosDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Left", func = function()
                 XP.db.profile.nc_position = 1
                 UIDropDownMenu_SetSelectedID(ncPosDD, 1)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Right", func = function()
                 XP.db.profile.nc_position = 2
                 UIDropDownMenu_SetSelectedID(ncPosDD, 2)
             end })
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Last Position", func = function()
                 XP.db.profile.nc_position = 3
                 UIDropDownMenu_SetSelectedID(ncPosDD, 3)
@@ -2545,10 +2720,16 @@ function XP:RefreshOptionsTab(parent, tabId)
         local dirVal = XP.db.profile.actionbar_direction or 2
         UIDropDownMenu_SetSelectedID(dirDD, dirVal)
         UIDropDownMenu_Initialize(dirDD, function()
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Left", func = function()
                 XP.db.profile.actionbar_direction = 1
                 UIDropDownMenu_SetSelectedID(dirDD, 1)
             end})
+            -- DEBUG: ENTER func()
+            -- DEBUG: PARAM { text = [{ text]
+            -- DEBUG: PARAM func = [func]
             UIDropDownMenu_AddButton({ text = "Right", func = function()
                 XP.db.profile.actionbar_direction = 2
                 UIDropDownMenu_SetSelectedID(dirDD, 2)
@@ -2559,10 +2740,12 @@ function XP:RefreshOptionsTab(parent, tabId)
 
         -- Scale
         local framescales = {0.625, 0.750, 0.875, 1.000, 1.125, 1.250, 1.375, 1.500, 1.625, 1.750}
+        -- DEBUG: ENTER GetActionbarScaleIdx()
         local function GetActionbarScaleIdx()
             local scale = XP.db.profile.actionbar_scale or 1.0
             for k, v in ipairs(framescales) do if v == scale then return k end end
             return 4
+        -- DEBUG: EXIT GetActionbarScaleIdx()
         end
         yOffset = AddSlider(contentFrame, yOffset, "Action Bar Scale", "actionbar_scale", nil, 1, 10, 1, "%.3f×")
         -- Override the slider's GetVal to use index-based lookup
@@ -2570,6 +2753,7 @@ function XP:RefreshOptionsTab(parent, tabId)
             for _, subchild in ipairs({ child:GetChildren() }) do
                 if subchild:IsObjectType("Slider") then
                     local slider = subchild
+                    -- DEBUG: ENTER RefreshActionbarScale()
                     local function RefreshActionbarScale()
                         local idx = GetActionbarScaleIdx()
                         slider:SetValue(idx)
@@ -2578,6 +2762,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                                 sc2:SetText(string.format("%.3f×", framescales[idx] or 1.0))
                             end
                         end
+                    -- DEBUG: EXIT RefreshActionbarScale()
                     end
                     slider:SetScript("OnValueChanged", function(self_sl, val)
                         local scale = framescales[val] or 1.0
@@ -2586,6 +2771,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                     end)
                     RefreshActionbarScale()
                 end
+            -- DEBUG: EXIT func()
             end
         end
 
@@ -2612,6 +2798,7 @@ function XP:RefreshOptionsTab(parent, tabId)
         -- re-runs the entire theme branch on every call, resetting local closures).
         local skinButtons = {}
 
+        -- DEBUG: ENTER RefreshSkinButtons()
         local function RefreshSkinButtons()
             local active = (XP.db and XP.db.profile.skin) or "default"
             for _, btn in ipairs(skinButtons) do
@@ -2627,6 +2814,7 @@ function XP:RefreshOptionsTab(parent, tabId)
                     btn.Text:SetTextColor(XP:ColorRGBA("text_muted"))
                 end
             end
+        -- DEBUG: EXIT RefreshSkinButtons()
         end
 
         for i, entry in ipairs(skinList) do
@@ -2819,6 +3007,7 @@ function XP:RefreshOptionsTab(parent, tabId)
 
     -- Update scrollbar thumb range to reflect actual scrollable content height
     parent.ContentScroll:SetVerticalScroll(0)
+    -- DEBUG: ENTER UpdateScrollRange()
     local function UpdateScrollRange()
         local viewH = parent.ContentScroll:GetHeight() or 1
         local contentH = parent.ContentChild:GetHeight() or 1
@@ -2826,10 +3015,12 @@ function XP:RefreshOptionsTab(parent, tabId)
         -- Update the Slider scrollbar's min/max so the thumb size reflects content
         parent.ContentScrollBar:SetMinMaxValues(0, math.max(1, scrollRange))
         parent.ContentScrollBar:SetValue(0)
+    -- DEBUG: EXIT UpdateScrollRange()
     end
     UpdateScrollRange()
     -- Hook OnSizeChanged to recalculate scroll range if content area resizes
     parent.ContentScroll:HookScript("OnSizeChanged", UpdateScrollRange)
+-- DEBUG: EXIT XP:RefreshOptionsTab()
 end
 
 -----------------------------------------------------------------------
@@ -2837,6 +3028,8 @@ end
 -- Shows guide title, description, level range, faction, expansion,
 -- and estimated step count when a guide row is selected.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateDetailPanel()
+-- DEBUG: PARAM parent = [parent]
 function XP:CreateDetailPanel(parent)
     -- Empty state (shown by default — no guide selected)
     local emptyMsg = parent:CreateFontString(nil, "OVERLAY")
@@ -2991,9 +3184,12 @@ function XP:CreateDetailPanel(parent)
     end)
     loadBtn:Hide()
     parent.DetailLoadBtn = loadBtn
+-- DEBUG: EXIT XP:CreateDetailPanel()
 end
 
 -- Show guide info in the right detail panel.
+-- DEBUG: ENTER XP:ShowGuideDetail()
+-- DEBUG: PARAM guideID = [guideID]
 function XP:ShowGuideDetail(guideID)
     local frame = self.MenuFrame
     if not frame or not frame.DetailColumn then return end
@@ -3103,11 +3299,15 @@ function XP:ShowGuideDetail(guideID)
             panel.DetailLoadBtn.Label:SetTextColor(XP:ColorRGBA("cyan"))
         end
     end
+-- DEBUG: EXIT XP:ShowGuideDetail()
 end
 
 -----------------------------------------------------------------------
 -- Navigation
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:MenuNavigate()
+-- DEBUG: PARAM view = [view]
+-- DEBUG: PARAM param = [param]
 function XP:MenuNavigate(view, param)
     if not self.MenuFrame then return end
     local frame = self.MenuFrame
@@ -3209,6 +3409,7 @@ function XP:MenuNavigate(view, param)
         frame.Breadcrumb:SetTextColor(XP:ColorRGBA("text_dim"))
         frame.SectionName:SetText(cat and cat.name or param)
         frame.SectionName:SetTextColor(XP:ColorRGBA("text_bright"))
+        -- DEBUG: ENTER BreadcrumbBackFunc()
         frame.BreadcrumbBackFunc = function() XP:MenuNavigate("home") end
 
         -- Get guides for this category
@@ -3231,6 +3432,7 @@ function XP:MenuNavigate(view, param)
         local guides = {}
         if self.CurrentGuide then
             table.insert(guides, self.CurrentGuide)
+        -- DEBUG: EXIT BreadcrumbBackFunc()
         end
         frame.GuideCount:SetText(#guides .. " guides")
         self:PopulateGuideList(guides)
@@ -3277,11 +3479,14 @@ function XP:MenuNavigate(view, param)
             frame.OptionsView:Show()
         end
     end
+-- DEBUG: EXIT XP:MenuNavigate()
 end
 
 -----------------------------------------------------------------------
 -- Populate Guide List
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:PopulateGuideList()
+-- DEBUG: PARAM guides = [guides]
 function XP:PopulateGuideList(guides)
     local listChild = self.MenuFrame and self.MenuFrame.ListChild
     if not listChild then return end
@@ -3353,11 +3558,14 @@ function XP:PopulateGuideList(guides)
 
     -- Update scroll child height
     listChild:SetHeight(math.max(yOffset, 1))
+-- DEBUG: EXIT XP:PopulateGuideList()
 end
 
 -----------------------------------------------------------------------
 -- Search
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:MenuSearch()
+-- DEBUG: PARAM query = [query]
 function XP:MenuSearch(query)
     if not query or query == "" then
         self:MenuNavigate("home")
@@ -3388,11 +3596,13 @@ function XP:MenuSearch(query)
     currentView = "search"
     currentCategory = nil
     self:PopulateGuideList(results)
+-- DEBUG: EXIT XP:MenuSearch()
 end
 
 -----------------------------------------------------------------------
 -- Update Menu (refresh counts, etc.)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateMenu()
 function XP:UpdateMenu()
     if not self.MenuFrame then return end
 
@@ -3411,4 +3621,5 @@ function XP:UpdateMenu()
     elseif currentView == "category" and currentCategory then
         self:MenuNavigate("category", currentCategory)
     end
+-- DEBUG: EXIT XP:UpdateMenu()
 end

@@ -37,6 +37,8 @@ local skinSubscribers = {}
 -----------------------------------------------------------------------
 -- Helper: HTML #RRGGBB[AA] -> {r,g,b,a}
 -----------------------------------------------------------------------
+-- DEBUG: ENTER HTML()
+-- DEBUG: PARAM hex = [hex]
 local function HTML(hex)
     hex = hex:gsub("^#", "")
     local r = tonumber(hex:sub(1, 2), 16) / 255
@@ -44,11 +46,16 @@ local function HTML(hex)
     local b = tonumber(hex:sub(5, 6), 16) / 255
     local a = hex:len() >= 8 and (tonumber(hex:sub(7, 8), 16) / 255) or 1.0
     return {r, g, b, a}
+-- DEBUG: EXIT HTML()
 end
 
 -----------------------------------------------------------------------
 -- Backdrop Helpers (Lua 5.0 compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER SolidBackdrop()
+-- DEBUG: PARAM edge = [edge]
+-- DEBUG: PARAM edgeSize = [edgeSize]
+-- DEBUG: PARAM inset = [inset]
 local function SolidBackdrop(edge, edgeSize, inset)
     edgeSize = edgeSize or 1
     inset = inset or 1
@@ -58,8 +65,14 @@ local function SolidBackdrop(edge, edgeSize, inset)
         tile = true, tileSize = 8, edgeSize = edgeSize,
         insets = {left = inset, right = inset, top = inset, bottom = inset}
     }
+-- DEBUG: EXIT SolidBackdrop()
 end
 
+-- DEBUG: ENTER TiledBackdrop()
+-- DEBUG: PARAM bgFile = [bgFile]
+-- DEBUG: PARAM edgeFile = [edgeFile]
+-- DEBUG: PARAM edgeSize = [edgeSize]
+-- DEBUG: PARAM inset = [inset]
 local function TiledBackdrop(bgFile, edgeFile, edgeSize, inset)
     edgeSize = edgeSize or 1
     inset = inset or edgeSize
@@ -69,10 +82,13 @@ local function TiledBackdrop(bgFile, edgeFile, edgeSize, inset)
         tile = true, tileSize = 256, edgeSize = edgeSize,
         insets = {left = inset, right = inset, top = inset, bottom = inset}
     }
+-- DEBUG: EXIT TiledBackdrop()
 end
 
+-- DEBUG: ENTER NoEdgeBackdrop()
 local function NoEdgeBackdrop()
     return {bgFile = WHITE_TEX, tile = true, tileSize = 8}
+-- DEBUG: EXIT NoEdgeBackdrop()
 end
 
 -----------------------------------------------------------------------
@@ -81,12 +97,20 @@ end
 local SkinProto = {}
 local StyleProto = {}
 
+-- DEBUG: ENTER SkinProto:New()
+-- DEBUG: PARAM id = [id]
+-- DEBUG: PARAM name = [name]
 function SkinProto:New(id, name)
     local skin = {id = id, name = name, styles = {}}
     setmetatable(skin, {__index = SkinProto})
     return skin
+-- DEBUG: EXIT SkinProto:New()
 end
 
+-- DEBUG: ENTER SkinProto:AddStyle()
+-- DEBUG: PARAM id = [id]
+-- DEBUG: PARAM name = [name]
+-- DEBUG: PARAM inherit = [inherit]
 function SkinProto:AddStyle(id, name, inherit)
     local style = StyleProto:New(id, name)
     style.skin = self
@@ -98,19 +122,31 @@ function SkinProto:AddStyle(id, name, inherit)
         self.defaultStyle = id
     end
     return style
+-- DEBUG: EXIT SkinProto:AddStyle()
 end
 
+-- DEBUG: ENTER SkinProto:GetStyle()
+-- DEBUG: PARAM id = [id]
 function SkinProto:GetStyle(id)
     return self.styles[id or self.defaultStyle]
+-- DEBUG: EXIT SkinProto:GetStyle()
 end
 
+-- DEBUG: ENTER SkinProto:GetDir()
 function SkinProto:GetDir()
     return SKINS_DIR .. self.id .. "\\"
+-- DEBUG: EXIT SkinProto:GetDir()
 end
 
+-- DEBUG: ENTER StyleProto:New()
+-- DEBUG: PARAM id = [id]
+-- DEBUG: PARAM name = [name]
 function StyleProto:New(id, name)
     local style = {id = id, name = name}
     setmetatable(style, {
+        -- DEBUG: ENTER __index()
+        -- DEBUG: PARAM t = [t]
+        -- DEBUG: PARAM k = [k]
         __index = function(t, k)
             local proto = rawget(StyleProto, k)
             if proto then return proto end
@@ -118,13 +154,17 @@ function StyleProto:New(id, name)
             if not inheritedStyle then return end
             local inherited = inheritedStyle[k]
             if inherited then return inherited end
+        -- DEBUG: EXIT __index()
         end
     })
     return style
+-- DEBUG: EXIT StyleProto:New()
 end
 
+-- DEBUG: ENTER StyleProto:GetDir()
 function StyleProto:GetDir()
     return self.skin:GetDir() .. self.id .. "\\"
+-- DEBUG: EXIT StyleProto:GetDir()
 end
 
 -----------------------------------------------------------------------
@@ -132,6 +172,8 @@ end
 -- XP:SD("KeyName") returns value, checking inheritance chain
 -----------------------------------------------------------------------
 local quiet = false
+-- DEBUG: ENTER StyleProto:GetProp()
+-- DEBUG: PARAM propertyname = [propertyname]
 function StyleProto:GetProp(propertyname, ...)
     if type(propertyname) == "table" then
         for i, prop in ipairs(propertyname) do
@@ -150,6 +192,7 @@ function StyleProto:GetProp(propertyname, ...)
             return r
         end
     end
+-- DEBUG: EXIT StyleProto:GetProp()
 end
 
 -----------------------------------------------------------------------
@@ -852,6 +895,8 @@ STEALTH_GLASS.StepBackdropColor = {0.13, 0.13, 0.13, 0.6}
 -----------------------------------------------------------------------
 -- Colors Table (Zygor-compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER InitColors()
+-- DEBUG: PARAM style = [style]
 local function InitColors(style)
     style.Colors = {
         bg_deep = style.MainBackdropColor or HTML("#111111FF"),
@@ -881,6 +926,7 @@ local function InitColors(style)
         white = {1, 1, 1, 1},
         transparent = {0, 0, 0, 0},
     }
+-- DEBUG: EXIT InitColors()
 end
 
 InitColors(STARLIGHT)
@@ -891,6 +937,8 @@ InitColors(STEALTH_GLASS)
 -----------------------------------------------------------------------
 -- Fonts Table (Zygor-compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER InitFonts()
+-- DEBUG: PARAM style = [style]
 local function InitFonts(style)
     style.Fonts = {
         title = {style.FontFace, 12, ""},
@@ -900,6 +948,7 @@ local function InitFonts(style)
         header = {style.FontFaceHeader, 16, ""},
         bold = {style.FontFaceBold, 12, ""},
     }
+-- DEBUG: EXIT InitFonts()
 end
 
 InitFonts(STARLIGHT)
@@ -910,6 +959,8 @@ InitFonts(STEALTH_GLASS)
 -----------------------------------------------------------------------
 -- Sizes Table (Zygor-compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER InitSizes()
+-- DEBUG: PARAM style = [style]
 local function InitSizes(style)
     style.Sizes = {
         viewer_width = style.ViewerWidth,
@@ -924,6 +975,7 @@ local function InitSizes(style)
         step_height = style.StepHeight,
         footer_height = style.FooterHeight,
     }
+-- DEBUG: EXIT InitSizes()
 end
 
 InitSizes(STARLIGHT)
@@ -934,6 +986,8 @@ InitSizes(STEALTH_GLASS)
 -----------------------------------------------------------------------
 -- Backdrops Table (Zygor-compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER InitBackdrops()
+-- DEBUG: PARAM style = [style]
 local function InitBackdrops(style)
     style.Backdrops = {
         main = style.MainBackdrop,
@@ -941,6 +995,7 @@ local function InitBackdrops(style)
         small = style.SmallBackdrop,
         none = style.NoEdgeBackdrop,
     }
+-- DEBUG: EXIT InitBackdrops()
 end
 
 InitBackdrops(STARLIGHT)
@@ -951,12 +1006,17 @@ InitBackdrops(STEALTH_GLASS)
 -----------------------------------------------------------------------
 -- Public API
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:InitSkins()
 function XP:InitSkins()
     local skinID = self.db and self.db.profile.skin or "default"
     local styleID = self.db and self.db.profile.skinstyle or "starlight"
     self:SetSkin(skinID, styleID)
+-- DEBUG: EXIT XP:InitSkins()
 end
 
+-- DEBUG: ENTER XP:SetSkin()
+-- DEBUG: PARAM skinID = [skinID]
+-- DEBUG: PARAM styleID = [styleID]
 function XP:SetSkin(skinID, styleID)
     -- Handle combined "skinID-styleID" format from GetSkinList
     if type(skinID) == "string" and styleID == nil and skinID:match(".-%-(.+)") then
@@ -993,8 +1053,10 @@ function XP:SetSkin(skinID, styleID)
     end
     
     self:CreateFrame()
+-- DEBUG: EXIT XP:SetSkin()
 end
 
+-- DEBUG: ENTER XP:CreateFrame()
 function XP:CreateFrame()
     if self.MenuFrame and self.MenuFrame.ApplySkin then
         self.MenuFrame:ApplySkin()
@@ -1002,20 +1064,28 @@ function XP:CreateFrame()
     if self.ViewerFrame and self.ViewerFrame.ApplySkin then
         self.ViewerFrame:ApplySkin()
     end
+-- DEBUG: EXIT XP:CreateFrame()
 end
 
+-- DEBUG: ENTER XP:RegisterSkinSubscriber()
+-- DEBUG: PARAM fn = [fn]
 function XP:RegisterSkinSubscriber(fn)
     if type(fn) == "function" then
         table.insert(skinSubscribers, fn)
     end
+-- DEBUG: EXIT XP:RegisterSkinSubscriber()
 end
 
+-- DEBUG: ENTER XP:RegisterSkin()
+-- DEBUG: PARAM skinData = [skinData]
 function XP:RegisterSkin(skinData)
     if skinData and skinData.id then
         skins[skinData.id] = skinData
     end
+-- DEBUG: EXIT XP:RegisterSkin()
 end
 
+-- DEBUG: ENTER XP:GetSkinList()
 function XP:GetSkinList()
     local list = {}
     for id, skin in pairs(skins) do
@@ -1034,50 +1104,71 @@ function XP:GetSkinList()
     end
     table.sort(list, function(a, b) return a.name < b.name end)
     return list
+-- DEBUG: EXIT XP:GetSkinList()
 end
 
+-- DEBUG: ENTER XP:GetSkin()
+-- DEBUG: PARAM id = [id]
 function XP:GetSkin(id)
     return skins[id or "default"]
+-- DEBUG: EXIT XP:GetSkin()
 end
 
 -----------------------------------------------------------------------
 -- SkinData Accessor (Zygor-compatible)
 -- XP:SD("KeyName") or XP.SkinData("KeyName")
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:SD()
+-- DEBUG: PARAM key = [key]
 function XP:SD(key)
     if not activeStyle then return nil end
     return activeStyle:GetProp(key)
+-- DEBUG: EXIT XP:SD()
 end
 
+-- DEBUG: ENTER SkinData()
+-- DEBUG: PARAM key = [key]
 XP.SkinData = function(key)
     if not activeStyle then return nil end
     return activeStyle:GetProp(key)
+-- DEBUG: EXIT SkinData()
 end
 
 -----------------------------------------------------------------------
 -- Color Helpers
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:Color()
+-- DEBUG: PARAM name = [name]
 function XP:Color(name)
     if not activeStyle or not activeStyle.Colors then
         return {1, 1, 1, 1}
     end
     local c = activeStyle.Colors[name]
     return c or {1, 1, 1, 1}
+-- DEBUG: EXIT XP:Color()
 end
 
+-- DEBUG: ENTER XP:ColorRGBA()
+-- DEBUG: PARAM name = [name]
 function XP:ColorRGBA(name)
     local c = self:Color(name)
     return c[1] or 1, c[2] or 1, c[3] or 1, c[4] or 1
+-- DEBUG: EXIT XP:ColorRGBA()
 end
 
+-- DEBUG: ENTER XP:Font()
+-- DEBUG: PARAM name = [name]
 function XP:Font(name)
     if not activeStyle or not activeStyle.Fonts then
         return {"Fonts\\FRIZQT__.TTF", 12, ""}
     end
     local f = activeStyle.Fonts[name]
     return f or {"Fonts\\FRIZQT__.TTF", 12, ""}
+-- DEBUG: EXIT XP:Font()
 end
 
+-- DEBUG: ENTER XP:Backdrop()
+-- DEBUG: PARAM name = [name]
 function XP:Backdrop(name)
     if not activeStyle then
         return SolidBackdrop()
@@ -1089,23 +1180,35 @@ function XP:Backdrop(name)
         return activeStyle[name]
     end
     return activeStyle.MainBackdrop or SolidBackdrop()
+-- DEBUG: EXIT XP:Backdrop()
 end
 
+-- DEBUG: ENTER XP:Size()
+-- DEBUG: PARAM name = [name]
 function XP:Size(name)
     if not activeStyle or not activeStyle.Sizes then
         return 0
     end
     local s = activeStyle.Sizes[name]
     return s or 0
+-- DEBUG: EXIT XP:Size()
 end
 
+-- DEBUG: ENTER XP:ActionIcon()
+-- DEBUG: PARAM actionName = [actionName]
 function XP:ActionIcon(actionName)
     return XP.ActionIconPaths[actionName:lower()] or XP.ActionIconPaths["default"]
+-- DEBUG: EXIT XP:ActionIcon()
 end
 
 -----------------------------------------------------------------------
 -- Skin Application Helpers
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ApplyBackdrop()
+-- DEBUG: PARAM frame = [frame]
+-- DEBUG: PARAM backdropName = [backdropName]
+-- DEBUG: PARAM bgColor = [bgColor]
+-- DEBUG: PARAM borderColor = [borderColor]
 function XP:ApplyBackdrop(frame, backdropName, bgColor, borderColor)
     if not frame then return end
     local bd = self:Backdrop(backdropName or "main")
@@ -1118,8 +1221,13 @@ function XP:ApplyBackdrop(frame, backdropName, bgColor, borderColor)
             frame:SetBackdropBorderColor(self:ColorRGBA(borderColor))
         end
     end
+-- DEBUG: EXIT XP:ApplyBackdrop()
 end
 
+-- DEBUG: ENTER XP:ApplyFont()
+-- DEBUG: PARAM fontString = [fontString]
+-- DEBUG: PARAM fontName = [fontName]
+-- DEBUG: PARAM colorName = [colorName]
 function XP:ApplyFont(fontString, fontName, colorName)
     if not fontString then return end
     local f = self:Font(fontName or "normal")
@@ -1127,8 +1235,12 @@ function XP:ApplyFont(fontString, fontName, colorName)
     if colorName then
         fontString:SetTextColor(self:ColorRGBA(colorName))
     end
+-- DEBUG: EXIT XP:ApplyFont()
 end
 
+-- DEBUG: ENTER XP:SkinButton()
+-- DEBUG: PARAM button = [button]
+-- DEBUG: PARAM options = [options]
 function XP:SkinButton(button, options)
     if not button then return end
     options = options or {}
@@ -1152,8 +1264,13 @@ function XP:SkinButton(button, options)
         end
         if options.onLeave then options.onLeave(self_btn) end
     end)
+-- DEBUG: EXIT XP:SkinButton()
 end
 
+-- DEBUG: ENTER XP:CreateDivider()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM yOffset = [yOffset]
+-- DEBUG: PARAM colorName = [colorName]
 function XP:CreateDivider(parent, yOffset, colorName)
     local div = parent:CreateTexture(nil, "ARTWORK")
     div:SetHeight(1)
@@ -1161,6 +1278,7 @@ function XP:CreateDivider(parent, yOffset, colorName)
     div:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, yOffset or 0)
     XP.SetTexColor(div, XP:ColorRGBA(colorName or "border"))
     return div
+-- DEBUG: EXIT XP:CreateDivider()
 end
 
 -- SetTexColor is defined in Compat.lua for WoW version compat
@@ -1171,7 +1289,11 @@ end
 -----------------------------------------------------------------------
 XP.IconSets = {}
 
+-- DEBUG: ENTER XP:CreateIconSets()
 function XP:CreateIconSets()
+    -- DEBUG: ENTER getTexCoord()
+    -- DEBUG: PARAM set = [set]
+    -- DEBUG: PARAM name = [name]
     local getTexCoord = function(set, name)
         local data = set[name]
         if not data then
@@ -1184,6 +1306,7 @@ function XP:CreateIconSets()
             c / set.cols - pad / set.cols,
             (r - 1) / set.rows + pad / set.rows,
             r / set.rows - pad / set.rows
+    -- DEBUG: EXIT getTexCoord()
     end
     
     self.IconSets.TabsIcons = {
@@ -1403,18 +1526,31 @@ function XP:CreateIconSets()
     }
     
     for setName, set in pairs(self.IconSets) do
+        -- DEBUG: ENTER getTexCoord()
+        -- DEBUG: PARAM name = [name]
         set.getTexCoord = function(name)
             return getTexCoord(set, name)
+        -- DEBUG: EXIT getTexCoord()
         end
+        -- DEBUG: ENTER getIconPath()
+        -- DEBUG: PARAM name = [name]
         set.getIconPath = function(name)
             return set.file
+        -- DEBUG: EXIT getIconPath()
         end
+        -- DEBUG: ENTER AssignToTexture()
+        -- DEBUG: PARAM icon = [icon]
+        -- DEBUG: PARAM texture = [texture]
         set.AssignToTexture = function(icon, texture)
             if not texture then return end
             texture:SetTexture(set.file)
             local left, right, top, bottom = getTexCoord(set, name or set.default)
             texture:SetTexCoord(left, right, top, bottom)
+        -- DEBUG: EXIT AssignToTexture()
         end
+        -- DEBUG: ENTER AssignToButton()
+        -- DEBUG: PARAM icon = [icon]
+        -- DEBUG: PARAM button = [button]
         set.AssignToButton = function(icon, button)
             if not button then return end
             if not button.GetNormalTexture then return end
@@ -1432,8 +1568,10 @@ function XP:CreateIconSets()
             if htex then htex:SetTexture(set.file); htex:SetTexCoord(left, right, top, bottom); htex:SetBlendMode("ADD") end
             local dtex = button:GetDisabledTexture()
             if dtex then dtex:SetTexture(set.file); dtex:SetTexCoord(left, right, top, bottom) end
+        -- DEBUG: EXIT AssignToButton()
         end
     end
+-- DEBUG: EXIT XP:CreateIconSets()
 end
 
 -----------------------------------------------------------------------
@@ -1441,8 +1579,16 @@ end
 -----------------------------------------------------------------------
 XP.ButtonSets = {}
 
+-- DEBUG: ENTER XP:CreateButtonSets()
 function XP:CreateButtonSets()
+    -- DEBUG: ENTER getTexCoords()
+    -- DEBUG: PARAM set = [set]
+    -- DEBUG: PARAM name = [name]
     local getTexCoords = function(set, name)
+        -- DEBUG: ENTER getTexCoord()
+        -- DEBUG: PARAM set = [set]
+        -- DEBUG: PARAM name = [name]
+        -- DEBUG: PARAM i = [i]
         local function getTexCoord(set, name, i)
             local n = set[name].n
             return
@@ -1450,11 +1596,20 @@ function XP:CreateButtonSets()
                 n / set.count - set.padding / set.count,
                 (i - 1) / 4 + set.padding / 4,
                 i / 4 - set.padding / 4
+        -- DEBUG: EXIT getTexCoord()
         end
         return {getTexCoord(set, name, 1)}, {getTexCoord(set, name, 2)}, {getTexCoord(set, name, 3)}, {getTexCoord(set, name, 4)}
+    -- DEBUG: EXIT getTexCoords()
     end
     
+    -- DEBUG: ENTER getTexCoordsRaw()
+    -- DEBUG: PARAM set = [set]
+    -- DEBUG: PARAM name = [name]
     local getTexCoordsRaw = function(set, name)
+        -- DEBUG: ENTER getTexCoord()
+        -- DEBUG: PARAM set = [set]
+        -- DEBUG: PARAM name = [name]
+        -- DEBUG: PARAM i = [i]
         local function getTexCoord(set, name, i)
             if not set.texturewidth then return end
             local n = set[name].n
@@ -1465,8 +1620,10 @@ function XP:CreateButtonSets()
                 n * w - set.padding / set.count,
                 (i - 1) * h + set.padding / 4,
                 i * h - set.padding / 4
+        -- DEBUG: EXIT getTexCoord()
         end
         return {getTexCoord(set, name, 1)}, {getTexCoord(set, name, 2)}, {getTexCoord(set, name, 3)}, {getTexCoord(set, name, 4)}
+    -- DEBUG: EXIT getTexCoordsRaw()
     end
     
     self.ButtonSets.TitleButtons = {
@@ -1564,12 +1721,21 @@ function XP:CreateButtonSets()
     }
     
     for setName, set in pairs(self.ButtonSets) do
+        -- DEBUG: ENTER getTexCoords()
+        -- DEBUG: PARAM name = [name]
         set.getTexCoords = function(name)
             return getTexCoords(set, name)
+        -- DEBUG: EXIT getTexCoords()
         end
+        -- DEBUG: ENTER getTexCoordsRaw()
+        -- DEBUG: PARAM name = [name]
         set.getTexCoordsRaw = function(name)
             return getTexCoordsRaw(set, name)
+        -- DEBUG: EXIT getTexCoordsRaw()
         end
+        -- DEBUG: ENTER AssignToButton()
+        -- DEBUG: PARAM icon = [icon]
+        -- DEBUG: PARAM button = [button]
         set.AssignToButton = function(icon, button)
             if not button then return end
             if not button.GetNormalTexture then return end
@@ -1587,13 +1753,24 @@ function XP:CreateButtonSets()
             if htex then htex:SetTexture(set.file); htex:SetTexCoord(unpack(coords[3])); htex:SetBlendMode("ADD") end
             local dtex = button:GetDisabledTexture()
             if dtex then dtex:SetTexture(set.file); dtex:SetTexCoord(unpack(coords[4])) end
+        -- DEBUG: EXIT AssignToButton()
         end
+        -- DEBUG: ENTER AssignToTexture()
+        -- DEBUG: PARAM icon = [icon]
+        -- DEBUG: PARAM texture = [texture]
         set.AssignToTexture = function(icon, texture)
             if not texture then return end
             local coords = getTexCoords(set, set.default)
             texture:SetTexture(set.file)
             texture:SetTexCoord(unpack(coords[1]))
+        -- DEBUG: EXIT AssignToTexture()
         end
+        -- DEBUG: ENTER GetFontString()
+        -- DEBUG: PARAM icon = [icon]
+        -- DEBUG: PARAM width = [width]
+        -- DEBUG: PARAM height = [height]
+        -- DEBUG: PARAM offsetx = [offsetx]
+        -- DEBUG: PARAM offsety = [offsety]
         set.GetFontString = function(icon, width, height, offsetx, offsety)
             local raw = getTexCoordsRaw(set, set.default)
             local icon1 = raw[1]
@@ -1603,13 +1780,17 @@ function XP:CreateButtonSets()
                 ("%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d"):format(set.file, width or 16, height or 16, offsetx or 0, offsety or 0, set.texturewidth or 256, set.textureheight or 64, raw[3][1], raw[3][2], raw[3][3], raw[3][4]),
                 ("%s:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d"):format(set.file, width or 16, height or 16, offsetx or 0, offsety or 0, set.texturewidth or 256, set.textureheight or 64, raw[4][1], raw[4][2], raw[4][3], raw[4][4])
             }
+        -- DEBUG: EXIT GetFontString()
         end
     end
+-- DEBUG: EXIT XP:CreateButtonSets()
 end
 
 -----------------------------------------------------------------------
 -- Scrollbar Styling (Zygor-compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:AddStyleToBlizzardScrollBar()
+-- DEBUG: PARAM scrollbar = [scrollbar]
 function XP:AddStyleToBlizzardScrollBar(scrollbar)
     if not scrollbar then return end
     
@@ -1649,6 +1830,7 @@ function XP:AddStyleToBlizzardScrollBar(scrollbar)
         scrollbar.ScrollDownButton:SetPushedTexture(arrowsTex)
         scrollbar.ScrollDownButton:SetHighlightTexture(arrowsTex)
     end
+-- DEBUG: EXIT XP:AddStyleToBlizzardScrollBar()
 end
 
 -----------------------------------------------------------------------
@@ -1657,21 +1839,30 @@ end
 -----------------------------------------------------------------------
 XP.ArrowSkins = {}
 
+-- DEBUG: ENTER XP.ArrowSkins:AddArrowSkin()
+-- DEBUG: PARAM id = [id]
+-- DEBUG: PARAM name = [name]
 function XP.ArrowSkins:AddArrowSkin(id, name)
     local arrowSkin = {id = id, name = name, icons = {}}
     XP.ArrowSkins[id] = arrowSkin
     return arrowSkin
+-- DEBUG: EXIT XP.ArrowSkins:AddArrowSkin()
 end
 
+-- DEBUG: ENTER XP:SetArrowSkin()
+-- DEBUG: PARAM skinID = [skinID]
 function XP:SetArrowSkin(skinID)
     self.CurrentArrowSkin = XP.ArrowSkins[skinID]
     if self.SendMessage then
         self:SendMessage("XP_ARROWSKIN_UPDATED", skinID)
     end
+-- DEBUG: EXIT XP:SetArrowSkin()
 end
 
+-- DEBUG: ENTER XP:GetArrowSkin()
 function XP:GetArrowSkin()
     return self.CurrentArrowSkin
+-- DEBUG: EXIT XP:GetArrowSkin()
 end
 
 -----------------------------------------------------------------------
@@ -1696,5 +1887,11 @@ ADDON_TABLE.HTMLColor = HTML
 ADDON_TABLE.F = { HTMLColor = HTML }
 
 
+-- DEBUG: ENTER GetSkin()
+-- DEBUG: PARAM skins = [skins]
+-- DEBUG: PARAM { __index = [{ __index]
+-- DEBUG: PARAM id = [id]
 setmetatable(skins, { __index = { GetSkin = function(self, id) return rawget(self, id) or rawget(self, "default") end } })
 
+
+-- DEBUG: EXIT GetSkin() [EOF]

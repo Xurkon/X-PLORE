@@ -23,6 +23,9 @@ local XP = ADDON_TABLE.XP
 --   normalColor, highlightColor, disabledColor
 -- }
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateButton()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateButton(parent, options)
     options = options or {}
     local w = options.width  or 120
@@ -83,17 +86,24 @@ function XP:CreateButton(parent, options)
     end
 
     -- Public helpers
+    -- DEBUG: ENTER btn:SetLabel()
+    -- DEBUG: PARAM text = [text]
     function btn:SetLabel(text) label:SetText(text or "") end
+    -- DEBUG: ENTER btn:Disable()
     function btn:Disable()
         btn:EnableMouse(false)
         label:SetTextColor(XP:ColorRGBA(options.disabledColor or "text_dim"))
+    -- DEBUG: EXIT btn:Disable()
     end
+    -- DEBUG: ENTER btn:Enable()
     function btn:Enable()
         btn:EnableMouse(true)
         label:SetTextColor(XP:ColorRGBA(options.normalColor or "text_bright"))
+    -- DEBUG: EXIT btn:Enable()
     end
 
     return btn
+-- DEBUG: EXIT XP:CreateButton()
 end
 
 -----------------------------------------------------------------------
@@ -102,6 +112,9 @@ end
 --   width, height, label, checked, onChange
 -- }
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateToggle()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateToggle(parent, options)
     options = options or {}
     local h = options.height or 22
@@ -150,10 +163,14 @@ function XP:CreateToggle(parent, options)
 
     row.CheckButton = chk
 
+    -- DEBUG: ENTER row:GetValue()
     function row:GetValue() return chk:GetChecked() and true or false end
+    -- DEBUG: ENTER row:SetValue()
+    -- DEBUG: PARAM v = [v]
     function row:SetValue(v) chk:SetChecked(v and true or false) end
 
     return row
+-- DEBUG: EXIT XP:CreateToggle()
 end
 
 -----------------------------------------------------------------------
@@ -163,6 +180,9 @@ end
 -- }
 -- items = array of { value, text } tables
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateDropDown()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateDropDown(parent, options)
     options = options or {}
     local w = options.width  or 180
@@ -206,10 +226,14 @@ function XP:CreateDropDown(parent, options)
     local items   = options.items or {}
     local current = options.selected
 
+    -- DEBUG: ENTER SetSelected()
+    -- DEBUG: PARAM value = [value]
+    -- DEBUG: PARAM text = [text]
     local function SetSelected(value, text)
         current = value
         selectedText:SetText(text or value or "")
         if options.onChange then options.onChange(value) end
+    -- DEBUG: EXIT SetSelected()
     end
 
     if current then
@@ -230,6 +254,7 @@ function XP:CreateDropDown(parent, options)
     container.Popup = popup
 
     -- Populate popup items
+    -- DEBUG: ENTER BuildPopup()
     local function BuildPopup()
         -- Remove old buttons
         for _, child in ipairs({ popup:GetChildren() }) do
@@ -267,6 +292,7 @@ function XP:CreateDropDown(parent, options)
             totalH = totalH + rowH
         end
         popup:SetHeight(totalH + 2)
+    -- DEBUG: EXIT BuildPopup()
     end
 
     mainBtn:SetScript("OnClick", function()
@@ -284,12 +310,18 @@ function XP:CreateDropDown(parent, options)
     popup:SetScript("OnHide", function() end)
 
     -- Public API
+    -- DEBUG: ENTER container:SetItems()
+    -- DEBUG: PARAM newItems = [newItems]
     function container:SetItems(newItems)
         items = newItems
         current = nil
         selectedText:SetText("")
+    -- DEBUG: EXIT container:SetItems()
     end
+    -- DEBUG: ENTER container:GetValue()
     function container:GetValue()  return current end
+    -- DEBUG: ENTER container:SetValue()
+    -- DEBUG: PARAM v = [v]
     function container:SetValue(v)
         for _, item in ipairs(items) do
             if item.value == v then
@@ -297,9 +329,11 @@ function XP:CreateDropDown(parent, options)
                 return
             end
         end
+    -- DEBUG: EXIT container:SetValue()
     end
 
     return container
+-- DEBUG: EXIT XP:CreateDropDown()
 end
 
 -----------------------------------------------------------------------
@@ -309,6 +343,9 @@ end
 --   showValue, valueFormat (format string, default "%d")
 -- }
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateSlider()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateSlider(parent, options)
     options = options or {}
     local w = options.width  or 200
@@ -395,10 +432,14 @@ function XP:CreateSlider(parent, options)
         if options.onChange then options.onChange(val) end
     end)
 
+    -- DEBUG: ENTER container:GetValue()
     function container:GetValue() return slider:GetValue() end
+    -- DEBUG: ENTER container:SetValue()
+    -- DEBUG: PARAM v = [v]
     function container:SetValue(v) slider:SetValue(v) end
 
     return container
+-- DEBUG: EXIT XP:CreateSlider()
 end
 
 -----------------------------------------------------------------------
@@ -408,6 +449,9 @@ end
 --   fillColor, bgColor, showText, textFormat
 -- }
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateProgressBar()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateProgressBar(parent, options)
     options = options or {}
     local w = options.width  or 200
@@ -447,20 +491,31 @@ function XP:CreateProgressBar(parent, options)
     end
 
     -- Public API
+    -- DEBUG: ENTER bar:SetFillColor()
+    -- DEBUG: PARAM colorName = [colorName]
     function bar:SetFillColor(colorName)
         bar:SetStatusBarColor(XP:ColorRGBA(colorName))
+    -- DEBUG: EXIT bar:SetFillColor()
     end
+    -- DEBUG: ENTER bar:SetProgress()
+    -- DEBUG: PARAM val = [val]
     function bar:SetProgress(val)
         bar:SetValue(val)
+    -- DEBUG: EXIT bar:SetProgress()
     end
 
     return bar
+-- DEBUG: EXIT XP:CreateProgressBar()
 end
 
 -----------------------------------------------------------------------
 -- SectionHeader
 -- Simple styled section label (used in options panels etc.)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateSectionHeader()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM text = [text]
+-- DEBUG: PARAM yOffset = [yOffset]
 function XP:CreateSectionHeader(parent, text, yOffset)
     local container = CreateFrame("Frame", nil, parent)
     container:SetHeight(20)
@@ -491,6 +546,7 @@ function XP:CreateSectionHeader(parent, text, yOffset)
     end
 
     return container
+-- DEBUG: EXIT XP:CreateSectionHeader()
 end
 
 -----------------------------------------------------------------------
@@ -499,6 +555,9 @@ end
 --   width, height, label, placeholder, maxLetters, onChange, onEnter
 -- }
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateTextInput()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM options = [options]
 function XP:CreateTextInput(parent, options)
     options = options or {}
     local w = options.width  or 180
@@ -559,9 +618,14 @@ function XP:CreateTextInput(parent, options)
 
     container.EditBox = eb
 
+    -- DEBUG: ENTER container:GetValue()
     function container:GetValue() return eb:GetText() end
+    -- DEBUG: ENTER container:SetValue()
+    -- DEBUG: PARAM v = [v]
     function container:SetValue(v) eb:SetText(v or "") end
+    -- DEBUG: ENTER container:SetFocus()
     function container:SetFocus()  eb:SetFocus() end
 
     return container
+-- DEBUG: EXIT XP:CreateTextInput()
 end

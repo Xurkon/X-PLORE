@@ -13,6 +13,7 @@ XP.Config = Config
 -- Called on startup after AceDB is initialized.
 -- Ensures the player has a valid character-specific profile.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Config:Run()
 function Config:Run()
     local profiles = XP.db.profiles
     local currentProfile = XP.db:GetCurrentProfile()
@@ -65,4 +66,5 @@ function Config:Run()
         XP.db.global = XP.db.global or {}
         XP.db.global.saw_tutorial = true
     end
+-- DEBUG: EXIT Config:Run()
 end

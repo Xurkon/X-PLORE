@@ -17,6 +17,8 @@ if not XP.ViewerFrame then XP.ViewerFrame = {} end
 -- Re-applies current skin colors/fonts to all ViewerFrame sub-frames.
 -- Called when skin changes or when XP.SetSkin() fires skin subscribers.
 --------------------------------------------------------------------------
+-- DEBUG: ENTER <unknown>()
+-- DEBUG: PARAM self = [self]
 function XP.ViewerFrame.ApplySkin(self)
     local f = self or XP.ViewerFrame
     if not f then return end
@@ -138,4 +140,5 @@ function XP.ViewerFrame.ApplySkin(self)
 
     -- Re-render step lines with new skin
     XP:UpdateViewer()
+-- DEBUG: EXIT <unknown>()
 end

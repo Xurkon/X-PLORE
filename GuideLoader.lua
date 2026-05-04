@@ -34,6 +34,7 @@ Loader.errors       = {}
 -- We create a fake ZygorGuidesViewer global that redirects to XP.
 -- This allows loading unmodified Zygor guide data files.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Loader:InstallZygorShim()
 function Loader:InstallZygorShim()
     -- Only install if ZygorGuidesViewer doesn't already exist
     -- (i.e., the real Zygor addon isn't loaded)
@@ -41,6 +42,11 @@ function Loader:InstallZygorShim()
 
     local shim = {}
 
+    -- DEBUG: ENTER RegisterGuide()
+    -- DEBUG: PARAM self_or_title = [self_or_title]
+    -- DEBUG: PARAM titleOrHeader = [titleOrHeader]
+    -- DEBUG: PARAM headerOrData = [headerOrData]
+    -- DEBUG: PARAM dataOrNil = [dataOrNil]
     shim.RegisterGuide = function(self_or_title, titleOrHeader, headerOrData, dataOrNil)
         -- Handle both ZygorGuidesViewer:RegisterGuide(t,h,d) and
         -- ZygorGuidesViewer.RegisterGuide(self,t,h,d) calling conventions
@@ -65,8 +71,13 @@ function Loader:InstallZygorShim()
             end
             return guide
         end
+    -- DEBUG: EXIT RegisterGuide()
     end
 
+    -- DEBUG: ENTER RegisterInclude()
+    -- DEBUG: PARAM self_or_name = [self_or_name]
+    -- DEBUG: PARAM nameOrText = [nameOrText]
+    -- DEBUG: PARAM textOrNil = [textOrNil]
     shim.RegisterInclude = function(self_or_name, nameOrText, textOrNil)
         local name, text
         if type(self_or_name) == "string" then
@@ -79,8 +90,13 @@ function Loader:InstallZygorShim()
         if name then
             XP:RegisterInclude(name, text)
         end
+    -- DEBUG: EXIT RegisterInclude()
     end
 
+    -- DEBUG: ENTER RegisterGuidePlaceholder()
+    -- DEBUG: PARAM self_or_title = [self_or_title]
+    -- DEBUG: PARAM titleOrHeader = [titleOrHeader]
+    -- DEBUG: PARAM headerOrNil = [headerOrNil]
     shim.RegisterGuidePlaceholder = function(self_or_title, titleOrHeader, headerOrNil)
         local title, header
         if type(self_or_title) == "string" then
@@ -93,25 +109,30 @@ function Loader:InstallZygorShim()
         if title then
             return XP:RegisterGuidePlaceholder(title, header)
         end
+    -- DEBUG: EXIT RegisterGuidePlaceholder()
     end
 
     _G.ZygorGuidesViewer = shim
 
     -- Also alias common short names
     _G.ZGV = shim
+-- DEBUG: EXIT Loader:InstallZygorShim()
 end
 
 -----------------------------------------------------------------------
 -- Guide Data Statistics
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Loader:GetStats()
 function Loader:GetStats()
     return {
         files   = self.loadedFiles,
         guides  = self.loadedGuides,
         errors  = #self.errors,
     }
+-- DEBUG: EXIT Loader:GetStats()
 end
 
+-- DEBUG: ENTER Loader:PrintStats()
 function Loader:PrintStats()
     local stats = self:GetStats()
     if XP.Print then
@@ -122,16 +143,19 @@ function Loader:PrintStats()
             stats.errors > 0 and ("|cffff0000" .. stats.errors .. " errors|r") or ""
         ))
     end
+-- DEBUG: EXIT Loader:PrintStats()
 end
 
 -----------------------------------------------------------------------
 -- Initialize: call during addon load
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Loader:Init()
 function Loader:Init()
     -- Install the Zygor compatibility shim FIRST, before any guide
     -- data files execute. This is called from Init.lua or very early
     -- in the load order.
     self:InstallZygorShim()
+-- DEBUG: EXIT Loader:Init()
 end
 
 -- Auto-initialize when this file loads

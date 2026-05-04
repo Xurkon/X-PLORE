@@ -29,12 +29,15 @@ local STANDINGS = {
 }
 
 -- Returns the standing index (1-8) for a given absolute standing value
+-- DEBUG: ENTER GetStandingIndex()
+-- DEBUG: PARAM standing = [standing]
 local function GetStandingIndex(standing)
     local idx = 1
     for i, tier in ipairs(STANDINGS) do
         if standing >= tier.from then idx = i end
     end
     return idx
+-- DEBUG: EXIT GetStandingIndex()
 end
 
 -----------------------------------------------------------------------
@@ -42,6 +45,8 @@ end
 -- WotLK: returns name, desc, reaction, minVal, maxVal, value, ...
 -- Retail: C_Reputation.GetFactionDataByID returns a table
 -----------------------------------------------------------------------
+-- DEBUG: ENTER GetFactionData()
+-- DEBUG: PARAM factionID = [factionID]
 local function GetFactionData(factionID)
     if not factionID then return nil end
 
@@ -77,12 +82,15 @@ local function GetFactionData(factionID)
     end
 
     return nil
+-- DEBUG: EXIT GetFactionData()
 end
 
 -----------------------------------------------------------------------
 -- Get rep info as normalized {name, standingName, standingColor,
 --   current, cap, pct, totalValue, barMin, barMax}
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Faction:GetInfo()
+-- DEBUG: PARAM factionID = [factionID]
 function Faction:GetInfo(factionID)
     local d = GetFactionData(factionID)
     if not d then return nil end
@@ -112,6 +120,7 @@ function Faction:GetInfo(factionID)
         barMin       = barMin,
         barMax       = barMax,
     }
+-- DEBUG: EXIT Faction:GetInfo()
 end
 
 -----------------------------------------------------------------------
@@ -119,6 +128,8 @@ end
 -----------------------------------------------------------------------
 local nameToIDCache = {}
 
+-- DEBUG: ENTER Faction:GetIDByName()
+-- DEBUG: PARAM factionName = [factionName]
 function Faction:GetIDByName(factionName)
     if not factionName then return nil end
 
@@ -159,6 +170,7 @@ function Faction:GetIDByName(factionName)
     end
 
     return nil
+-- DEBUG: EXIT Faction:GetIDByName()
 end
 
 -----------------------------------------------------------------------
@@ -170,6 +182,7 @@ local repBar    = nil
 local repLabel  = nil
 local repPct    = nil
 
+-- DEBUG: ENTER EnsureRepBar()
 local function EnsureRepBar()
     if repBar then return end
     local footer = XP.ViewerFrame and XP.ViewerFrame.Footer
@@ -202,8 +215,12 @@ local function EnsureRepBar()
     repBar:Hide()
     repLabel:Hide()
     repPct:Hide()
+-- DEBUG: EXIT EnsureRepBar()
 end
 
+-- DEBUG: ENTER Faction:ShowRepBar()
+-- DEBUG: PARAM factionID = [factionID]
+-- DEBUG: PARAM targetStanding = [targetStanding]
 function Faction:ShowRepBar(factionID, targetStanding)
     EnsureRepBar()
     if not repBar then return end
@@ -229,17 +246,22 @@ function Faction:ShowRepBar(factionID, targetStanding)
     repBar:Show()
     repLabel:Show()
     repPct:Show()
+-- DEBUG: EXIT Faction:ShowRepBar()
 end
 
+-- DEBUG: ENTER Faction:HideRepBar()
 function Faction:HideRepBar()
     if repBar   then repBar:Hide()   end
     if repLabel then repLabel:Hide() end
     if repPct   then repPct:Hide()   end
+-- DEBUG: EXIT Faction:HideRepBar()
 end
 
 -----------------------------------------------------------------------
 -- UpdateForStep — call whenever the viewer advances to a new step
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Faction:UpdateForStep()
+-- DEBUG: PARAM step = [step]
 function Faction:UpdateForStep(step)
     if not step then
         self:HideRepBar()
@@ -273,11 +295,13 @@ function Faction:UpdateForStep(step)
     else
         self:HideRepBar()
     end
+-- DEBUG: EXIT Faction:UpdateForStep()
 end
 
 -----------------------------------------------------------------------
 -- Init — called from XP:OnEnable
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:InitFaction()
 function XP:InitFaction()
     -- Listen for step changes to update rep bar
     XP:RegisterMessage("XP_STEP_CHANGED", function(_, step)
@@ -286,6 +310,7 @@ function XP:InitFaction()
 
     -- Refresh on reputation updates
     local eventFrame = CreateFrame("Frame")
+  -- DEBUG: EVENT RegisterEvent("UPDATE_FACTION")
     eventFrame:RegisterEvent("UPDATE_FACTION")
     eventFrame:SetScript("OnEvent", function()
         if XP.CurrentStep then
@@ -294,4 +319,5 @@ function XP:InitFaction()
     end)
 
     Faction.eventFrame = eventFrame
+-- DEBUG: EXIT XP:InitFaction()
 end

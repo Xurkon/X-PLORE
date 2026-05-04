@@ -25,14 +25,20 @@ Parser.ConditionEnv = {}
 -----------------------------------------------------------------------
 -- Utility: trim whitespace
 -----------------------------------------------------------------------
+-- DEBUG: ENTER strtrim()
+-- DEBUG: PARAM s = [s]
 local function strtrim(s)
     if not s then return "" end
     return s:match("^%s*(.-)%s*$") or s
+-- DEBUG: EXIT strtrim()
 end
 
 -----------------------------------------------------------------------
 -- Utility: split string by delimiter
 -----------------------------------------------------------------------
+-- DEBUG: ENTER strsplit()
+-- DEBUG: PARAM sep = [sep]
+-- DEBUG: PARAM str = [str]
 local function strsplit(sep, str)
     local parts = {}
     local pattern = "([^" .. sep .. "]*)" .. sep .. "?"
@@ -46,6 +52,7 @@ local function strsplit(sep, str)
         parts[#parts] = nil
     end
     return parts
+-- DEBUG: EXIT strsplit()
 end
 
 -----------------------------------------------------------------------
@@ -54,6 +61,8 @@ end
 -- Example: "Defias Thug##123" -> "Defias Thug", 123, nil
 -- Example: "Some Item##456/obj" -> "Some Item", 456, "obj"
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseID()
+-- DEBUG: PARAM str = [str]
 function Parser:ParseID(str)
     if not str then return nil, nil, nil end
     local name, idStr, suffix = str:match("^(.-)##(%d+)/?(.*)$")
@@ -62,6 +71,7 @@ function Parser:ParseID(str)
     end
     -- No ## found, return whole string as name
     return strtrim(str), nil, nil
+-- DEBUG: EXIT Parser:ParseID()
 end
 
 -----------------------------------------------------------------------
@@ -73,6 +83,8 @@ end
 --   "X.XX,Y.YY" (coords only, no map)
 -- Returns: mapName, mapID, floor, x, y, dist
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseMapXYDist()
+-- DEBUG: PARAM str = [str]
 function Parser:ParseMapXYDist(str)
     if not str then return nil end
     str = strtrim(str)
@@ -125,12 +137,15 @@ function Parser:ParseMapXYDist(str)
     end
 
     return mapName, mapID, floor, x, y, dist
+-- DEBUG: EXIT Parser:ParseMapXYDist()
 end
 
 -----------------------------------------------------------------------
 -- ParseRanges: parse "3-5" or "3+" or "3" range strings
 -- Returns: min, max
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseRanges()
+-- DEBUG: PARAM str = [str]
 function Parser:ParseRanges(str)
     if not str then return nil, nil end
     str = strtrim(str)
@@ -141,12 +156,15 @@ function Parser:ParseRanges(str)
     a = str:match("^(%d+)$")
     if a then return tonumber(a), tonumber(a) end
     return nil, nil
+-- DEBUG: EXIT Parser:ParseRanges()
 end
 
 -----------------------------------------------------------------------
 -- ParseCount: parse "Kill #6# Worgen" -> count, cleaned text
 -- Also handles "Verb Count Noun" e.g. "Kill 8 Defias"
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseCount()
+-- DEBUG: PARAM text = [text]
 function Parser:ParseCount(text)
     if not text then return 1, text end
 
@@ -157,6 +175,7 @@ function Parser:ParseCount(text)
     -- "Count" at start after action verb
     -- We'll handle this case in goal parsing instead
     return 1, text
+-- DEBUG: EXIT Parser:ParseCount()
 end
 
 -----------------------------------------------------------------------
@@ -164,6 +183,8 @@ end
 -- For safety, we use a restricted environment.
 -- Returns: function or nil
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:MakeCondition()
+-- DEBUG: PARAM condStr = [condStr]
 function Parser:MakeCondition(condStr)
     if not condStr or condStr == "" then return nil end
 
@@ -189,12 +210,14 @@ function Parser:MakeCondition(condStr)
         end
     end
     return nil
+-- DEBUG: EXIT Parser:MakeCondition()
 end
 
 -----------------------------------------------------------------------
 -- GetConditionEnv: build the sandbox environment for conditions
 -- Provides player-state query functions
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:GetConditionEnv()
 function Parser:GetConditionEnv()
     if self._condEnv then return self._condEnv end
 
@@ -211,35 +234,52 @@ function Parser:GetConditionEnv()
     env.level = UnitLevel and UnitLevel("player") or 1
 
     -- Quest helpers
+    -- DEBUG: ENTER completedq()
+    -- DEBUG: PARAM questID = [questID]
     env.completedq = function(questID)
         if XP.IsQuestCompleted then return XP:IsQuestCompleted(questID) end
         if C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted then
             return C_QuestLog.IsQuestFlaggedCompleted(questID)
         end
         return false
+    -- DEBUG: EXIT completedq()
     end
 
+    -- DEBUG: ENTER haveq()
+    -- DEBUG: PARAM questID = [questID]
     env.haveq = function(questID)
         if XP.IsQuestInLog then return XP:IsQuestInLog(questID) end
         return false
+    -- DEBUG: EXIT haveq()
     end
 
     -- Skill helpers
+    -- DEBUG: ENTER skill()
+    -- DEBUG: PARAM skillName = [skillName]
+    -- DEBUG: PARAM level = [level]
     env.skill = function(skillName, level)
         -- TODO: implement skill level check
         return false
+    -- DEBUG: EXIT skill()
     end
 
     -- Rep helpers
+    -- DEBUG: ENTER rep()
+    -- DEBUG: PARAM factionName = [factionName]
+    -- DEBUG: PARAM standing = [standing]
     env.rep = function(factionName, standing)
         -- TODO: implement reputation check
         return false
+    -- DEBUG: EXIT rep()
     end
 
     -- Profession helpers
+    -- DEBUG: ENTER hasprof()
+    -- DEBUG: PARAM profName = [profName]
     env.hasprof = function(profName)
         -- TODO: implement profession check
         return false
+    -- DEBUG: EXIT hasprof()
     end
 
     -- Race/class checks
@@ -262,12 +302,15 @@ function Parser:GetConditionEnv()
     env.XP_IsVanilla = XP_IsVanilla or false
 
     -- Chromie Time
+    -- DEBUG: ENTER chromietime()
     env.chromietime = function()
         return 0 -- TODO: detect Chromie Time expansion
+    -- DEBUG: EXIT chromietime()
     end
 
     self._condEnv = env
     return env
+-- DEBUG: EXIT Parser:GetConditionEnv()
 end
 
 -----------------------------------------------------------------------
@@ -281,6 +324,9 @@ local GOALTYPES = {}
 -- Accept quest: "accept QuestName##QuestID"
 GOALTYPES["accept"] = {
     action = "accept",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -292,6 +338,9 @@ GOALTYPES["accept"] = {
 -- Turn in quest: "turnin QuestName##QuestID"
 GOALTYPES["turnin"] = {
     action = "turnin",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -303,6 +352,9 @@ GOALTYPES["turnin"] = {
 -- Abandon quest
 GOALTYPES["abandon"] = {
     action = "abandon",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -314,6 +366,9 @@ GOALTYPES["abandon"] = {
 -- Kill mobs: "kill MobName##MobID+" or "kill Count MobName##MobID"
 GOALTYPES["kill"] = {
     action = "kill",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- Handle comma-separated multiple targets: "kill Mob1##ID+, Mob2##ID+"
         -- For now, take first target
@@ -332,6 +387,9 @@ GOALTYPES["kill"] = {
 -- Collect items: "collect Count ItemName##ItemID"
 GOALTYPES["collect"] = {
     action = "collect",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- Try "Count ItemName##ItemID"
         local countStr, rest = params:match("^(%d+)%s+(.*)")
@@ -356,6 +414,9 @@ GOALTYPES["farm"] = GOALTYPES["collect"]
 -- Buy item
 GOALTYPES["buy"] = {
     action = "buy",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local countStr, rest = params:match("^(%d+)%s+(.*)")
         if countStr then
@@ -375,6 +436,9 @@ GOALTYPES["buy"] = {
 -- Use item
 GOALTYPES["use"] = {
     action = "use",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -386,6 +450,9 @@ GOALTYPES["use"] = {
 -- Talk to NPC
 GOALTYPES["talk"] = {
     action = "talk",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -397,6 +464,9 @@ GOALTYPES["talk"] = {
 -- Click object
 GOALTYPES["click"] = {
     action = "click",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -408,6 +478,9 @@ GOALTYPES["click"] = {
 -- Click NPC
 GOALTYPES["clicknpc"] = {
     action = "clicknpc",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -419,6 +492,9 @@ GOALTYPES["clicknpc"] = {
 -- Goto: "goto MapName/Floor X.XX,Y.YY"
 GOALTYPES["goto"] = {
     action = "goto",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local mapName, mapID, floor, x, y, dist = Parser:ParseMapXYDist(params)
         goal.mapName = mapName
@@ -443,6 +519,9 @@ GOALTYPES["at"] = GOALTYPES["goto"]
 -- Home: set hearthstone
 GOALTYPES["home"] = {
     action = "home",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Set Hearthstone"
         goal.action = "home"
@@ -453,6 +532,9 @@ GOALTYPES["hearth"] = GOALTYPES["home"]
 -- Confirm: manual confirmation step
 GOALTYPES["confirm"] = {
     action = "confirm",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Click to confirm"
         goal.action = "confirm"
@@ -463,6 +545,9 @@ GOALTYPES["confirm"] = {
 -- Skill check
 GOALTYPES["skill"] = {
     action = "skill",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- "SkillName,Level"
         local skillName, level = params:match("^(.+),(%d+)")
@@ -481,6 +566,9 @@ GOALTYPES["reachskill"] = GOALTYPES["skill"]
 -- Learn spell/ability
 GOALTYPES["learn"] = {
     action = "learn",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -493,6 +581,9 @@ GOALTYPES["learnspell"] = GOALTYPES["learn"]
 -- Learn mount
 GOALTYPES["learnmount"] = {
     action = "learnmount",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params or "Learn mount"
@@ -504,6 +595,9 @@ GOALTYPES["learnmount"] = {
 -- Learn pet
 GOALTYPES["learnpet"] = {
     action = "learnpet",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params or "Learn pet"
@@ -515,6 +609,9 @@ GOALTYPES["learnpet"] = {
 -- Equipped check
 GOALTYPES["equipped"] = {
     action = "equipped",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -527,6 +624,9 @@ GOALTYPES["equip"] = GOALTYPES["equipped"]
 -- Reputation check
 GOALTYPES["rep"] = {
     action = "rep",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- "FactionName,Standing"
         local factionName, standing = params:match("^(.+),(.+)$")
@@ -544,6 +644,9 @@ GOALTYPES["rep"] = {
 -- Create/craft item
 GOALTYPES["create"] = {
     action = "create",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- "RecipeName##SpellID,SkillName,TargetLevel"
         local recipe, rest = params:match("^([^,]+),?(.*)")
@@ -567,6 +670,9 @@ GOALTYPES["craft"] = GOALTYPES["create"]
 -- Gossip selection
 GOALTYPES["gossip"] = {
     action = "gossip",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.gossipIndex = tonumber(params)
         goal.text = "Select gossip option"
@@ -577,6 +683,9 @@ GOALTYPES["gossip"] = {
 -- Vendor
 GOALTYPES["vendor"] = {
     action = "vendor",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Visit vendor"
         goal.action = "vendor"
@@ -586,6 +695,9 @@ GOALTYPES["vendor"] = {
 -- Trainer
 GOALTYPES["trainer"] = {
     action = "trainer",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Visit trainer"
         goal.action = "trainer"
@@ -595,6 +707,9 @@ GOALTYPES["trainer"] = {
 -- Level check
 GOALTYPES["ding"] = {
     action = "level",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.level = tonumber(params)
         goal.text = "Reach level " .. (params or "?")
@@ -606,6 +721,9 @@ GOALTYPES["level"] = GOALTYPES["ding"]
 -- Grind
 GOALTYPES["grind"] = {
     action = "grind",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Grind until complete"
         goal.action = "grind"
@@ -615,6 +733,9 @@ GOALTYPES["grind"] = {
 -- Flight path
 GOALTYPES["fpath"] = {
     action = "fpath",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Get flight path"
         goal.action = "fpath"
@@ -622,6 +743,9 @@ GOALTYPES["fpath"] = {
 }
 GOALTYPES["fly"] = {
     action = "fly",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Fly"
         goal.action = "fly"
@@ -632,6 +756,9 @@ GOALTYPES["ferry"] = GOALTYPES["fpath"]
 -- Achievement
 GOALTYPES["achieve"] = {
     action = "achieve",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -643,6 +770,9 @@ GOALTYPES["achieve"] = {
 -- Image display (informational)
 GOALTYPES["image"] = {
     action = "image",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.imagePath = params
         goal.text = ""
@@ -653,6 +783,9 @@ GOALTYPES["image"] = {
 -- Info text (non-actionable)
 GOALTYPES["info"] = {
     action = "info",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or ""
         goal.action = "info"
@@ -662,6 +795,9 @@ GOALTYPES["info"] = {
 -- Cast spell
 GOALTYPES["cast"] = {
     action = "cast",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         local name, id = Parser:ParseID(params)
         goal.text = name or params
@@ -673,6 +809,9 @@ GOALTYPES["cast"] = {
 -- Goal (generic objective)
 GOALTYPES["goal"] = {
     action = "goal",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or ""
         goal.action = "goal"
@@ -682,6 +821,9 @@ GOALTYPES["goal"] = {
 -- Discover area
 GOALTYPES["discover"] = {
     action = "discover",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = params or "Discover area"
         goal.action = "discover"
@@ -691,6 +833,9 @@ GOALTYPES["discover"] = {
 -- Load another guide
 GOALTYPES["loadguide"] = {
     action = "loadguide",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         -- Strip quotes
         local path = params:match('^"(.-)"') or params
@@ -703,6 +848,9 @@ GOALTYPES["loadguide"] = {
 -- Next tab
 GOALTYPES["nexttab"] = {
     action = "nexttab",
+    -- DEBUG: ENTER parse()
+    -- DEBUG: PARAM goal = [goal]
+    -- DEBUG: PARAM params = [params]
     parse = function(goal, params)
         goal.text = "Continue to next guide"
         goal.action = "nexttab"
@@ -710,9 +858,14 @@ GOALTYPES["nexttab"] = {
 }
 
 -- Catch-all for unrecognized types: store as info
+-- DEBUG: ENTER genericParse()
+-- DEBUG: PARAM goal = [goal]
+-- DEBUG: PARAM params = [params]
+-- DEBUG: PARAM cmd = [cmd]
 local function genericParse(goal, params, cmd)
     goal.text = params or ""
     goal.action = cmd or "unknown"
+-- DEBUG: EXIT genericParse()
 end
 
 Parser.GOALTYPES = GOALTYPES
@@ -720,15 +873,21 @@ Parser.GOALTYPES = GOALTYPES
 -----------------------------------------------------------------------
 -- RegisterInclude: store a reusable guide text snippet
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:RegisterInclude()
+-- DEBUG: PARAM name = [name]
+-- DEBUG: PARAM text = [text]
 function Parser:RegisterInclude(name, text)
     if not name then return end
     self.Includes[name] = text
+-- DEBUG: EXIT Parser:RegisterInclude()
 end
 
 -----------------------------------------------------------------------
 -- ExpandIncludes: replace #include directives with include text
 -- Supports parameter substitution: #include "name" param1=val1
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ExpandIncludes()
+-- DEBUG: PARAM text = [text]
 function Parser:ExpandIncludes(text)
     if not text then return text end
 
@@ -766,11 +925,14 @@ function Parser:ExpandIncludes(text)
     end
 
     return text
+-- DEBUG: EXIT Parser:ExpandIncludes()
 end
 
 -----------------------------------------------------------------------
 -- StripComments: remove -- and // comments, handle || continuation
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:StripComments()
+-- DEBUG: PARAM text = [text]
 function Parser:StripComments(text)
     if not text then return text end
     local lines = {}
@@ -802,12 +964,15 @@ function Parser:StripComments(text)
     end
 
     return lines
+-- DEBUG: EXIT Parser:StripComments()
 end
 
 -----------------------------------------------------------------------
 -- ParseModifier: parse a pipe-delimited modifier chunk
 -- Returns modifier type and value
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseModifier()
+-- DEBUG: PARAM chunk = [chunk]
 function Parser:ParseModifier(chunk)
     chunk = strtrim(chunk)
     if chunk == "" then return nil, nil end
@@ -882,12 +1047,15 @@ function Parser:ParseModifier(chunk)
     if countNum then return "count", tonumber(countNum) end
 
     return "unknown", chunk
+-- DEBUG: EXIT Parser:ParseModifier()
 end
 
 -----------------------------------------------------------------------
 -- FormatText: strip markup from display text
 -- Removes {color}...{}, _gold_, #count# etc.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:FormatText()
+-- DEBUG: PARAM text = [text]
 function Parser:FormatText(text)
     if not text then return "" end
 
@@ -908,6 +1076,7 @@ function Parser:FormatText(text)
     end
 
     return strtrim(text)
+-- DEBUG: EXIT Parser:FormatText()
 end
 
 -----------------------------------------------------------------------
@@ -918,6 +1087,9 @@ end
 -- Input: raw text string (multi-line)
 -- Output: array of step tables, each containing goals array
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseEntry()
+-- DEBUG: PARAM text = [text]
+-- DEBUG: PARAM guideObj = [guideObj]
 function Parser:ParseEntry(text, guideObj)
     if not text or text == "" then return {} end
 
@@ -1121,6 +1293,7 @@ function Parser:ParseEntry(text, guideObj)
     end
 
     return steps
+-- DEBUG: EXIT Parser:ParseEntry()
 end
 
 -----------------------------------------------------------------------
@@ -1128,6 +1301,8 @@ end
 -- Input: raw header table (from RegisterGuide second argument)
 -- Output: structured metadata table
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseHeader()
+-- DEBUG: PARAM header = [header]
 function Parser:ParseHeader(header)
     if not header then return {} end
 
@@ -1158,6 +1333,7 @@ function Parser:ParseHeader(header)
     end
 
     return meta
+-- DEBUG: EXIT Parser:ParseHeader()
 end
 
 -----------------------------------------------------------------------
@@ -1165,6 +1341,8 @@ end
 -- category parts. Zygor uses backslash-delimited paths.
 -- Returns: array of path segments, leaf name
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:ParseGuidePath()
+-- DEBUG: PARAM path = [path]
 function Parser:ParseGuidePath(path)
     if not path then return {}, "" end
 
@@ -1175,11 +1353,14 @@ function Parser:ParseGuidePath(path)
 
     local leaf = parts[#parts] or ""
     return parts, leaf
+-- DEBUG: EXIT Parser:ParseGuidePath()
 end
 
 -----------------------------------------------------------------------
 -- DeriveCategory: try to map a guide path to our category system
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:DeriveCategory()
+-- DEBUG: PARAM pathParts = [pathParts]
 function Parser:DeriveCategory(pathParts)
     if not pathParts or #pathParts == 0 then return "LEVELING" end
 
@@ -1200,11 +1381,14 @@ function Parser:DeriveCategory(pathParts)
     if top:find("poi") then return "EXPLORATION" end
 
     return "LEVELING"
+-- DEBUG: EXIT Parser:DeriveCategory()
 end
 
 -----------------------------------------------------------------------
 -- DeriveFaction: try to determine faction from guide path
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:DeriveFaction()
+-- DEBUG: PARAM pathParts = [pathParts]
 function Parser:DeriveFaction(pathParts)
     if not pathParts then return nil end
     for _, part in ipairs(pathParts) do
@@ -1214,12 +1398,15 @@ function Parser:DeriveFaction(pathParts)
         if lower == "neutral" or lower == "common" then return "NEUTRAL" end
     end
     return nil
+-- DEBUG: EXIT Parser:DeriveFaction()
 end
 
 -----------------------------------------------------------------------
 -- DeriveExpansion: try to determine expansion from guide path
 -- Returns numeric expansion index (0=Classic, 1=TBC, 2=WotLK, etc.)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Parser:DeriveExpansion()
+-- DEBUG: PARAM pathParts = [pathParts]
 function Parser:DeriveExpansion(pathParts)
     if not pathParts then return nil end
     for _, part in ipairs(pathParts) do
@@ -1237,9 +1424,46 @@ function Parser:DeriveExpansion(pathParts)
         if lower == "tww" or lower:find("within") then return 10 end
     end
     return nil
+-- DEBUG: EXIT Parser:DeriveExpansion()
 end
 
 -----------------------------------------------------------------------
 -- Export
 -----------------------------------------------------------------------
 XP.Parser = Parser
+
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]
+-- DEBUG: EXIT parse() [EOF]

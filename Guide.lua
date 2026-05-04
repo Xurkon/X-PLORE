@@ -18,6 +18,8 @@ local XP = ADDON_TABLE.XP
 local Goal = {}
 Goal.__index = Goal
 
+-- DEBUG: ENTER Goal:New()
+-- DEBUG: PARAM data = [data]
 function Goal:New(data)
     local obj = setmetatable({}, Goal)
     obj.action          = data.action or data.type or "text"
@@ -53,12 +55,14 @@ function Goal:New(data)
     obj.loadguidePath   = data.loadguidePath
     obj.modifiers       = data.modifiers or {}
     return obj
+-- DEBUG: EXIT Goal:New()
 end
 
 -----------------------------------------------------------------------
 -- Goal Completion Logic
 -- Returns: isComplete, isPossible, numDone, numNeeded
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Goal:IsComplete()
 function Goal:IsComplete()
     if self.forceComplete then return true, true, 1, 1 end
 
@@ -153,11 +157,13 @@ function Goal:IsComplete()
     if self.complete then return true, true, 1, 1 end
 
     return false, true, 0, 1
+-- DEBUG: EXIT Goal:IsComplete()
 end
 
 -----------------------------------------------------------------------
 -- Quest Completion Helpers (WoW version compatible)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Goal:CheckQuestAccepted()
 function Goal:CheckQuestAccepted()
     if not self.questID then return false end
 
@@ -177,8 +183,10 @@ function Goal:CheckQuestAccepted()
     end
 
     return false
+-- DEBUG: EXIT Goal:CheckQuestAccepted()
 end
 
+-- DEBUG: ENTER Goal:CheckQuestTurnin()
 function Goal:CheckQuestTurnin()
     if not self.questID then return false end
 
@@ -195,10 +203,12 @@ function Goal:CheckQuestTurnin()
     end
 
     return false
+-- DEBUG: EXIT Goal:CheckQuestTurnin()
 end
 
 -- Checks if a quest is currently in the player's quest log (any state).
 -- Returns: questLogEntry (table) or nil
+-- DEBUG: ENTER Goal:IsQuestInLog()
 function Goal:IsQuestInLog()
     if not self.questID then return nil end
 
@@ -218,8 +228,10 @@ function Goal:IsQuestInLog()
     end
 
     return nil
+-- DEBUG: EXIT Goal:IsQuestInLog()
 end
 
+-- DEBUG: ENTER Goal:CheckQuestCompletion()
 function Goal:CheckQuestCompletion()
     if not self.questID then return nil end
 
@@ -234,8 +246,10 @@ function Goal:CheckQuestCompletion()
     end
 
     return nil
+-- DEBUG: EXIT Goal:CheckQuestCompletion()
 end
 
+-- DEBUG: ENTER Goal:CheckAchievementCompletion()
 function Goal:CheckAchievementCompletion()
     if not self.achieveID then return false end
     if XP.IsVanilla then
@@ -248,15 +262,20 @@ function Goal:CheckAchievementCompletion()
         end
     end
     return false
+-- DEBUG: EXIT Goal:CheckAchievementCompletion()
 end
 
 -----------------------------------------------------------------------
 -- Update goal count from external source (called by GoalTracker)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Goal:SetCount()
+-- DEBUG: PARAM count = [count]
 function Goal:SetCount(count)
     self.current = count
+-- DEBUG: EXIT Goal:SetCount()
 end
 
+-- DEBUG: ENTER Goal:GetDisplayText()
 function Goal:GetDisplayText()
     local prefix = ""
     local action = (self.action or "text"):upper()
@@ -306,15 +325,19 @@ function Goal:GetDisplayText()
         prefix = ""
     end
     return prefix .. (self.text or "")
+-- DEBUG: EXIT Goal:GetDisplayText()
 end
 
+-- DEBUG: ENTER Goal:GetProgressText()
 function Goal:GetProgressText()
     if self.count and self.count > 1 then
         return (self.current or 0) .. "/" .. self.count
     end
     return self.complete and "Done" or ""
+-- DEBUG: EXIT Goal:GetProgressText()
 end
 
+-- DEBUG: ENTER Goal:GetActionIcon()
 function Goal:GetActionIcon()
     local iconMap = {
         -- Zygor-style names
@@ -374,10 +397,13 @@ function Goal:GetActionIcon()
         TEXT          = "note",
     }
     return iconMap[self.action] or iconMap[(self.action or ""):upper()] or "default"
+-- DEBUG: EXIT Goal:GetActionIcon()
 end
 
+-- DEBUG: ENTER Goal:GetTips()
 function Goal:GetTips()
     return self.tips or {}
+-- DEBUG: EXIT Goal:GetTips()
 end
 
 XP.Goal = Goal
@@ -389,6 +415,9 @@ XP.Goal = Goal
 local Step = {}
 Step.__index = Step
 
+-- DEBUG: ENTER Step:New()
+-- DEBUG: PARAM data = [data]
+-- DEBUG: PARAM index = [index]
 function Step:New(data, index)
     local obj = setmetatable({}, Step)
     obj.index       = index or 1
@@ -421,6 +450,7 @@ function Step:New(data, index)
     end
 
     return obj
+-- DEBUG: EXIT Step:New()
 end
 
 -----------------------------------------------------------------------
@@ -428,16 +458,20 @@ end
 -- Returns: isComplete, state ("complete"|"active"|"upcoming"|"skipped")
 -- Uses event-driven goal completion (WoW API), not position.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Step:IsComplete()
 function Step:IsComplete()
     for _, goal in ipairs(self.goals) do
         if not goal:IsComplete() then return false end
     end
     return #self.goals > 0
+-- DEBUG: EXIT Step:IsComplete()
 end
 
 -- Returns completion state for this step.
 -- activeStepNum: the step index of the first non-complete step (determines "active" marker).
 -- Uses event-driven completion, not position.
+-- DEBUG: ENTER Step:GetCompletionState()
+-- DEBUG: PARAM activeStepNum = [activeStepNum]
 function Step:GetCompletionState(activeStepNum)
     if self:IsComplete() then
         return "complete"
@@ -454,14 +488,18 @@ function Step:GetCompletionState(activeStepNum)
     end
 
     return "upcoming"
+-- DEBUG: EXIT Step:GetCompletionState()
 end
 
+-- DEBUG: ENTER Step:GetTitle()
 function Step:GetTitle()
     if self.label then return self.label end
     if self.goals[1] then return self.goals[1]:GetDisplayText() end
     return "Step " .. self.index
+-- DEBUG: EXIT Step:GetTitle()
 end
 
+-- DEBUG: ENTER Step:GetDescription()
 function Step:GetDescription()
     -- Combine tips from all goals
     local tips = {}
@@ -475,34 +513,45 @@ function Step:GetDescription()
     if #tips > 0 then return table.concat(tips, "\n") end
     if self.goals[1] then return self.goals[1].description or "" end
     return ""
+-- DEBUG: EXIT Step:GetDescription()
 end
 
+-- DEBUG: ENTER Step:GetPrimaryCoords()
 function Step:GetPrimaryCoords()
     for _, goal in ipairs(self.goals) do
         if goal.coords then return goal.coords end
     end
     return nil
+-- DEBUG: EXIT Step:GetPrimaryCoords()
 end
 
+-- DEBUG: ENTER Step:GetPrimaryMapName()
 function Step:GetPrimaryMapName()
     for _, goal in ipairs(self.goals) do
         if goal.mapName then return goal.mapName end
     end
     return nil
+-- DEBUG: EXIT Step:GetPrimaryMapName()
 end
 
+-- DEBUG: ENTER Step:GetPrimaryAction()
 function Step:GetPrimaryAction()
     if self.goals[1] then return self.goals[1].action end
     return "text"
+-- DEBUG: EXIT Step:GetPrimaryAction()
 end
 
+-- DEBUG: ENTER Step:GetPrimaryIcon()
 function Step:GetPrimaryIcon()
     if self.goals[1] then return self.goals[1]:GetActionIcon() end
     return "default"
+-- DEBUG: EXIT Step:GetPrimaryIcon()
 end
 
+-- DEBUG: ENTER Step:GetGoalCount()
 function Step:GetGoalCount()
     return #self.goals
+-- DEBUG: EXIT Step:GetGoalCount()
 end
 
 XP.Step = Step
@@ -515,6 +564,8 @@ XP.Step = Step
 local Guide = {}
 Guide.__index = Guide
 
+-- DEBUG: ENTER Guide:New()
+-- DEBUG: PARAM data = [data]
 function Guide:New(data)
     local obj = setmetatable({}, Guide)
     obj.id              = data.id
@@ -563,6 +614,7 @@ function Guide:New(data)
     end
 
     return obj
+-- DEBUG: EXIT Guide:New()
 end
 
 -----------------------------------------------------------------------
@@ -570,6 +622,7 @@ end
 -- Call this when the guide is first loaded/viewed.
 -- Uses XP.Parser:ParseEntry() to convert raw text to steps.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER Guide:Parse()
 function Guide:Parse()
     if self.parsed then return end
     if not self.rawData then
@@ -615,15 +668,20 @@ function Guide:Parse()
     -- Free raw data to save memory
     self.rawData = nil
     self.rawHeader = nil
+-- DEBUG: EXIT Guide:Parse()
 end
 
+-- DEBUG: ENTER Guide:GetProgress()
+-- DEBUG: PARAM currentStep = [currentStep]
 function Guide:GetProgress(currentStep)
     self:Parse() -- Ensure parsed
     currentStep = currentStep or 1
     return currentStep, self.numSteps
+-- DEBUG: EXIT Guide:GetProgress()
 end
 
 -- Returns how many steps have ALL goals complete (event-driven completion).
+-- DEBUG: ENTER Guide:GetCompletedSteps()
 function Guide:GetCompletedSteps()
     self:Parse()
     local count = 0
@@ -634,8 +692,11 @@ function Guide:GetCompletedSteps()
         end
     end
     return count
+-- DEBUG: EXIT Guide:GetCompletedSteps()
 end
 
+-- DEBUG: ENTER Guide:GetProgressPercent()
+-- DEBUG: PARAM currentStep = [currentStep]
 function Guide:GetProgressPercent(currentStep)
     self:Parse()
     if self.numSteps == 0 then return 0 end
@@ -644,39 +705,52 @@ function Guide:GetProgressPercent(currentStep)
     -- Cap at 100% once current step is reached
     local pct = math.floor((completed / self.numSteps) * 100)
     return math.min(pct, 100)
+-- DEBUG: EXIT Guide:GetProgressPercent()
 end
 
+-- DEBUG: ENTER Guide:GetStep()
+-- DEBUG: PARAM index = [index]
 function Guide:GetStep(index)
     self:Parse()
     return self.steps[index]
+-- DEBUG: EXIT Guide:GetStep()
 end
 
+-- DEBUG: ENTER Guide:GetNumSteps()
 function Guide:GetNumSteps()
     self:Parse()
     return self.numSteps
+-- DEBUG: EXIT Guide:GetNumSteps()
 end
 
+-- DEBUG: ENTER Guide:IsSuggested()
 function Guide:IsSuggested()
     if self.conditionSuggestedFn then
         return self.conditionSuggestedFn()
     end
     return true
+-- DEBUG: EXIT Guide:IsSuggested()
 end
 
+-- DEBUG: ENTER Guide:IsValid()
 function Guide:IsValid()
     if self.conditionValidFn then
         return self.conditionValidFn()
     end
     return true
+-- DEBUG: EXIT Guide:IsValid()
 end
 
+-- DEBUG: ENTER Guide:IsEnded()
 function Guide:IsEnded()
     if self.conditionEndFn then
         return self.conditionEndFn()
     end
     return false
+-- DEBUG: EXIT Guide:IsEnded()
 end
 
+-- DEBUG: ENTER Guide:ToggleFavourite()
 function Guide:ToggleFavourite()
     if not XP.db then return end
     local favs = XP.db.char.favourites or {}
@@ -686,12 +760,15 @@ function Guide:ToggleFavourite()
         favs[self.title] = true
     end
     XP.db.char.favourites = favs
+-- DEBUG: EXIT Guide:ToggleFavourite()
 end
 
+-- DEBUG: ENTER Guide:IsFavourite()
 function Guide:IsFavourite()
     if not XP.db then return false end
     local favs = XP.db.char.favourites or {}
     return favs[self.title] == true
+-- DEBUG: EXIT Guide:IsFavourite()
 end
 
 XP.Guide = Guide
@@ -712,6 +789,10 @@ XP.GuidesByCategory = XP.GuidesByCategory or {}
 -- 2) Zygor-format (title, header, data):
 --    XP:RegisterGuide("Leveling\\Alliance\\1-10", { description="..." }, [[step\naccept Quest##123]])
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:RegisterGuide()
+-- DEBUG: PARAM titleOrData = [titleOrData]
+-- DEBUG: PARAM header = [header]
+-- DEBUG: PARAM data = [data]
 function XP:RegisterGuide(titleOrData, header, data)
     -- Detect calling convention
     if type(titleOrData) == "table" then
@@ -726,11 +807,14 @@ function XP:RegisterGuide(titleOrData, header, data)
         end
         return nil
     end
+-- DEBUG: EXIT XP:RegisterGuide()
 end
 
 -----------------------------------------------------------------------
 -- _RegisterGuideFromTable: original table-based registration
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:_RegisterGuideFromTable()
+-- DEBUG: PARAM tbl = [tbl]
 function XP:_RegisterGuideFromTable(tbl)
     if not tbl or not tbl.id then
         if self.Print then
@@ -747,6 +831,7 @@ function XP:_RegisterGuideFromTable(tbl)
     self.GuidesByCategory[cat][#self.GuidesByCategory[cat] + 1] = guide
 
     return guide
+-- DEBUG: EXIT XP:_RegisterGuideFromTable()
 end
 
 -----------------------------------------------------------------------
@@ -755,6 +840,10 @@ end
 -- header: metadata table { description, condition_suggested, ... }
 -- data: raw multi-line guide text string
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:_RegisterGuideFromZygor()
+-- DEBUG: PARAM title = [title]
+-- DEBUG: PARAM header = [header]
+-- DEBUG: PARAM data = [data]
 function XP:_RegisterGuideFromZygor(title, header, data)
     if not title then
         if self.Print then
@@ -808,21 +897,29 @@ function XP:_RegisterGuideFromZygor(title, header, data)
     self.GuidesByCategory[category][#self.GuidesByCategory[category] + 1] = guide
 
     return guide
+-- DEBUG: EXIT XP:_RegisterGuideFromZygor()
 end
 
 -----------------------------------------------------------------------
 -- RegisterInclude: store a reusable guide text snippet
 -- Delegates to Parser.
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:RegisterInclude()
+-- DEBUG: PARAM name = [name]
+-- DEBUG: PARAM text = [text]
 function XP:RegisterInclude(name, text)
     if self.Parser then
         self.Parser:RegisterInclude(name, text)
     end
+-- DEBUG: EXIT XP:RegisterInclude()
 end
 
 -----------------------------------------------------------------------
 -- RegisterGuidePlaceholder: register a locked/placeholder guide
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:RegisterGuidePlaceholder()
+-- DEBUG: PARAM title = [title]
+-- DEBUG: PARAM header = [header]
 function XP:RegisterGuidePlaceholder(title, header)
     if not title then return nil end
 
@@ -849,25 +946,36 @@ function XP:RegisterGuidePlaceholder(title, header)
     self.GuidesByCategory[category][#self.GuidesByCategory[category] + 1] = guide
 
     return guide
+-- DEBUG: EXIT XP:RegisterGuidePlaceholder()
 end
 
 -----------------------------------------------------------------------
 -- Convenience accessors
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:GetAllGuides()
 function XP:GetAllGuides()
     return self.Guides
+-- DEBUG: EXIT XP:GetAllGuides()
 end
 
+-- DEBUG: ENTER XP:GetGuide()
+-- DEBUG: PARAM id = [id]
 function XP:GetGuide(id)
     return self.Guides[id]
+-- DEBUG: EXIT XP:GetGuide()
 end
 
+-- DEBUG: ENTER XP:GetGuideCount()
 function XP:GetGuideCount()
     local n = 0
     for _ in pairs(self.Guides) do n = n + 1 end
     return n
+-- DEBUG: EXIT XP:GetGuideCount()
 end
 
+-- DEBUG: ENTER XP:GetGuidesByCategory()
+-- DEBUG: PARAM category = [category]
 function XP:GetGuidesByCategory(category)
     return self.GuidesByCategory[category] or {}
+-- DEBUG: EXIT XP:GetGuidesByCategory()
 end

@@ -21,6 +21,8 @@ local GLOW_COLOR = { 0, 0.9, 1, 0.7 }  -- cyan glow RGBA
 -- Compat wrappers
 -----------------------------------------------------------------------
 -- GetSpellInfo returns different tables on Retail vs WotLK.
+-- DEBUG: ENTER GetSpellName()
+-- DEBUG: PARAM spellID = [spellID]
 local function GetSpellName(spellID)
     if not spellID then return nil end
     if C_Spell and C_Spell.GetSpellInfo then
@@ -29,11 +31,14 @@ local function GetSpellName(spellID)
     end
     local name = GetSpellInfo(spellID)  -- Lua multiple return on WotLK
     return name
+-- DEBUG: EXIT GetSpellName()
 end
 
 -- Returns the action bar button frame for a given bar slot (1-120).
 -- WotLK: ActionButton1..12, MultiBarBottomLeft/Right, MultiBarLeft/Right.
 -- Retail: uses the same global naming convention.
+-- DEBUG: ENTER GetActionSlotFrame()
+-- DEBUG: PARAM slot = [slot]
 local function GetActionSlotFrame(slot)
     if slot <= 12 then
         return _G["ActionButton" .. slot]
@@ -47,11 +52,14 @@ local function GetActionSlotFrame(slot)
         return _G["MultiBarLeftButton" .. (slot - 48)]
     end
     return nil
+-- DEBUG: EXIT GetActionSlotFrame()
 end
 
 -----------------------------------------------------------------------
 -- Glow helper
 -----------------------------------------------------------------------
+-- DEBUG: ENTER CreateGlowTexture()
+-- DEBUG: PARAM btn = [btn]
 local function CreateGlowTexture(btn)
     local glow = btn:CreateTexture(nil, "OVERLAY")
     glow:SetBlendMode("ADD")
@@ -59,11 +67,13 @@ local function CreateGlowTexture(btn)
     glow:SetTexture("Interface\\SpellActivationOverlay\\IconAlert")
     glow:SetVertexColor(GLOW_COLOR[1], GLOW_COLOR[2], GLOW_COLOR[3], GLOW_COLOR[4])
     return glow
+-- DEBUG: EXIT CreateGlowTexture()
 end
 
 -----------------------------------------------------------------------
 -- Clear all current highlights
 -----------------------------------------------------------------------
+-- DEBUG: ENTER ActionBar:ClearHighlights()
 function ActionBar:ClearHighlights()
     for _, info in ipairs(highlightedSlots) do
         if info.glow and info.glow:IsObjectType("Texture") then
@@ -72,11 +82,14 @@ function ActionBar:ClearHighlights()
         end
     end
     highlightedSlots = {}
+-- DEBUG: EXIT ActionBar:ClearHighlights()
 end
 
 -----------------------------------------------------------------------
 -- Highlight a single action bar slot
 -----------------------------------------------------------------------
+-- DEBUG: ENTER ActionBar:HighlightSlot()
+-- DEBUG: PARAM slot = [slot]
 function ActionBar:HighlightSlot(slot)
     local btn = GetActionSlotFrame(slot)
     if not btn then return end
@@ -88,11 +101,14 @@ function ActionBar:HighlightSlot(slot)
     btn._xpGlow:Show()
 
     table.insert(highlightedSlots, { slot = slot, btn = btn, glow = btn._xpGlow })
+-- DEBUG: EXIT ActionBar:HighlightSlot()
 end
 
 -----------------------------------------------------------------------
 -- Find all action bar slots that contain a given spell ID or item ID
 -----------------------------------------------------------------------
+-- DEBUG: ENTER FindSlotsForSpell()
+-- DEBUG: PARAM spellID = [spellID]
 local function FindSlotsForSpell(spellID)
     local slots = {}
     for i = 1, 120 do
@@ -104,8 +120,11 @@ local function FindSlotsForSpell(spellID)
         end
     end
     return slots
+-- DEBUG: EXIT FindSlotsForSpell()
 end
 
+-- DEBUG: ENTER FindSlotsForItem()
+-- DEBUG: PARAM itemID = [itemID]
 local function FindSlotsForItem(itemID)
     local slots = {}
     for i = 1, 120 do
@@ -117,11 +136,14 @@ local function FindSlotsForItem(itemID)
         end
     end
     return slots
+-- DEBUG: EXIT FindSlotsForItem()
 end
 
 -----------------------------------------------------------------------
 -- Resolve a goal to a spell/item ID and highlight matching slots
 -----------------------------------------------------------------------
+-- DEBUG: ENTER HighlightGoal()
+-- DEBUG: PARAM goal = [goal]
 local function HighlightGoal(goal)
     if not goal then return end
 
@@ -163,11 +185,14 @@ local function HighlightGoal(goal)
             end
         end
     end
+-- DEBUG: EXIT HighlightGoal()
 end
 
 -----------------------------------------------------------------------
 -- Update highlights for the current step
 -----------------------------------------------------------------------
+-- DEBUG: ENTER ActionBar:UpdateForStep()
+-- DEBUG: PARAM step = [step]
 function ActionBar:UpdateForStep(step)
     self:ClearHighlights()
 
@@ -181,6 +206,7 @@ function ActionBar:UpdateForStep(step)
             HighlightGoal(goal)
         end
     end
+-- DEBUG: EXIT ActionBar:UpdateForStep()
 end
 
 -----------------------------------------------------------------------
@@ -191,6 +217,7 @@ local pulseDelta  = 0.6   -- range 0.4–1.0
 local pulseDir    = 1
 local pulseTicker = nil
 
+-- DEBUG: ENTER PulseTick()
 local function PulseTick()
     pulseAlpha = pulseAlpha + pulseDir * 0.05
     if pulseAlpha >= 1.0 then pulseAlpha = 1.0; pulseDir = -1 end
@@ -201,8 +228,10 @@ local function PulseTick()
             info.glow:SetAlpha(pulseAlpha)
         end
     end
+-- DEBUG: EXIT PulseTick()
 end
 
+-- DEBUG: ENTER StartPulse()
 local function StartPulse()
     if pulseTicker then return end
     if C_Timer and C_Timer.NewTicker then
@@ -222,8 +251,10 @@ local function StartPulse()
         end
         ActionBar._pulseFrame:Show()
     end
+-- DEBUG: EXIT StartPulse()
 end
 
+-- DEBUG: ENTER StopPulse()
 local function StopPulse()
     if pulseTicker then
         pulseTicker:Cancel()
@@ -232,11 +263,13 @@ local function StopPulse()
     if ActionBar._pulseFrame then
         ActionBar._pulseFrame:Hide()
     end
+-- DEBUG: EXIT StopPulse()
 end
 
 -----------------------------------------------------------------------
 -- Init — called from XP:OnEnable
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:InitActionBar()
 function XP:InitActionBar()
     -- DB defaults (merged into XP.db.profile in Core.lua)
     if XP.db and XP.db.profile.actionBar == nil then
@@ -260,8 +293,11 @@ function XP:InitActionBar()
 
     -- Also refresh when spells/bag changes
     local refreshFrame = CreateFrame("Frame")
+  -- DEBUG: EVENT RegisterEvent("ACTIONBAR_SLOT_CHANGED")
     refreshFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+  -- DEBUG: EVENT RegisterEvent("BAG_UPDATE_DELAYED")
     refreshFrame:RegisterEvent("BAG_UPDATE_DELAYED")
+  -- DEBUG: EVENT RegisterEvent("SPELLS_CHANGED")
     refreshFrame:RegisterEvent("SPELLS_CHANGED")
     refreshFrame:SetScript("OnEvent", function()
         if XP.CurrentStep then
@@ -270,4 +306,5 @@ function XP:InitActionBar()
     end)
 
     ActionBar.refreshFrame = refreshFrame
+-- DEBUG: EXIT XP:InitActionBar()
 end

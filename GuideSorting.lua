@@ -54,6 +54,7 @@ local EXPANSION_GROUPS = {
 -----------------------------------------------------------------------
 -- Initialization
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:InitCategories()
 function XP:InitCategories()
     self.Categories = {}
     self.CategoryMap = {}       -- [id] => category data
@@ -68,18 +69,23 @@ function XP:InitCategories()
     -- Store sub-groups for reference
     self.FactionGroups    = FACTION_GROUPS
     self.ExpansionGroups  = EXPANSION_GROUPS
+-- DEBUG: EXIT XP:InitCategories()
 end
 
 -- Get ordered category list (for sidebar display)
+-- DEBUG: ENTER XP:GetCategories()
 function XP:GetCategories()
     -- Lazy-init
     if not self.CategoryMap then
         self:InitCategories()
     end
     return self.Categories
+-- DEBUG: EXIT XP:GetCategories()
 end
 
 -- Get guides for a category (filtered by current expansion)
+-- DEBUG: ENTER XP:GetGuidesForCategory()
+-- DEBUG: PARAM categoryID = [categoryID]
 function XP:GetGuidesForCategory(categoryID)
     -- Lazy-init
     if not self.CategoryMap then
@@ -97,18 +103,23 @@ function XP:GetGuidesForCategory(categoryID)
         return filtered
     end
     return guides
+-- DEBUG: EXIT XP:GetGuidesForCategory()
 end
 
 -- Get category info by ID
+-- DEBUG: ENTER XP:GetCategory()
+-- DEBUG: PARAM categoryID = [categoryID]
 function XP:GetCategory(categoryID)
     -- Lazy-init: ensure categories are initialized before access
     if not self.CategoryMap then
         self:InitCategories()
     end
     return self.CategoryMap[categoryID]
+-- DEBUG: EXIT XP:GetCategory()
 end
 
 -- Count guides in a category
+-- DEBUG: ENTER XP:GetGuideCounts()
 function XP:GetGuideCounts()
     -- Lazy-init
     if not self.CategoryMap then
@@ -119,9 +130,11 @@ function XP:GetGuideCounts()
         counts[id] = #guides
     end
     return counts
+-- DEBUG: EXIT XP:GetGuideCounts()
 end
 
 -- Get all guides that are marked as favourite
+-- DEBUG: ENTER XP:GetFavouriteGuides()
 function XP:GetFavouriteGuides()
     local favs = self.db and self.db.char and self.db.char.favourites or {}
     local result = {}
@@ -131,4 +144,5 @@ function XP:GetFavouriteGuides()
         end
     end
     return result
+-- DEBUG: EXIT XP:GetFavouriteGuides()
 end

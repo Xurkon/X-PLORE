@@ -23,6 +23,7 @@ local activeStepLines = {}
 -----------------------------------------------------------------------
 -- Create the Viewer Frame
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:CreateViewerFrame()
 function XP:CreateViewerFrame()
     if self.ViewerFrame and self.ViewerFrameCreated then return end
 
@@ -520,11 +521,15 @@ function XP:CreateViewerFrame()
         -- Redraw current step lines with new skin colors
         XP:UpdateViewer()
     end)
+-- DEBUG: EXIT XP:CreateViewerFrame()
 end
 
 -----------------------------------------------------------------------
 -- Create a Step Line Frame
 -----------------------------------------------------------------------
+-- DEBUG: ENTER CreateStepLine()
+-- DEBUG: PARAM parent = [parent]
+-- DEBUG: PARAM index = [index]
 local function CreateStepLine(parent, index)
     local lineHeight = STEP_LINE_HEIGHT
 
@@ -578,11 +583,13 @@ local function CreateStepLine(parent, index)
     line.stepIndex = index
 
     return line
+-- DEBUG: EXIT CreateStepLine()
 end
 
 -----------------------------------------------------------------------
 -- Update Viewer: refresh all step lines from current guide
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateViewer()
 function XP:UpdateViewer()
     if not self.ViewerFrame then return end
     local frame = self.ViewerFrame
@@ -748,11 +755,13 @@ function XP:UpdateViewer()
 
     -- Apply current appearance settings to the frame
     XP:ApplyViewerAppearance()
+-- DEBUG: EXIT XP:UpdateViewer()
 end
 
 -----------------------------------------------------------------------
 -- Apply Viewer Appearance: apply display settings to the frame
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ApplyViewerAppearance()
 function XP:ApplyViewerAppearance()
     if not self.ViewerFrame then return end
     local frame = self.ViewerFrame
@@ -794,4 +803,5 @@ function XP:ApplyViewerAppearance()
     if self.MarkPendingChange then
         self:MarkPendingChange()
     end
+-- DEBUG: EXIT XP:ApplyViewerAppearance()
 end

@@ -26,14 +26,17 @@ XP.Announcements = AN
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Return the effective settings table, falling back to safe defaults.
+-- DEBUG: ENTER DB()
 local function DB()
     if XP.db and XP.db.profile and XP.db.profile.announcements then
         return XP.db.profile.announcements
     end
     return { enabled = false, shareParty = false, showZoneHint = true }
+-- DEBUG: EXIT DB()
 end
 
 -- Determine whether the player is currently in a group.
+-- DEBUG: ENTER InGroup()
 local function InGroup()
     if GetNumGroupMembers then
         return GetNumGroupMembers() > 0
@@ -41,10 +44,12 @@ local function InGroup()
         return GetNumRaidMembers() > 0 or GetNumPartyMembers() > 0
     end
     return false
+-- DEBUG: EXIT InGroup()
 end
 
 -- Return the correct channel keyword for the current group type.
 -- On WotLK: "PARTY" / "RAID". On Retail: same (still valid).
+-- DEBUG: ENTER GetGroupChannel()
 local function GetGroupChannel()
     if GetNumGroupMembers then
         local members = GetNumGroupMembers()
@@ -56,6 +61,7 @@ local function GetGroupChannel()
         return "PARTY"
     end
     return "PARTY"  -- safe fallback
+-- DEBUG: EXIT GetGroupChannel()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -65,6 +71,9 @@ end
 --- Called by Core.lua (or GoalTracker) whenever the player advances to a new step.
 -- @param stepIndex  (number) the new step index
 -- @param guide      (Guide)  the current guide object (optional; uses XP.CurrentGuide)
+-- DEBUG: ENTER AN:OnStepAdvanced()
+-- DEBUG: PARAM stepIndex = [stepIndex]
+-- DEBUG: PARAM guide = [guide]
 function AN:OnStepAdvanced(stepIndex, guide)
     local db = DB()
     if not db.enabled then return end
@@ -94,6 +103,7 @@ function AN:OnStepAdvanced(stepIndex, guide)
             -- Silently ignore; don't spam error to user
         end
     end
+-- DEBUG: EXIT AN:OnStepAdvanced()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -106,6 +116,8 @@ local lastAnnouncedZone = nil
 --- Called when the player enters a new zone. Checks whether the current guide
 -- has upcoming steps in this zone and prints a brief reminder.
 -- @param zoneName  (string|nil) the new zone name
+-- DEBUG: ENTER AN:OnZoneChanged()
+-- DEBUG: PARAM zoneName = [zoneName]
 function AN:OnZoneChanged(zoneName)
     local db = DB()
     if not db.showZoneHint then return end
@@ -143,6 +155,7 @@ function AN:OnZoneChanged(zoneName)
             "Entered |cff00e5ff%s|r — guide picks up at step |cff00e5ff%d|r.",
             zoneName, matchStep))
     end
+-- DEBUG: EXIT AN:OnZoneChanged()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -150,6 +163,8 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 --- Called when a guide is first loaded.
+-- DEBUG: ENTER AN:OnGuideLoaded()
+-- DEBUG: PARAM guide = [guide]
 function AN:OnGuideLoaded(guide)
     local db = DB()
     if not db.enabled then return end
@@ -160,9 +175,12 @@ function AN:OnGuideLoaded(guide)
         "Guide loaded: |cff00e5ff%s|r  (%d steps)",
         guide.title or guide.titleShort or "Unknown",
         guide:GetNumSteps()))
+-- DEBUG: EXIT AN:OnGuideLoaded()
 end
 
 --- Called when the last step is completed.
+-- DEBUG: ENTER AN:OnGuideCompleted()
+-- DEBUG: PARAM guide = [guide]
 function AN:OnGuideCompleted(guide)
     local db = DB()
     if not db.enabled then return end
@@ -180,12 +198,14 @@ function AN:OnGuideCompleted(guide)
             guide.title or guide.titleShort or "Unknown")
         pcall(SendChatMessage, msg, channel)
     end
+-- DEBUG: EXIT AN:OnGuideCompleted()
 end
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Init
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- DEBUG: ENTER AN:OnEnable()
 function AN:OnEnable()
     -- Ensure DB keys exist
     if XP.db and XP.db.profile then
@@ -213,7 +233,10 @@ function AN:OnEnable()
 
     -- Zone change event
     if XP.RegisterEvent then
+  -- DEBUG: EVENT RegisterEvent("ZONE_CHANGED")
         XP:RegisterEvent("ZONE_CHANGED",          function() AN:OnZoneChanged() end)
+  -- DEBUG: EVENT RegisterEvent("ZONE_CHANGED_NEW_AREA")
         XP:RegisterEvent("ZONE_CHANGED_NEW_AREA", function() AN:OnZoneChanged() end)
     end
+-- DEBUG: EXIT AN:OnEnable()
 end

@@ -94,6 +94,7 @@ local DB_DEFAULTS = {
 -----------------------------------------------------------------------
 -- OnInitialize: runs once when ADDON_LOADED fires for us
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:OnInitialize()
 function XP:OnInitialize()
     -- Saved variables via AceDB
     self.db = AceDB:New("XPloreDB", DB_DEFAULTS, true)
@@ -115,11 +116,13 @@ function XP:OnInitialize()
     if XP.Config and XP.Config.Run then
         XP.Config:Run()
     end
+-- DEBUG: EXIT XP:OnInitialize()
 end
 
 -----------------------------------------------------------------------
 -- OnEnable: runs after all addons loaded and the player logs in
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:OnEnable()
 function XP:OnEnable()
     -- Create UI frames
     self:CreateViewerFrame()
@@ -127,6 +130,7 @@ function XP:OnEnable()
     self:CreateWaypointArrow()
 
     -- Register waypoint-related events
+  -- DEBUG: EVENT self:RegisterEvent("PLAYER_CORPSE_EXPIRED")
     self:RegisterEvent("PLAYER_CORPSE_EXPIRED", function()
         self:ClearWaypoints()
     end)
@@ -166,30 +170,39 @@ function XP:OnEnable()
         self:InitFaction()
 
     -- Register game events for auto-advance
+  -- DEBUG: EVENT self:RegisterEvent("QUEST_ACCEPTED")
     self:RegisterEvent("QUEST_ACCEPTED", "OnQuestEvent")
+  -- DEBUG: EVENT self:RegisterEvent("QUEST_LOG_UPDATE")
     self:RegisterEvent("QUEST_LOG_UPDATE", "OnQuestEvent")
+  -- DEBUG: EVENT self:RegisterEvent("ZONE_CHANGED")
     self:RegisterEvent("ZONE_CHANGED", "OnZoneEvent")
+  -- DEBUG: EVENT self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "OnZoneEvent")
 
     -- Register combat and zone events for viewer visibility
+  -- DEBUG: EVENT self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", function()
         if self.db.profile.hideInCombat then
             self:UpdateViewerVisibility()
         end
     end)
+  -- DEBUG: EVENT self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", function()
         if self.db.profile.hideInCombat then
             self:UpdateViewerVisibility()
         end
     end)
+  -- DEBUG: EVENT self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA", function()
         self:UpdateViewerVisibility()
     end)
 
     -- WotLK / Classic specific events
     if not XP.isRetail then
+  -- DEBUG: EVENT self:RegisterEvent("QUEST_COMPLETE")
         self:RegisterEvent("QUEST_COMPLETE", "OnQuestEvent")
     else
+  -- DEBUG: EVENT self:RegisterEvent("QUEST_TURNED_IN")
         self:RegisterEvent("QUEST_TURNED_IN", "OnQuestEvent")
     end
 
@@ -203,11 +216,14 @@ function XP:OnEnable()
     end
 
     self:Print("v" .. self.version .. " loaded. Type |cff00e5ff/xp|r to open.")
+-- DEBUG: EXIT XP:OnEnable()
 end
 
 -----------------------------------------------------------------------
 -- Slash command handler
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:SlashCommand()
+-- DEBUG: PARAM input = [input]
 function XP:SlashCommand(input)
     input = input and input:lower():match("^%s*(.-)%s*$") or ""
 
@@ -224,6 +240,7 @@ function XP:SlashCommand(input)
         -- Default: toggle the guide menu
         self:ToggleMenu()
     end
+-- DEBUG: EXIT XP:SlashCommand()
 end
 
 -----------------------------------------------------------------------
@@ -234,6 +251,8 @@ end
 -- operate on Guide objects (have .numSteps, .steps as Step objects, etc.)
 -----------------------------------------------------------------------
 
+-- DEBUG: ENTER XP:LoadGuide()
+-- DEBUG: PARAM guideID = [guideID]
 function XP:LoadGuide(guideID)
     local guide = self.Guides[guideID]
     if not guide then
@@ -272,8 +291,10 @@ function XP:LoadGuide(guideID)
 
     -- Send message so other subsystems can react
     self:SendMessage("XP_GUIDE_LOADED", guide)
+-- DEBUG: EXIT XP:LoadGuide()
 end
 
+-- DEBUG: ENTER XP:NextStep()
 function XP:NextStep()
     if not self.CurrentGuide then return end
     local numSteps = self.CurrentGuide.numSteps or #self.CurrentGuide.steps
@@ -300,8 +321,10 @@ function XP:NextStep()
     if PlaySoundFile then
         PlaySoundFile(soundFile, "Master")
     end
+-- DEBUG: EXIT XP:NextStep()
 end
 
+-- DEBUG: ENTER XP:PrevStep()
 function XP:PrevStep()
     if not self.CurrentGuide or self.CurrentStep <= 1 then return end
     self.CurrentStep = self.CurrentStep - 1
@@ -319,8 +342,11 @@ function XP:PrevStep()
     if XP.Announcements then
         XP.Announcements:OnStepAdvanced(self.CurrentStep)
     end
+-- DEBUG: EXIT XP:PrevStep()
 end
 
+-- DEBUG: ENTER XP:GoToStep()
+-- DEBUG: PARAM n = [n]
 function XP:GoToStep(n)
     if not self.CurrentGuide then return end
     local numSteps = self.CurrentGuide.numSteps or #self.CurrentGuide.steps
@@ -340,18 +366,24 @@ function XP:GoToStep(n)
     if XP.Announcements then
         XP.Announcements:OnStepAdvanced(n)
     end
+-- DEBUG: EXIT XP:GoToStep()
 end
 
 -----------------------------------------------------------------------
 -- Event Handlers
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:OnQuestEvent()
+-- DEBUG: PARAM event = [event]
 function XP:OnQuestEvent(event, ...)
     -- Trigger auto-advance check
     if self.db.profile.autoAdvance and self.CurrentGuide then
         self:CheckAutoAdvance()
     end
+-- DEBUG: EXIT XP:OnQuestEvent()
 end
 
+-- DEBUG: ENTER XP:OnZoneEvent()
+-- DEBUG: PARAM event = [event]
 function XP:OnZoneEvent(event, ...)
     -- Update waypoint if needed
     if self.CurrentGuide then
@@ -361,8 +393,10 @@ function XP:OnZoneEvent(event, ...)
     if XP.AutoComplete then
         XP.AutoComplete:OnZoneChanged()
     end
+-- DEBUG: EXIT XP:OnZoneEvent()
 end
 
+-- DEBUG: ENTER XP:CheckAutoAdvance()
 function XP:CheckAutoAdvance()
     if not self.CurrentGuide then return end
     local step = self.CurrentGuide:GetStep(self.CurrentStep)
@@ -411,11 +445,15 @@ function XP:CheckAutoAdvance()
     if allComplete and step:IsComplete() then
         self:NextStep()
     end
+-- DEBUG: EXIT XP:CheckAutoAdvance()
 end
 
 -----------------------------------------------------------------------
 -- Quest Objective Completion Check
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:IsQuestObjectiveComplete()
+-- DEBUG: PARAM questID = [questID]
+-- DEBUG: PARAM objectiveIndex = [objectiveIndex]
 function XP:IsQuestObjectiveComplete(questID, objectiveIndex)
     if not questID or not objectiveIndex then return false end
     if XP.isRetail then
@@ -438,11 +476,14 @@ function XP:IsQuestObjectiveComplete(questID, objectiveIndex)
         end
     end
     return false
+-- DEBUG: EXIT XP:IsQuestObjectiveComplete()
 end
 
 -----------------------------------------------------------------------
 -- Quest Helpers (universal across versions)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:IsQuestInLog()
+-- DEBUG: PARAM questID = [questID]
 function XP:IsQuestInLog(questID)
     if XP.isRetail then
         return C_QuestLog and C_QuestLog.IsOnQuest and C_QuestLog.IsOnQuest(questID)
@@ -453,8 +494,11 @@ function XP:IsQuestInLog(questID)
         end
     end
     return false
+-- DEBUG: EXIT XP:IsQuestInLog()
 end
 
+-- DEBUG: ENTER XP:IsQuestCompleted()
+-- DEBUG: PARAM questID = [questID]
 function XP:IsQuestCompleted(questID)
     if XP.isRetail then
         return C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted
@@ -469,11 +513,13 @@ function XP:IsQuestCompleted(questID)
         end
     end
     return false
+-- DEBUG: EXIT XP:IsQuestCompleted()
 end
 
 -----------------------------------------------------------------------
 -- Frame Toggle Helpers (actual frame creation is in Viewer.lua / GuideMenu.lua)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ToggleViewer()
 function XP:ToggleViewer()
     if self.ViewerFrame and self.ViewerFrameCreated then
         if self.ViewerFrame:IsShown() then
@@ -490,8 +536,10 @@ function XP:ToggleViewer()
             self:UpdateViewer()
         end
     end
+-- DEBUG: EXIT XP:ToggleViewer()
 end
 
+-- DEBUG: ENTER XP:ToggleMenu()
 function XP:ToggleMenu()
     if self.MenuFrame then
         if self.MenuFrame:IsShown() then
@@ -501,8 +549,10 @@ function XP:ToggleMenu()
             self:UpdateMenu()
         end
     end
+-- DEBUG: EXIT XP:ToggleMenu()
 end
 
+-- DEBUG: ENTER XP:ResetFrames()
 function XP:ResetFrames()
     if self.ViewerFrame then
         self.ViewerFrame:ClearAllPoints()
@@ -512,11 +562,13 @@ function XP:ResetFrames()
         self.MenuFrame:ClearAllPoints()
         self.MenuFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     end
+-- DEBUG: EXIT XP:ResetFrames()
 end
 
 -----------------------------------------------------------------------
 -- Options Table (basic; expandable later)
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:GetOptionsTable()
 function XP:GetOptionsTable()
     return {
         type = "group",
@@ -531,7 +583,11 @@ function XP:GetOptionsTable()
                         type = "toggle",
                         name = "Auto-Advance Steps",
                         desc = "Automatically advance to the next step when the current step is completed.",
+                        -- DEBUG: ENTER get()
                         get = function() return self.db.profile.autoAdvance end,
+                        -- DEBUG: ENTER set()
+                        -- DEBUG: PARAM _ = [_]
+                        -- DEBUG: PARAM val = [val]
                         set = function(_, val) self.db.profile.autoAdvance = val end,
                         order = 1,
                     },
@@ -540,7 +596,11 @@ function XP:GetOptionsTable()
                         name = "Viewer Scale",
                         desc = "Scale of the step viewer frame.",
                         min = 0.5, max = 2.0, step = 0.05,
+                        -- DEBUG: ENTER get()
                         get = function() return self.db.profile.viewer.scale end,
+                        -- DEBUG: ENTER set()
+                        -- DEBUG: PARAM _ = [_]
+                        -- DEBUG: PARAM val = [val]
                         set = function(_, val)
                             self.db.profile.viewer.scale = val
                             if self.ViewerFrame then
@@ -553,7 +613,11 @@ function XP:GetOptionsTable()
                         type = "toggle",
                         name = "Lock Viewer",
                         desc = "Prevent the viewer from being moved.",
+                        -- DEBUG: ENTER get()
                         get = function() return self.db.profile.viewer.locked end,
+                        -- DEBUG: ENTER set()
+                        -- DEBUG: PARAM _ = [_]
+                        -- DEBUG: PARAM val = [val]
                         set = function(_, val)
                             self.db.profile.viewer.locked = val
                             if self.ViewerFrame then
@@ -572,7 +636,11 @@ function XP:GetOptionsTable()
                     enabled = {
                         type = "toggle",
                         name = "Enable Arrow",
+                        -- DEBUG: ENTER get()
                         get = function() return self.db.profile.arrow.enabled end,
+                        -- DEBUG: ENTER set()
+                        -- DEBUG: PARAM _ = [_]
+                        -- DEBUG: PARAM val = [val]
                         set = function(_, val) self.db.profile.arrow.enabled = val end,
                         order = 1,
                     },
@@ -580,7 +648,11 @@ function XP:GetOptionsTable()
                         type = "range",
                         name = "Arrow Scale",
                         min = 0.5, max = 2.0, step = 0.05,
+                        -- DEBUG: ENTER get()
                         get = function() return self.db.profile.arrow.scale end,
+                        -- DEBUG: ENTER set()
+                        -- DEBUG: PARAM _ = [_]
+                        -- DEBUG: PARAM val = [val]
                         set = function(_, val) self.db.profile.arrow.scale = val end,
                         order = 2,
                     },
@@ -588,11 +660,13 @@ function XP:GetOptionsTable()
             },
         },
     }
+-- DEBUG: EXIT XP:GetOptionsTable()
 end
 
 -----------------------------------------------------------------------
 -- Update Viewer Visibility: apply combat and dungeon visibility rules
 -----------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateViewerVisibility()
 function XP:UpdateViewerVisibility()
     if not self.ViewerFrame then return end
     local p = self.db.profile
@@ -613,4 +687,5 @@ function XP:UpdateViewerVisibility()
     else
         self.ViewerFrame:Hide()
     end
+-- DEBUG: EXIT XP:UpdateViewerVisibility()
 end
