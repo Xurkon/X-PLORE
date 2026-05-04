@@ -1,0 +1,4 @@
+# selene configuration for X-Plore WoW addon
+# https://github.com/Ketho/selene-wow-std (WoW API definitions)
+
+std = "wow_classic"

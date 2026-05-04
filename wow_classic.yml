@@ -1,0 +1,203 @@
+# WoW Classic / WotLK Standard Library for Selene
+# Usage: std = "wow_classic" in selene.toml
+# Place in project root or parent dir of files being linted
+---
+base: lua51
+name: wow_classic
+globals:
+  GetScreenWidth:
+    args: []
+  GetScreenHeight:
+    args: []
+  UIParent:
+    property: new-fields
+  WorldFrame:
+    property: new-fields
+  ChatFrame1:
+    property: new-fields
+  GameTooltip:
+    property: new-fields
+  GameTooltip.SetPoint:
+    method: true
+    args:
+      - type: string
+      - type: any
+      - type: string
+      - type: any
+      - type: string
+  GameTooltip.SetOwner:
+    method: true
+    args:
+      - type: any
+      - type: string
+  GameTooltip.AddDoubleLine:
+    method: true
+    args:
+      - type: any
+      - type: any
+      - type: any
+      - type: any
+      - required: false
+        type: any
+  GameTooltip.AddLine:
+    method: true
+    args:
+      - type: any
+      - type: any
+      - required: false
+        type: any
+      - required: false
+        type: any
+      - required: false
+        type: any
+  GameTooltip.Show:
+    method: true
+    args: []
+  GameTooltip.Hide:
+    method: true
+    args: []
+  CreateFrame:
+    args:
+      - type: string
+      - type: any
+      - required: false
+        type: any
+  UnitName:
+    args:
+      - type: string
+    must_use: true
+  UnitHealth:
+    args:
+      - type: string
+    must_use: true
+  UnitHealthMax:
+    args:
+      - type: string
+    must_use: true
+  UnitPower:
+    args:
+      - type: string
+    must_use: true
+  UnitPowerMax:
+    args:
+      - type: string
+    must_use: true
+  UnitExists:
+    args:
+      - type: string
+    must_use: true
+  UnitIsPlayer:
+    args:
+      - type: string
+    must_use: true
+  UnitGUID:
+    args:
+      - type: string
+    must_use: true
+  IsShiftKeyDown:
+    args: []
+  IsControlKeyDown:
+    args: []
+  IsAltKeyDown:
+    args: []
+  print:
+    args:
+      - type: "..."
+  DEFAULT_CHAT_FRAME:
+    property: new-fields
+  DEFAULT_CHAT_FRAME.AddMessage:
+    method: true
+    args:
+      - type: any
+      - type: any
+      - required: false
+        type: any
+      - type: any
+      - required: false
+        type: any
+  math:
+    property: new-fields
+  string:
+    property: new-fields
+  table:
+    property: new-fields
+  select:
+    args:
+      - type: any
+      - type: "..."
+  GetGameTime:
+    args: []
+  date:
+    args:
+      - type: string
+      - required: false
+        type: number
+    must_use: true
+  time:
+    args:
+      - required: false
+        type: any
+  RegisterEvent:
+    args:
+      - type: any
+      - type: function
+  UnregisterEvent:
+    args:
+      - type: any
+      - type: function
+  RegisterUnitEvent:
+    args:
+      - type: any
+      - type: string
+      - type: any
+  SlashCmdList:
+    property: new-fields
+  SLASH_:
+    property: new-fields
+  CursorHasItem:
+    args: []
+  PickupItem:
+    args:
+      - type: any
+  PlaceItem:
+    args:
+      - type: any
+      - type: any
+  GetAddOnMetadata:
+    args:
+      - type: any
+      - type: string
+    must_use: true
+  GetLocale:
+    args: []
+  GetBuildInfo:
+    args: []
+  GetItemInfo:
+    args:
+      - type: any
+    must_use: true
+  GetContainerItemInfo:
+    args:
+      - type: any
+      - type: any
+    must_use: true
+  PickupContainerItem:
+    args:
+      - type: any
+      - type: any
+  ContainerIDToInventoryID:
+    args:
+      - type: any
+    must_use: true
+  GetSpellInfo:
+    args:
+      - type: any
+    must_use: true
+  GetActionInfo:
+    args:
+      - type: any
+    must_use: true
+  GetActionText:
+    args:
+      - type: any
+    must_use: true
