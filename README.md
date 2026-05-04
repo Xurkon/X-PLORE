@@ -1,15 +1,13 @@
 <div align="center">
 
-# ⚠️ X-PLORE — INCOMPLETE / BROKEN ⚠️
+# X-PLORE — Universal WoW Guide Viewer
 
-**This project is actively in development and is currently in a broken, non-functional state.**
-It is publicly visible for transparency and to allow curious users to follow progress.
-Do not attempt to use this addon — it will not work correctly.
+**A community-built guide viewer for World of Warcraft, compatible with all expansions.**
 
 ---
 
 ![Version](https://img.shields.io/badge/version-v2.0.0--dev-blue.svg?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-BROKEN-red.svg?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-IN%20DEVELOPMENT-orange.svg?style=for-the-badge)
 ![Downloads](https://img.shields.io/github/downloads/Xurkon/X-PLORE/total?style=for-the-badge&color=e67e22)
 [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/Xurkon)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/Xurkon)
@@ -30,9 +28,9 @@ Do not attempt to use this addon — it will not work correctly.
 
 ## ⚠️ Disclaimer
 
-**X-PLORE is incomplete and currently broken.** This repository is published for transparency and progress tracking purposes only. The addon is not loadable in-game. Features are partially implemented, UI is non-functional, and the codebase is under active development.
+**X-PLORE is in active development.** This repository hosts the in-progress codebase. The addon is loadable in-game with partial functionality: the guide menu, skin system, and options panel are functional, but core features like guide loading, waypoints, and goal tracking are still being implemented.
 
-If you are looking for a working guide addon, use the reference implementation: [ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer).
+For a working reference implementation, see [ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer).
 
 ---
 
