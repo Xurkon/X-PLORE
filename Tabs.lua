@@ -37,10 +37,9 @@ function XP:InitTabs()
 
     Tabs.container = self.ViewerFrame.TabContainer
 
-    -- Create the "+" (add tab) button — always visible at LEFT of tab bar (Zygor-style)
+    -- Create the "+" (add tab) button — Zygor positions it to the right, after all tabs
     local addBtn = CreateFrame("Button", nil, Tabs.container)
     addBtn:SetSize(20, self:Size("tab_height") - 4)
-    addBtn:SetPoint("LEFT", Tabs.container, "LEFT", 4, 0)
     addBtn:SetNormalFontObject(GameFontNormalSmall)
     addBtn:SetText("+")
     addBtn:GetFontString():SetTextColor(XP:ColorRGBA("cyan_dark"))
@@ -58,6 +57,28 @@ function XP:InitTabs()
         GameTooltip:Hide()
     end)
     Tabs.AddButton = addBtn
+
+    -- Create the ">" (overflow) button — appears when tabs overflow the tab bar width
+    local overflowBtn = CreateFrame("Button", nil, Tabs.container)
+    overflowBtn:SetSize(20, self:Size("tab_height") - 4)
+    overflowBtn:SetNormalFontObject(GameFontNormalSmall)
+    overflowBtn:SetText(">")
+    overflowBtn:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
+    overflowBtn:SetScript("OnClick", function()
+        Tabs:ToggleOverflowMenu()
+    end)
+    overflowBtn:SetScript("OnEnter", function(self_btn)
+        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("text_bright"))
+        GameTooltip:SetOwner(self_btn, "ANCHOR_BOTTOMLEFT")
+        GameTooltip:SetText("More guides")
+        GameTooltip:Show()
+    end)
+    overflowBtn:SetScript("OnLeave", function(self_btn)
+        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
+        GameTooltip:Hide()
+    end)
+    overflowBtn:Hide()
+    Tabs.OverflowButton = overflowBtn
 
     -- Restore saved tabs from DB
     local saved = self.db and self.db.char and self.db.char.tabGuides
@@ -586,9 +607,71 @@ function Tabs:OnDragStop()
 -- DEBUG: EXIT Tabs:OnDragStop()
 end
 
------------------------------------------------------------------------
--- Layout: reposition and resize all visible tabs
------------------------------------------------------------------------
+---------------------------------------------------------------------
+-- Overflow menu: show/hide the overflow dropdown
+---------------------------------------------------------------------
+-- DEBUG: ENTER Tabs:ToggleOverflowMenu()
+function Tabs:ToggleOverflowMenu()
+    if Tabs.OverflowMenu and Tabs.OverflowMenu:IsShown() then
+        Tabs:HideOverflowMenu()
+    else
+        Tabs:ShowOverflowMenu()
+    end
+-- DEBUG: EXIT Tabs:ToggleOverflowMenu()
+end
+
+-- DEBUG: ENTER Tabs:ShowOverflowMenu()
+function Tabs:ShowOverflowMenu()
+    if not Tabs.OverflowMenu then
+        -- Create the overflow dropdown frame (simple menu, not forked)
+        local menu = CreateFrame("Frame", "XPlore_OverflowMenu", Tabs.container, "UIDropDownMenuTemplate")
+        menu:SetPoint("TOPRIGHT", Tabs.OverflowButton, "BOTTOMRIGHT", 0, -2)
+        menu:Hide()
+        Tabs.OverflowMenu = menu
+    end
+
+    local menu = Tabs.OverflowMenu
+
+    -- Count overflow tabs (tabs beyond the visible ones)
+    local overflowTabs = {}
+    for _, tab in ipairs(Pool) do
+        if tab.guideID and tab.isOverflowed then
+            table.insert(overflowTabs, tab)
+        end
+    end
+
+    if #overflowTabs == 0 then return end
+
+    UIDropDownMenu_SetWidth(menu, 180)
+
+    UIDropDownMenu_Initialize(menu, function()
+        for _, tab in ipairs(overflowTabs) do
+            local info = {
+                text = tab.title or tab.guideID,
+                notCheckable = 1,
+                func = function()
+                    tab:ActivateGuide()
+                    Tabs:HideOverflowMenu()
+                end,
+            }
+            UIDropDownMenu_AddButton(info, menu)
+        end
+    end)
+    ToggleDropDownMenu(1, nil, menu, nil, 0, 0)
+-- DEBUG: EXIT Tabs:ShowOverflowMenu()
+end
+
+-- DEBUG: ENTER Tabs:HideOverflowMenu()
+function Tabs:HideOverflowMenu()
+    if Tabs.OverflowMenu then
+        Tabs.OverflowMenu:Hide()
+    end
+-- DEBUG: EXIT Tabs:HideOverflowMenu()
+end
+
+---------------------------------------------------------------------
+-- Layout: reposition and resize all visible tabs with overflow
+---------------------------------------------------------------------
 -- DEBUG: ENTER Tabs:ReanchorTabs()
 function Tabs:ReanchorTabs()
     if not Tabs.container then return end
@@ -599,51 +682,84 @@ function Tabs:ReanchorTabs()
     end
 
     local addBtn = Tabs.AddButton
+    local overflowBtn = Tabs.OverflowButton
 
     if count == 0 then
-        -- No tabs: position add button at RIGHT of tab bar
+        -- No tabs: position add button at LEFT of tab bar
         if addBtn then
             addBtn:ClearAllPoints()
-            addBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -4, 0)
+            addBtn:SetPoint("LEFT", Tabs.container, "LEFT", 4, 0)
         end
+        if overflowBtn then overflowBtn:Hide() end
         return
     end
+
     local containerWidth = Tabs.container:GetWidth()
-    local addBtnWidth = addBtn and addBtn:GetWidth() or 24
     local leftMargin = 4
     local rightMargin = 4
     local tabSpacing = 1
+    local addBtnWidth = 20
+    local overflowBtnWidth = 20
     local addBtnGap = 4
+    local overflowBtnGap = 4
 
-    local availWidth = containerWidth - leftMargin - rightMargin - addBtnWidth - addBtnGap
-    local tabWidth = math.max(80, availWidth / math.max(count, 1))
-    local tabHeight = XP:Size("tab_height") - 2
-
-    local prev = nil  -- first tab anchors to container
-    local visibleCount = 0
-
+    -- Start by hiding all tabs, then reveal only those that fit
     for _, tab in ipairs(Pool) do
         if tab.guideID then
-            visibleCount = visibleCount + 1
-
-            tab.Button:ClearAllPoints()
-            tab.Button:SetSize(tabWidth, tabHeight)
-
-            if prev then
-                tab.Button:SetPoint("LEFT", prev, "RIGHT", tabSpacing, 0)
-            else
-                -- First tab: anchor to left of container
-                tab.Button:SetPoint("LEFT", Tabs.container, "LEFT", leftMargin, 0)
-            end
-
-            tab.Button:Show()
-            prev = tab.Button
-        else
             tab.Button:Hide()
+            tab.isOverflowed = true
         end
     end
 
-    -- Position add button at RIGHT of tab bar (Zygor style — always at right edge)
+    -- Count visible slots available: addBtn + overflowBtn take space on the right
+    local availWidth = containerWidth - leftMargin - rightMargin - addBtnWidth - overflowBtnWidth - addBtnGap - overflowBtnGap
+    local tabWidth = math.max(60, math.floor(availWidth / count))
+    local tabHeight = XP:Size("tab_height") - 2
+
+    local prev = nil
+    local visibleCount = 0
+    local currentX = leftMargin
+
+    for _, tab in ipairs(Pool) do
+        if tab.guideID then
+            local tabRightEdge = currentX + tabWidth
+            -- Check if this tab fits before the overflow button zone
+            if tabRightEdge <= containerWidth - rightMargin - overflowBtnWidth - overflowBtnGap - addBtnWidth - addBtnGap then
+                tab.Button:ClearAllPoints()
+                tab.Button:SetSize(tabWidth, tabHeight)
+                if prev then
+                    tab.Button:SetPoint("LEFT", prev, "RIGHT", tabSpacing, 0)
+                else
+                    tab.Button:SetPoint("LEFT", Tabs.container, "LEFT", leftMargin, 0)
+                end
+                tab.Button:Show()
+                tab.isOverflowed = false
+                prev = tab.Button
+                currentX = tabRightEdge + tabSpacing
+                visibleCount = visibleCount + 1
+            end
+        end
+    end
+
+    -- Show overflow button if there are overflowed tabs
+    if overflowBtn then
+        local hasOverflowed = false
+        for _, tab in ipairs(Pool) do
+            if tab.guideID and tab.isOverflowed then
+                hasOverflowed = true
+                break
+            end
+        end
+        if hasOverflowed then
+            overflowBtn:Show()
+            overflowBtn:ClearAllPoints()
+            overflowBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin - addBtnWidth - addBtnGap - overflowBtnGap, 0)
+        else
+            overflowBtn:Hide()
+        end
+    end
+
+    -- Position add button at the far right (Zygor style)
     if addBtn then
         addBtn:ClearAllPoints()
         addBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin, 0)
