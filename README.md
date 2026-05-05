@@ -55,21 +55,20 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Guide menu / viewer | ✅ Functional | Frame, tabs, step scrolling, progress bar, navigation buttons |
 | Skin system | ✅ Functional | Stealth & Starlight themes working; Default, Midnight, glass variants coming |
 | Waypoint arrow | ✅ Functional | Arrow frame, rotation, distance, ETA, cycling, turn audio cues |
-| Arrow themes | ⚙️ Partial | 5 themes wired (Modern/Classic/Minimal/Circular/Waypoint); UI selector coming |
-| Ant trail | 🔴 Not wired | Infrastructure exists; not yet called from OnUpdate |
+| Arrow themes | ✅ Complete | 5 themes wired; UI selector dropdown in Options panel |
+| Ant trail | ✅ Functional | Dot fallback wired for WotLK/Classic (915407d); world line for Retail |
 | Goal tracker | ⚙️ Partial | Step/goal structures defined; display rendering in progress |
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
 | Zygor guide parsing | ⚙️ Partial | Parser structures exist; guide loading in progress |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ⚙️ Partial | Custom tabs working; STEPS/LEVELING GUIDES tabs coming |
 
-#### 🔄 In Development — Session 38 Complete
+#### 🔄 In Development — Session 41 Complete
 **Arrow Theme System** (`f875935`): `XP:GetArrowThemes()`, `XP:SetArrowTheme()`, `XP:SetArrowScale()`, `XP:ToggleArrow()`, `XP:UpdateArrowSettings()`, `XP.Waypoints` proxy. 5 arrow themes available: Modern, Classic, Minimal, Circular, Waypoint. Theme auto-loaded from profile on arrow spawn.
 
+**Ant Trail Fix** (`915407d`): `UpdateAntLine` now calls `AddAntDots` for WotLK/Classic (no `SetWorldLine`). Fixed instanceID: `HBD:GetWorldCoordinatesFromZone` 3rd return value now captured and used instead of hardcoded 946.
+
 #### 🔜 Up Next
-- **A2** Circular arrow styling — refine mask texture for CIRCULAR theme
-- **A3** Ant trail — wire `AddAntDots`/`UpdateAntLine` into OnUpdate
-- **A4** Arrow theme selector UI — dropdown in Options panel
 - **A5** Hamburger menu icon — replace `INV_Misc_Map_01` on viewer button
 - **A6** STEPS / LEVELING GUIDES tabs — alongside existing custom tabs
 

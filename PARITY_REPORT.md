@@ -1,6 +1,6 @@
 # X-PLORE Parity & Progress Report
 
-**Last Updated:** 2026-05-04 (Session 39)  
+**Last Updated:** 2026-05-04 (Session 41)  
 **Based on:** ZygorGuidesViewer screenshot analysis + codebase audit  
 **Goal:** 1:1 parity with ZygorGuidesViewer for all WoW versions (Retail, WotLK, TBC, Classic)
 
@@ -213,9 +213,11 @@
   - `XP:ToggleArrow(enabled)` — accepts boolean param (was toggle-only)
   - `XP.Waypoints:` proxy — bridges `XP.Waypoints:Method()` calls from Options.lua to `XP:Method()`
   - Arrow creation (`CreateWaypointArrow`) loads saved theme from profile
+- **Completed (Session 41 — commit 915407d):**
+  - Ant trail dot fallback: `UpdateAntLine` now calls `AddAntDots` when `SetWorldLine` is absent (WotLK/Classic)
+  - InstanceID fix: `HBD:GetWorldCoordinatesFromZone` 3rd return value now captured and used instead of hardcoded 946
 - **Still missing:**
   - Quest blob on minimap
-  - Ant trail wiring into OnUpdate
   - CIRCULAR theme mask: `UI-Minimap-ZoomButton-Mask` applied (06a8282); AddMaskTexture guarded for pre-3.3.5
 - **Priority:** Medium
 - **Files:** `Waypoints.lua`
@@ -237,7 +239,6 @@
 - **Missing:**
   - Zygor minimap icon
   - Quest area blob (foglight reveal)
-  - Ant trail on minimap
 - **Priority:** Medium
 - **Files:** `Waypoints.lua`, `Minimap.lua`
 
