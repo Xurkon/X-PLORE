@@ -852,6 +852,15 @@ function XP:_RegisterGuideFromZygor(title, header, data)
         return nil
     end
 
+    -- Zygor's actual calling convention is RegisterGuide(title, rawTextString)
+    -- where rawTextString embeds header fields (author, startlevel, next, etc.)
+    -- at the top before the first 'step' keyword.
+    -- When data is nil and header is a string, treat header as the raw data.
+    if type(header) == "string" and data == nil then
+        data = header
+        header = nil
+    end
+
     local Parser = self.Parser
 
     -- Parse the path to derive metadata
@@ -877,7 +886,7 @@ function XP:_RegisterGuideFromZygor(title, header, data)
     }
 
     -- Pull easy fields from header immediately
-    if header then
+    if type(header) == "table" then
         guideData.description = header.description
         guideData.author      = header.author
         guideData.patch       = header.patch
@@ -887,6 +896,15 @@ function XP:_RegisterGuideFromZygor(title, header, data)
         guideData.nextGuide   = header.next
         guideData.class       = header.class
         guideData.spec        = header.spec
+    elseif data and self.Parser then
+        -- No separate header table — extract metadata embedded in raw text
+        local meta = self.Parser:ParseHeaderFromText(data)
+        guideData.author     = meta.author
+        guideData.image      = meta.image
+        guideData.startLevel = meta.startLevel
+        guideData.endLevel   = meta.endLevel
+        guideData.nextGuide  = meta.next
+        guideData.defaultfor = meta.defaultfor
     end
 
     local guide = Guide:New(guideData)

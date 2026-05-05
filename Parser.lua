@@ -1303,6 +1303,45 @@ end
 -- Input: raw header table (from RegisterGuide second argument)
 -- Output: structured metadata table
 -----------------------------------------------------------------------
+-- ParseHeaderFromText: extract header metadata from lines before first 'step'
+-- in the Zygor raw guide text format.
+-- e.g. "author foo\nstartlevel 1\nnext SomeGuide\nstep\n..."
+-----------------------------------------------------------------------
+function Parser:ParseHeaderFromText(text)
+    if not text or text == "" then return {} end
+    local meta = {}
+    for line in text:gmatch("[^\n]+") do
+        line = strtrim(line)
+        if line == "" then -- skip blanks
+        elseif line:match("^step") or line:match("^stickystart") then
+            break  -- reached guide body
+        else
+            local key, val = line:match("^(%a[%a_]*)%s+(.*)")
+            if key and val then
+                key = key:lower()
+                val = strtrim(val)
+                if key == "author" then
+                    meta.author = val
+                elseif key == "startlevel" then
+                    meta.startLevel = tonumber(val)
+                elseif key == "endlevel" then
+                    meta.endLevel = tonumber(val)
+                elseif key == "next" then
+                    meta.next = val
+                elseif key == "image" then
+                    meta.image = val
+                elseif key == "defaultfor" then
+                    meta.defaultfor = val
+                elseif key == "condition" then
+                    meta.condition_suggested = val
+                end
+            end
+        end
+    end
+    return meta
+end
+
+-----------------------------------------------------------------------
 -- DEBUG: ENTER Parser:ParseHeader()
 -- DEBUG: PARAM header = [header]
 function Parser:ParseHeader(header)
