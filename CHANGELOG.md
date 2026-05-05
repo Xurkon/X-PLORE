@@ -4,6 +4,61 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 53 — 2026-05-05
+
+### Summary
+
+**Guide shim fully implemented; all guide files renamed Zygor* → XP*; category routing expanded.** ~28 guide files were crashing at load with `attempt to call method 'DoMutex' (a nil value)` and `ZygorCommon.lua` crashed with `attempt to call method 'RegisterGuideSorting' (a nil value)`. The shim now implements all methods and properties that Zygor guide files expect. All 60+ guide data files renamed from `ZygorXxx.lua` to `XPXxx.lua`; `Autoload.xml` updated to match. Guide category routing expanded to cover Macros, Gear, Scenarios, Hunter Pets, and Battle Pets.
+
+### Changes
+
+#### GuideLoader.lua — Shim Full Implementation
+
+1. **`DoMutex(key)`** — Deduplication guard: first call per key → `false` (continue loading), repeat calls with same key → `true` (abort). Fixes all ~28 guide files using `if ZGV:DoMutex("KeyName") then return end` at top
+2. **`RegisterGuideSorting(order)`** — Accepts Zygor's category sort order table; delegates to `XP:RegisterGuideSorting()` in GuideSorting.lua
+3. **No-op stubs** — `FocusStep`, `FocusStepQuiet`, `GetReputation`, `DoEmote`, `SetGuide`, `Print` all stubbed safely
+4. **Default properties** — `AllianceInstalled=true`, `HordeInstalled=true`, `AllianceDailiesInstalled=true`, `HordeDailiesInstalled=true`, `CommonGear=true`, `CommonPets=true`, `guide_images_installed=true`, `guidesets={}`, `questsbyid={}`, `completedQuests={}`, `completioninterval=1`, `ItemScore={}`
+5. **New aliases** — Shim now also installs as `_G.XPViewer = shim` and `_G.XPV = shim` alongside the existing `ZygorGuidesViewer` / `ZGV` aliases
+
+#### GuideSorting.lua — Category Additions
+
+1. **MACROS category** — Added `{ id="MACROS", name="Macros", icon={3,3}, order=12 }` to CATEGORIES table
+2. **`XP:RegisterGuideSorting(order)`** — New method that maps incoming Zygor category names (e.g. `"Pets & Mounts"`, `"Loremaster"`) to X-PLORE category IDs and re-sorts the CATEGORIES table by order
+
+#### Parser.lua — DeriveCategory Expansion
+
+- Added keyword mappings missing from `DeriveCategory`:
+  - `macro` → `MACROS`
+  - `gear` → `DUNGEONS`
+  - `scenario` → `DUNGEONS`
+  - `hunter` → `PETS_MOUNTS`
+  - `battlepet` / `battle pet` → `PETS_MOUNTS`
+  - `include` → `LEVELING` (shared include data, no display category needed)
+  - `starter` → `LEVELING`
+
+#### Guide File Rename — All Zygor* → XP*
+
+All 60+ guide data files in `Guides/` renamed from `ZygorXxx.lua` to `XPXxx.lua`:
+
+| Subfolder | Files renamed |
+|---|---|
+| Root (`Guides/`) | XPCommon, XPMacros, XPGuidesAlliance, XPGuidesHorde, XPIncludesAlliance, XPIncludesHorde, XPDailiesAlliance, XPDailiesHorde, XPAchievementAlliance |
+| `Achievements/` | 5 files (XPAchievements*) |
+| `Dailies/` | 4 files (XPDailies*) |
+| `Dungeons/` | 7 files (XPDungeon*, XPGear*) |
+| `Leveling/` | 5 files (XPLeveling*) |
+| `PetsMounts/` | 16 files (XPBattlePet*, XPHunterPet*, XPMounts*, XPPets*) |
+| `Professions/` | 6 files (XPProfessions*) |
+| `Reputations/` | 4 files (XPReputations*) |
+| `Titles/` | 4 files (XPTitles*) |
+
+- `Guides\Autoload.xml` fully rewritten with all XP* paths
+- Guide file internal content unchanged (still references `ZygorGuidesViewer` global, which the shim provides)
+
+**Commit:** `5d3a8df`
+
+---
+
 ## Session 50 — 2026-05-05
 
 ### Summary
@@ -60,6 +115,70 @@ All notable changes to X-PLORE are documented here.
 - `.gitignore` updated: `*_PLAN.md`, `*_REPORT.md`, `*_ANALYSIS.md` patterns excluded
 
 **Commits:** `356180f`, `fbc5846`
+
+---
+
+## Session 51 — 2026-05-05
+
+### Summary
+
+**Tab button template overhaul.** Three root causes of broken tab appearance identified and fixed: (1) `UIPanelButtonTemplate` was applying Blizzard's silver gradient to all tab buttons; (2) plain `CreateFrame("Button")` in WotLK has no built-in font string, causing `SetText` to silently fail; (3) `f.TabBg` is a Texture, not a Frame, so `SetBackdrop` silently no-ops on it. All three fixed. Tab container background now uses the correct `TabsContainerBackdropInactive` color instead of `bg_medium`.
+
+### Changes
+
+#### `Tabs.lua`
+
+1. **No template** — All button creations switched to `XP.CreateBackdropFrame("Button", ...)` (plain backdrop buttons, no Blizzard silver gradient)
+2. **Font string** — Added `CreateFontString` + `SetFontString` before `SetText` (WotLK requires explicit font string on plain buttons)
+3. **`TabBackdrop()`, `SetTabInactive()`, `SetTabActive()`** — New helpers for consistent tab state management
+4. **`SkinTabButton()`** — Now creates + sets a font string before calling `SetText`
+5. **`SetAsCurrent`** — Uses `SetBackdropColor` instead of `LockHighlight`/`UnlockHighlight`
+6. **Hover feedback** — `ShowInteraction`/`HideInteraction` backdrop color changes on enter/leave
+
+#### `Skins\Default\ViewerFrame.lua`
+
+- `ApplySkin`: replaced broken `XP:ApplyBackdrop(f.TabBg, "TabBackdrop")` with `XP.SetTexColor(f.TabBg, ...)` using `TabsContainerBackdropInactive` color (TabBg is a Texture, not a Frame)
+
+#### `Viewer.lua`
+
+- Tab container bg now uses `XP:SD("TabsContainerBackdropInactive")` instead of hardcoded `bg_medium = #202020`
+
+**Commit:** `7de0e70`
+
+---
+
+## Session 52 — 2026-05-05
+
+### Summary
+
+**Guides path fixed, step colors corrected, icon paths fixed.** The TOC referenced `Guides-Retail\Autoload.xml` after the user renamed the folder; WoW silently ignored the missing include so no real guides loaded. `Autoload.xml` was completely rewritten to load all ~70 guide files. The orange active-step background (`#FE610026`) was traced to a missing `StepActiveColor` in Starlight/Style.lua and fixed. Icon paths now correctly resolve to `Interface\Icons\<name>`.
+
+### Changes
+
+#### `X-Plore.toc`
+
+- Line 52: `Guides-Retail\Autoload.xml` → `Guides\Autoload.xml`
+
+#### `Guides\Autoload.xml`
+
+- Completely rewritten — loads all ~70 real guide files organized by category (Common, Root bundles, Leveling, Dailies, Dungeons, Achievements, Professions, Reputations, PetsMounts, Titles)
+- All 193 guide/image files added to git tracking (previously untracked)
+
+#### `Skins\Default\Starlight\Style.lua`
+
+- Added three missing color definitions:
+  ```lua
+  STYLE.StepActiveColor   = HTML("#202020FF")   -- all steps same dark bg (Zygor parity)
+  STYLE.StepCompleteColor = HTML("#1A2B1AFF")   -- subtle green tint for completed
+  STYLE.StepUpcomingColor = HTML("#202020FF")   -- same dark bg for upcoming
+  ```
+- Root cause: `InitColors()` fallback was `HTML("#FE610026")` — 15% alpha orange — whenever `StepActiveColor` was nil
+
+#### `Viewer.lua`
+
+- Icon paths: bare icon names now resolve to `Interface\Icons\<name>`; full `Interface\...` paths pass through unchanged; missing icons clear texture with `""` (no white placeholder squares)
+
+**Commit:** `2f6df9c`
 
 ---
 
