@@ -59,12 +59,25 @@ local EXPANSION_GROUPS = {
 function XP:InitCategories()
     self.Categories = {}
     self.CategoryMap = {}       -- [id] => category data
-    self.GuidesByCategory = {}  -- [id] => { guide1, guide2, ... }
+
+    -- Preserve any guides already registered before InitCategories runs.
+    -- Guide data files load before OnInitialize fires, so wiping this table
+    -- would silently drop every registered guide.
+    local existingGuides = self.GuidesByCategory or {}
+    self.GuidesByCategory = {}
 
     for _, cat in ipairs(CATEGORIES) do
         table.insert(self.Categories, cat)
         self.CategoryMap[cat.id] = cat
-        self.GuidesByCategory[cat.id] = {}
+        -- Keep any guides already registered into this category slot.
+        self.GuidesByCategory[cat.id] = existingGuides[cat.id] or {}
+    end
+
+    -- Carry over guides that landed in categories not in the CATEGORIES list.
+    for catID, guides in pairs(existingGuides) do
+        if not self.GuidesByCategory[catID] then
+            self.GuidesByCategory[catID] = guides
+        end
     end
 
     -- Store sub-groups for reference
