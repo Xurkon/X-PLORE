@@ -139,7 +139,8 @@ function XP:CreateViewerFrame()
 
     frame.TabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
     frame.TabBg:SetAllPoints()
-    XP.SetTexColor(frame.TabBg, XP:ColorRGBA("bg_medium"))
+    local tabContainerBgColor = XP:SD("TabsContainerBackdropInactive") or XP:Color("bg_medium")
+    XP.SetTexColor(frame.TabBg, tabContainerBgColor[1], tabContainerBgColor[2], tabContainerBgColor[3], tabContainerBgColor[4] or 1)
 
 
     frame.TabContainer = tabContainer
@@ -415,9 +416,10 @@ function XP:CreateViewerFrame()
             f:SetBackdropBorderColor(XP:ColorRGBA("border"))
         end
 
-        -- Tab bar background
+        -- Tab bar background (texture, not frame — use SetTexColor)
         if f.TabBg then
-            XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
+            local tabBgColor = XP:SD("TabsContainerBackdropInactive") or XP:Color("bg_medium")
+            XP.SetTexColor(f.TabBg, tabBgColor[1], tabBgColor[2], tabBgColor[3], tabBgColor[4] or 1)
         end
 
 

@@ -29,14 +29,23 @@ function XP.ViewerFrame.ApplySkin(self)
     -- Title bar
     if f.TitleBar then
         if f.TitleBar.Logo then
-            -- Logo uses TitleLogo skin texture or fallback
             local logoTex = XP:SD("TitleLogo")
+            local logoSize = XP:SD("TitleLogoSize") or {120, 30}
+            f.TitleBar.Logo:SetSize(logoSize[1] or 120, logoSize[2] or 30)
             if logoTex then
                 f.TitleBar.Logo:SetTexture(logoTex)
+                f.TitleBar.Logo:Show()
+                if f.TitleText then f.TitleText:Hide() end
+            else
+                f.TitleBar.Logo:Hide()
+                if f.TitleText then
+                    XP:ApplyFont(f.TitleText, "bold", "cyan")
+                    f.TitleText:Show()
+                end
             end
-        end
-        if f.TitleText then
+        elseif f.TitleText then
             XP:ApplyFont(f.TitleText, "bold", "cyan")
+            f.TitleText:Show()
         end
         -- Title divider
         if f.TitleDivider then
@@ -44,9 +53,10 @@ function XP.ViewerFrame.ApplySkin(self)
         end
     end
 
-    -- Tab container
+    -- Tab container background (TabBg is a Texture, not a Frame — use SetTexColor)
     if f.TabBg then
-        XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
+        local tabBgColor = XP:SD("TabsContainerBackdropInactive") or XP:SD("TabBackdropColor") or {0.067, 0.067, 0.067, 1}
+        XP.SetTexColor(f.TabBg, tabBgColor[1] or 0, tabBgColor[2] or 0, tabBgColor[3] or 0, tabBgColor[4] or 1)
     end
     if f.TabDivider then
         XP.SetTexColor(f.TabDivider, XP:ColorRGBA("border_dim"))
@@ -89,6 +99,10 @@ function XP.ViewerFrame.ApplySkin(self)
             local sbcc = XP:SD("ScrollBarColor") or {0.4, 0.4, 0.4, 1}
             XP.SetTexColor(f.ScrollThumb, sbcc[1], sbcc[2], sbcc[3], sbcc[4])
         end
+    end
+    if f.EmptyBodyBg then
+        local emptyBgColor = XP:SD("ViewerEmptyBodyColor") or {0, 0, 0, 0.5}
+        XP.SetTexColor(f.EmptyBodyBg, emptyBgColor[1], emptyBgColor[2], emptyBgColor[3], emptyBgColor[4])
     end
 
     -- Progress area

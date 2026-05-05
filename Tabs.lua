@@ -3,7 +3,7 @@
 -- Tab management for the Viewer frame.
 -- Allows multiple guides to be open simultaneously with clickable tabs.
 -- Modeled after Zygor's Tabs.lua architecture:
---   Pool of tab objects, each with a Button + Icon + Close button.
+--   Pool of tab objects, each with a tab Button + Close button.
 --   Active tab drives XP.CurrentGuide / XP.CurrentStep.
 --   Tabs saved/restored via AceDB char.tabGuides.
 -----------------------------------------------------------------------
@@ -26,6 +26,62 @@ Tabs.Pool      = Pool
 Tabs.ActiveTab = nil       -- Currently active tab object (or nil)
 Tabs.Dragging  = nil       -- Tab currently being dragged (or nil)
 
+local function GetTabButtonHeight()
+    local barHeight = XP:Size("tab_height")
+    if not barHeight or barHeight <= 0 then
+        barHeight = 20
+    end
+    return math.max(15, barHeight - 5)
+end
+
+local function ApplyZygorTabFont(fontString)
+    if not fontString then return end
+    fontString:SetFont(STANDARD_TEXT_FONT, 9, "")
+    fontString:SetTextColor(1, 1, 1, 1)
+end
+
+-- Returns the NoEdgeBackdrop table for tab/utility buttons (no file I/O, safe to call often)
+local function TabBackdrop()
+    return {bgFile = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\white", tile = true, tileSize = 8}
+end
+
+local function SetTabInactive(button)
+    if not button then return end
+    if button.SetBackdrop then
+        button:SetBackdrop(TabBackdrop())
+        local c = XP:SD("TabsBackdropInactive") or {0, 0, 0, 0}
+        button:SetBackdropColor(c[1] or 0, c[2] or 0, c[3] or 0, c[4] or 0)
+    end
+end
+
+local function SetTabActive(button)
+    if not button then return end
+    if button.SetBackdrop then
+        button:SetBackdrop(TabBackdrop())
+        local c = XP:SD("TabsBackdropActive") or {0.125, 0.125, 0.125, 1}
+        button:SetBackdropColor(c[1] or 0.125, c[2] or 0.125, c[3] or 0.125, c[4] or 1)
+    end
+end
+
+local function SkinTabButton(button, text)
+    if not button then return end
+    -- Plain buttons (no UIPanelButtonTemplate) need a font string created explicitly
+    if not button:GetFontString() then
+        local fs = button:CreateFontString(nil, "OVERLAY")
+        fs:SetAllPoints()
+        button:SetFontString(fs)
+    end
+    button:SetText(text or "")
+    -- Remove WoW native button textures if present
+    if button.SetNormalTexture then button:SetNormalTexture("") end
+    if button.SetPushedTexture then button:SetPushedTexture("") end
+    if button.SetHighlightTexture then button:SetHighlightTexture("") end
+    if button.SetDisabledTexture then button:SetDisabledTexture("") end
+    -- Apply skin-aware inactive appearance
+    SetTabInactive(button)
+    ApplyZygorTabFont(button:GetFontString())
+end
+
 -----------------------------------------------------------------------
 -- Initialize: called from XP:OnEnable()
 -----------------------------------------------------------------------
@@ -37,44 +93,36 @@ function XP:InitTabs()
 
     Tabs.container = self.ViewerFrame.TabContainer
 
-    -- Create the "+" (add tab) button — Zygor positions it to the right, after all tabs
-    local addBtn = CreateFrame("Button", nil, Tabs.container)
-    addBtn:SetSize(20, self:Size("tab_height") - 4)
-    addBtn:SetNormalFontObject(GameFontNormalSmall)
-    addBtn:SetText("+")
-    addBtn:GetFontString():SetTextColor(XP:ColorRGBA("cyan_dark"))
+    -- Create the "+" (add tab) button — skinned like Zygor's classic tabs
+    local addBtn = XP.CreateBackdropFrame("Button", nil, Tabs.container)
+    addBtn:SetSize(20, GetTabButtonHeight())
+    SkinTabButton(addBtn, "+")
     addBtn:SetScript("OnClick", function()
         XP:ToggleMenu()
     end)
     addBtn:SetScript("OnEnter", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("cyan"))
         GameTooltip:SetOwner(self_btn, "ANCHOR_BOTTOMLEFT")
         GameTooltip:SetText("Open a new guide")
         GameTooltip:Show()
     end)
-    addBtn:SetScript("OnLeave", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("cyan_dark"))
+    addBtn:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
     Tabs.AddButton = addBtn
 
-    -- Create the ">" (overflow) button — appears when tabs overflow the tab bar width
-    local overflowBtn = CreateFrame("Button", nil, Tabs.container)
-    overflowBtn:SetSize(20, self:Size("tab_height") - 4)
-    overflowBtn:SetNormalFontObject(GameFontNormalSmall)
-    overflowBtn:SetText(">")
-    overflowBtn:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
+    -- Create the ">" (overflow) button — uses the same native panel-button styling
+    local overflowBtn = XP.CreateBackdropFrame("Button", nil, Tabs.container)
+    overflowBtn:SetSize(20, GetTabButtonHeight())
+    SkinTabButton(overflowBtn, ">")
     overflowBtn:SetScript("OnClick", function()
         Tabs:ToggleOverflowMenu()
     end)
     overflowBtn:SetScript("OnEnter", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("text_bright"))
         GameTooltip:SetOwner(self_btn, "ANCHOR_BOTTOMLEFT")
         GameTooltip:SetText("More guides")
         GameTooltip:Show()
     end)
-    overflowBtn:SetScript("OnLeave", function(self_btn)
-        self_btn:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
+    overflowBtn:SetScript("OnLeave", function()
         GameTooltip:Hide()
     end)
     overflowBtn:Hide()
@@ -152,7 +200,7 @@ end
 -----------------------------------------------------------------------
 -- DEBUG: ENTER Tabs:CreateTab()
 function Tabs:CreateTab()
-    local tabHeight = XP:Size("tab_height") - 2
+    local tabHeight = GetTabButtonHeight()
     local index = #Pool + 1
 
     local tab = {}
@@ -164,37 +212,27 @@ function Tabs:CreateTab()
     btn:RegisterForDrag("LeftButton")
     btn:EnableMouse(true)
     btn:Hide()
+    SkinTabButton(btn, "Guide")
 
-    XP:ApplyBackdrop(btn, "tab", "bg_medium", nil)
-
-    -- Tab text
-    local text = btn:CreateFontString(nil, "OVERLAY")
-    text:SetPoint("LEFT", btn, "LEFT", 22, 0)
-    text:SetPoint("RIGHT", btn, "RIGHT", -18, 0)
-    text:SetJustifyH("LEFT")
-    text:SetWordWrap(false)
-    XP:ApplyFont(text, "small", "text_muted")
-    text:SetText("Guide")
+    local text = btn:GetFontString()
+    if text then
+        text:ClearAllPoints()
+        text:SetPoint("LEFT", btn, "LEFT", 4, 0)
+        text:SetPoint("RIGHT", btn, "RIGHT", -14, 0)
+        text:SetJustifyH("CENTER")
+        text:SetWordWrap(false)
+        ApplyZygorTabFont(text)
+    end
     tab.Text = text
 
-    -- Small guide-type icon (left side); sprite set in AssignGuide
+    -- Zygor's classic viewer tabs are text-only.
     local icon = btn:CreateTexture(nil, "ARTWORK")
-    icon:SetSize(14, 14)
-    icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
+    icon:Hide()
     tab.Icon = icon
-
-    -- Thin orange bottom bar shown only on the active tab
-    local accentBar = btn:CreateTexture(nil, "OVERLAY")
-    accentBar:SetHeight(2)
-    accentBar:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
-    accentBar:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
-    XP.SetTexColor(accentBar, XP:ColorRGBA("orange"))
-    accentBar:Hide()
-    tab.AccentBar = accentBar
 
     -- Close button (right side)
     local closeBtn = CreateFrame("Button", nil, btn)
-    closeBtn:SetSize(14, 14)
+    closeBtn:SetSize(12, 12)
     closeBtn:SetPoint("RIGHT", btn, "RIGHT", -2, 0)
     closeBtn:SetNormalFontObject(GameFontNormalSmall)
     closeBtn:SetText("x")
@@ -268,24 +306,15 @@ function Tabs:AssignGuide(guideID, step)
     self.title   = guide.titleShort or guide.title or guideID
     self.step    = step or 1
 
-    self.Text:SetText(self.title)
+    self.Button:SetText(self.title)
+    if self.Text then
+        ApplyZygorTabFont(self.Text)
+    end
 
-    -- Set icon from the sprite sheet (4×4 grid matching Zygor guideicons-small layout)
-    local cat = guide.category or "LEVELING"
-    local GUIDE_ICON_COORDS = {
-        LEVELING     = {1, 1},  EVENTS       = {2, 1},
-        DAILIES      = {3, 1},  LOREMASTER   = {4, 1},
-        GOLD         = {1, 2},  PROFESSIONS  = {2, 2},
-        PETSMOUNTS   = {3, 2},  PETS_MOUNTS  = {3, 2},
-        ACHIEVEMENTS = {4, 2},  TITLES       = {1, 3},
-        REPUTATIONS  = {2, 3},  MACROS       = {3, 3},
-        DUNGEONS     = {4, 3},  GEAR         = {1, 4},
-    }
-    local coords = GUIDE_ICON_COORDS[cat] or {4, 4}
-    local col, row = coords[1], coords[2]
-    local iconSheet = XP:SD("GuideMiniIconsTexture")
-    self.Icon:SetTexture(iconSheet)
-    self.Icon:SetTexCoord((col-1)/4, col/4, (row-1)/4, row/4)
+    if self.Icon then
+        self.Icon:SetTexture(nil)
+        self.Icon:Hide()
+    end
 
     Tabs:SaveTabState()
     Tabs:ReanchorTabs()
@@ -318,16 +347,18 @@ function Tabs:SetAsCurrent()
     -- Deactivate previous
     if Tabs.ActiveTab and Tabs.ActiveTab ~= self then
         Tabs.ActiveTab.isActive = false
-        XP:ApplyBackdrop(Tabs.ActiveTab.Button, "tab", "bg_medium", nil)
-        Tabs.ActiveTab.Text:SetTextColor(XP:ColorRGBA("text_muted"))
-        if Tabs.ActiveTab.AccentBar then Tabs.ActiveTab.AccentBar:Hide() end
+        SetTabInactive(Tabs.ActiveTab.Button)
+        if Tabs.ActiveTab.Text then
+            ApplyZygorTabFont(Tabs.ActiveTab.Text)
+        end
     end
 
     Tabs.ActiveTab = self
     self.isActive = true
-    XP:ApplyBackdrop(self.Button, "tab", "bg_light", nil)
-    self.Text:SetTextColor(XP:ColorRGBA("text_bright"))
-    if self.AccentBar then self.AccentBar:Show() end
+    SetTabActive(self.Button)
+    if self.Text then
+        ApplyZygorTabFont(self.Text)
+    end
 -- DEBUG: EXIT Tabs:SetAsCurrent()
 end
 
@@ -464,15 +495,24 @@ function Tabs:ShowContextMenu()
 end
 
 -----------------------------------------------------------------------
--- Hover interaction: show close button, lighten border
+-- Hover interaction: show close button and tooltip
 -----------------------------------------------------------------------
 -- DEBUG: ENTER Tabs:ShowInteraction()
 function Tabs:ShowInteraction()
     if self.CloseBtn then
         self.CloseBtn:Show()
     end
-    if self.Button and self.Button.SetBackdropBorderColor then
-        self.Button:SetBackdropBorderColor(XP:ColorRGBA("border_bright"))
+
+    -- Hover colour: dim the backdrop slightly (match Zygor's hover cue)
+    if not self.isActive and self.Button then
+        local c = XP:SD("TabsBackdropActive") or {0.125, 0.125, 0.125, 1}
+        if self.Button.SetBackdropColor then
+            self.Button:SetBackdropColor(c[1] or 0, c[2] or 0, c[3] or 0, (c[4] or 1) * 0.5)
+        end
+        if self.Text then
+            local oc = XP:SD("TabsTextColorOver") or {1, 1, 1, 0.47}
+            self.Text:SetTextColor(oc[1] or 1, oc[2] or 1, oc[3] or 1, oc[4] or 0.47)
+        end
     end
 
     -- Tooltip
@@ -495,13 +535,13 @@ function Tabs:HideInteraction()
     if self.CloseBtn then
         self.CloseBtn:Hide()
     end
-    if self.Button and self.Button.SetBackdropBorderColor then
-        if self.isActive then
-            self.Button:SetBackdropBorderColor(XP:ColorRGBA("cyan"))
-        else
-            self.Button:SetBackdropBorderColor(XP:ColorRGBA("border_dim"))
-        end
+
+    -- Restore normal appearance on leave
+    if not self.isActive then
+        SetTabInactive(self.Button)
+        if self.Text then ApplyZygorTabFont(self.Text) end
     end
+
     GameTooltip:Hide()
 -- DEBUG: EXIT Tabs:HideInteraction()
 end
@@ -665,11 +705,9 @@ function Tabs:ShowOverflowMenu()
     for _, row in ipairs(menu.rows) do row:Hide() end
     menu.rows = {}
 
-    local rowH     = 22
+    local rowH     = 18
     local padV     = 6
     local padH     = 8
-    local iconSize = 16
-    local iconGap  = 4
     local maxTextW = 0
 
     for i, tab in ipairs(overflowTabs) do
@@ -677,24 +715,10 @@ function Tabs:ShowOverflowMenu()
         row:SetHeight(rowH)
         row:SetPoint("TOPLEFT", menu, "TOPLEFT", padH, -(padV + (i - 1) * rowH))
 
-        -- Guide-type icon
-        local icon = row:CreateTexture(nil, "ARTWORK")
-        icon:SetSize(iconSize, iconSize)
-        icon:SetPoint("LEFT", row, "LEFT", 0, 0)
-        if tab.Icon then
-            local tex = tab.Icon:GetTexture()
-            if tex then icon:SetTexture(tex) end
-            local r, g, b = tab.Icon:GetVertexColor()
-            XP.SetTexColor(icon, r or 1, g or 1, b or 1, 1)
-        else
-            XP.SetTexColor(icon, XP:ColorRGBA("cyan_dark"))
-        end
-
-        -- Guide title label
         local label = row:CreateFontString(nil, "OVERLAY")
-        label:SetPoint("LEFT", row, "LEFT", iconSize + iconGap, 0)
+        label:SetPoint("LEFT", row, "LEFT", 0, 0)
         label:SetJustifyH("LEFT")
-        XP:ApplyFont(label, "small", "text_bright")
+        ApplyZygorTabFont(label)
         label:SetText(tab.title or tab.guideID or "")
         row.Label = label
 
@@ -704,16 +728,16 @@ function Tabs:ShowOverflowMenu()
             capturedTab:ActivateGuide()
         end)
         row:SetScript("OnEnter", function()
-            label:SetTextColor(XP:ColorRGBA("cyan"))
+            label:SetTextColor(1, 1, 1, 1)
         end)
         row:SetScript("OnLeave", function()
-            XP:ApplyFont(label, "small", "text_bright")
+            ApplyZygorTabFont(label)
         end)
 
         row:Show()
         menu.rows[i] = row
 
-        local tw = label:GetStringWidth() + iconSize + iconGap + padH * 2
+        local tw = label:GetStringWidth() + padH * 2
         if tw > maxTextW then maxTextW = tw end
     end
 
@@ -786,8 +810,8 @@ function Tabs:ReanchorTabs()
 
     -- Count visible slots available: addBtn + overflowBtn take space on the right
     local availWidth = containerWidth - leftMargin - rightMargin - addBtnWidth - overflowBtnWidth - addBtnGap - overflowBtnGap
-    local tabWidth = math.max(60, math.floor(availWidth / count))
-    local tabHeight = XP:Size("tab_height") - 2
+    local tabWidth = math.max(40, math.floor(availWidth / count))
+    local tabHeight = GetTabButtonHeight()
 
     local prev = nil
     local visibleCount = 0
