@@ -4,6 +4,103 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 50 — 2026-05-05
+
+### Summary
+
+**Zygor skin architecture replicated exactly.** The monolithic `Skins.lua` (~1900 lines with all style data embedded) has been refactored into Zygor's separated architecture: a slim engine file plus independent `Skin.lua` and per-style `Style.lua` files. The fabricated `TabDecorTex`/`TabsDecor` concept (which caused an orange overlay across the tab container) has been fully removed. Dynamic `ADDON_NAME` path fix ensures correct texture loading regardless of installed folder name.
+
+### Changes
+
+#### Skin Engine (`Skins.lua`)
+
+1. **Slimmed to engine only** — All 4 style data blocks (STARLIGHT, STEALTH, STARLIGHT_GLASS, STEALTH_GLASS) extracted; file reduced from ~1900 to ~1260 lines
+2. **`XP:AddSkin(id, name)`** — New function matching Zygor's `ZGV:AddSkin()`; creates and registers a skin, returns the skin table
+3. **`XP:GetSkinPath(skin, style)`** — New function matching Zygor's `ZGV:GetSkinPath()`; builds texture path from skin/style IDs
+4. **`XP.InitStyleTables(style)`** — New wrapper calling `InitColors` + `InitFonts` + `InitSizes` + `InitBackdrops`; called at end of each Style.lua
+5. **Helper exposure** — `XP.HTML`, `XP.SolidBackdrop`, `XP.TiledBackdrop`, `XP.NoEdgeBackdrop` now exposed on XP namespace for use in Style.lua files
+6. **Removed premature init** — `activeSkin`/`activeStyle` lines at file bottom deleted; initialization now happens at addon load via `XP:InitSkins()` → `XP:SetSkin()`
+7. **Removed ZGV shim** — Legacy `ZygorGuidesViewer` compatibility block deleted
+
+#### `Skins\Default\Skin.lua`
+
+- Replaced stub with full skin registration matching Zygor's `Skins\Default\Skin.lua`
+- `XP:AddSkin("default", "Default")` → returns `Skin`
+- Registers 4 styles: `starlight`, `starlight-glass`, `stealth`, `stealth-glass`
+- `Skin.defaultstyle = starlight`; glass variants marked `GUIHidden = true` with `inheritedStyle` set
+- Defines `Skin:CreateFrame()`, `Skin:UpdateSkin()`, `Skin:UpdateLocking()`, `Skin:AlignFrame()`
+
+#### Style Files (4 files)
+
+- **`Skins\Default\Starlight\Style.lua`** — Populated with all STARLIGHT style data; Zygor-pattern namespace guard + STYLEDIR/SKINSDIR locals; ends with `XP.InitStyleTables(STYLE)`
+- **`Skins\Default\Stealth\Style.lua`** — Populated with all STEALTH style data; same pattern
+- **`Skins\Default\Starlight-glass\Style.lua`** — Replaced ZGV retail namespace (used `local name,ZGV=...`) with correct X-PLORE version; STARLIGHT_GLASS data
+- **`Skins\Default\Stealth-glass\Style.lua`** — Replaced ZGV retail namespace; STEALTH_GLASS data
+
+#### `Skins\Default\Skin.xml`
+
+- Replaced empty TODO stub with valid XML matching Zygor's load order:
+  `ViewerFrame.lua` → `ViewerFrame.xml` → `Skin.lua` → `Starlight\Style.lua` → `Starlight-glass\Style.lua` → `Stealth\Style.lua` → `Stealth-glass\Style.lua`
+
+#### `X-Plore.toc`
+
+- Skins section reduced from 9 entries to 2: `Skins.lua` + `Skins\Default\Skin.xml`
+- Removed: `Skin.lua`, all `Style.lua`, `ViewerFrame.lua`, `ViewerFrame.xml`, `Midnight\Style.lua` (now loaded via Skin.xml — no double-loading)
+
+#### Orange Tab Fix — TabDecorTex Removed (`Viewer.lua`, `Skins\Default\ViewerFrame.lua`)
+
+- Deleted `tabDecorTex` creation block in `Viewer.lua` (~lines 144–154): `tabContainer:CreateTexture` + `SetAllPoints()` that was flooding the tab container with an orange overlay
+- Deleted `TabDecorTex` skin-update block in `Viewer.lua` (~lines 434–443)
+- Deleted `if f.TabDecorTex then` update block in `ViewerFrame.lua` (~lines 54–63)
+- `TabsDecor`/`TabDecorTex`/`viewer8-tabs` concepts do not exist in Zygor — they were fabricated and caused the orange tab container bug
+
+#### Dev Docs
+
+- `SKIN_REFACTOR_PLAN.md` added to X-PLORE folder (not tracked)
+- `.gitignore` updated: `*_PLAN.md`, `*_REPORT.md`, `*_ANALYSIS.md` patterns excluded
+
+**Commits:** `356180f`, `fbc5846`
+
+---
+
+## Session 49 — 2026-05-05
+
+### Summary
+
+**Visual bug fixes and runtime error resolution.** Multiple crashes and visual issues resolved: `SetMaxLines` nil guard, `UpdateForStep` number/object mismatch, tab sprite sheet icons replacing solid colors, invalid anchor point `MIDDLE→CENTER`, hamburger icon fallback to standalone `.tga`. Dynamic `ADDON_NAME` path used throughout to fix texture loading on non-standard folder names.
+
+### Changes
+
+#### Runtime Errors Fixed
+
+1. **`SetMaxLines` nil guard** (`Viewer.lua:572`) — Added `if f.StepText and f.StepText.SetMaxLines then` guard; `SetMaxLines` is absent on some WotLK frames
+2. **`UpdateForStep` number/object crash** (`Faction.lua:273`, `ActionBar.lua:204`) — Both files now guard `if type(step) ~= "table" then return end` before indexing step properties
+3. **Invalid anchor `MIDDLE`→`CENTER`** (`Viewer.lua:579`) — `SetPoint("MIDDLE", ...)` replaced with `SetPoint("CENTER", ...)`; `MIDDLE` is not a valid WoW region anchor point
+
+#### Tab Icons — Sprite Sheet (`Tabs.lua`, `Viewer.lua`)
+
+- Tab icons now use `guideicons-small` sprite sheet (extracted per-tab via `SetTexCoord`) instead of solid-color textures
+- Active tab icon highlighted; inactive tabs use dimmed version of same sprite
+
+#### Orange Bleed Fix — NoEdge Backdrops (`Skins.lua`, `ViewerFrame.lua`)
+
+- Step and tab backdrops changed to `NoEdgeBackdrop()` — removes the edge tile that was bleeding orange color into adjacent elements
+- `c8cf7d7`
+
+#### Dynamic Addon Path (`Skins.lua`, Style files)
+
+- `ADDON_DIR` now computed from `ADDON_NAME` vararg: `"Interface\\AddOns\\" .. ADDON_NAME`
+- Fixes texture loading when addon is installed as `X-Plore-2.0.0` instead of `X-Plore`
+
+#### Hamburger Icon (`Viewer.lua`)
+
+- Replaced corrupted `titlebuttons-thin` sprite sheet reference with standalone `hamburger-icon.tga`
+- `177a221`
+
+**Commits:** `d17e054`, `5142bff`, `177a221`, `918c594`, `fc4e624`, `c8cf7d7`, `5c88ede`
+
+---
+
 ## Session 44 — 2026-05-05
 
 ### Summary

@@ -53,7 +53,8 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 |-----------|--------|-------|
 | Core framework | ✅ Functional | AceDB profiles, version detection, skin system |
 | Guide menu / viewer | ✅ Functional | Frame, tabs, step scrolling, progress bar, navigation buttons |
-| Skin system | ✅ Functional | Stealth & Starlight themes working; Default, Midnight, glass variants coming |
+| Skin engine | ✅ Zygor-matching | Separated architecture: engine + Skin.lua + per-style Style.lua files |
+| Skin styles | ✅ All 4 populated | Starlight, Stealth, Starlight-glass, Stealth-glass — each in own Style.lua |
 | Waypoint arrow | ✅ Functional | Arrow frame, rotation, distance, ETA, cycling, turn audio cues |
 | Arrow themes | ✅ Complete | 5 themes wired; UI selector dropdown in Options panel |
 | Ant trail | ✅ Functional | Dot fallback wired for WotLK/Classic (915407d); world line for Retail |
@@ -61,17 +62,24 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
 | Zygor guide parsing | ⚙️ Partial | Parser structures exist; guide loading in progress |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
-| Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs |
-#### 🔄 In Development — Session 45 Complete
+| Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
-**STEPS + LEVELING GUIDES Tabs** (`7c6dac2`): Two static tabs now anchor the left side of the tab bar — STEPS (50px, opens guide steps view) and LEVELING GUIDES (90px, opens guide selector menu). `XP:SetDisplayMode()` added to Core.lua as Zygor parity. `ReanchorTabs()` accounts for 145px static tab width when distributing dynamic guide tabs.
+#### 🔄 Recently Completed — Sessions 49–50
 
-**Arrow Theme System** (`f875935`): `XP:GetArrowThemes()`, `XP:SetArrowTheme()`, `XP:SetArrowScale()`, `XP:ToggleArrow()`, `XP:UpdateArrowSettings()`, `XP.Waypoints` proxy. 5 arrow themes available: Modern, Classic, Minimal, Circular, Waypoint. Theme auto-loaded from profile on arrow spawn.
+**Zygor Skin Architecture** (`356180f`): `Skins.lua` slimmed to engine-only (~1260 lines). `Skins\Default\Skin.lua` registers 4 styles. Individual `Style.lua` files hold all style data. `Skin.xml` controls load order. `X-Plore.toc` Skins section reduced to 2 entries.
 
-**Ant Trail Fix** (`915407d`): `UpdateAntLine` now calls `AddAntDots` for WotLK/Classic (no `SetWorldLine`). Fixed instanceID: `HBD:GetWorldCoordinatesFromZone` 3rd return value now captured and used instead of hardcoded 946.
+**Orange Tab Fix** (`356180f`): Removed fabricated `TabDecorTex`/`TabsDecor`/`viewer8-tabs` concept — `tabDecorTex:SetAllPoints()` was flooding the tab container orange. Deleted from `Viewer.lua` and `ViewerFrame.lua`.
 
-#### 🔜 Up Next
-- **A4** Arrow theme selector UI in Options panel — dropdown/select widget for MODERN/CLASSIC/MINIMAL/CIRCULAR/WAYPOINT
+**Runtime Error Fixes** (`5142bff`): `SetMaxLines` nil guard; `Faction.lua`/`ActionBar.lua` `step` number/object crash; `SetPoint("MIDDLE")` → `"CENTER"`.
+
+#### 🔜 Remaining Parity Gaps
+
+- **Viewer visual parity** — Step list styling, separators, step height/spacing to exactly match Zygor screenshots
+- **Tab visual parity** — Tab textures/sprites to match Zygor's sprite-sheet-based tab appearance
+- **Action Bar integration** — Highlight action bar slots for quest items (`ActionBar.lua` stub)
+- **Minimap** — Quest area blob / foglight reveal
+- **Faction system** — Reputation badges and standing-based guide filtering
+- **Sound system** — Multiple event sounds beyond step_complete
 
 ---
 
@@ -126,22 +134,28 @@ Get it here: https://github.com/Xurkon/-X-Libs
 X-PLORE/
 ├── X-Plore.toc              # Addon manifest (TOC)
 ├── Core.lua                 # Addon initialization and core
-├── Compat.lua                # WoW version detection + API shims
-├── Init.lua                  # Early initialization
-├── Config.lua                # Configuration system
-├── GuideMenu.lua             # Main guide menu UI
-├── Viewer.lua                # Guide viewer frame
-├── GuideLoader.lua           # Guide parsing and loading
-├── Guide.lua                 # Guide data structures
-├── Skins.lua                 # Skin system
-├── Skins/Default/            # Default skin assets
-├── Arrows/                   # Navigation arrow skins
-├── Waypoints.lua             # Map waypoint system
-├── GoalTracker.lua           # Step/goal tracking
-├── QuestTracking.lua         # Quest auto-tracking
-├── ui/                       # Shared UI templates
-├── UiWidgets/                # Reusable widget library
-├── Localization/             # enUS + base localization
+├── Compat.lua               # WoW version detection + API shims
+├── Init.lua                 # Early initialization
+├── Config.lua               # Configuration system
+├── GuideMenu.lua            # Main guide menu UI
+├── Viewer.lua               # Guide viewer frame
+├── GuideLoader.lua          # Guide parsing and loading
+├── Guide.lua                # Guide data structures
+├── Skins.lua                # Skin engine (SkinProto, API, helpers)
+├── Skins/Default/
+│   ├── Skin.xml             # Load order: ViewerFrame → Skin.lua → Style files
+│   ├── Skin.lua             # Registers skin + 4 styles; CreateFrame/UpdateSkin
+│   ├── ViewerFrame.lua/.xml # Frame widget definitions
+│   ├── Starlight/Style.lua  # Starlight style data
+│   ├── Starlight-glass/Style.lua
+│   ├── Stealth/Style.lua    # Stealth style data
+│   └── Stealth-glass/Style.lua
+├── Arrows/                  # Navigation arrow skins
+├── Waypoints.lua            # Map waypoint system
+├── GoalTracker.lua          # Step/goal tracking
+├── QuestTracking.lua        # Quest auto-tracking
+├── UiWidgets/               # Reusable widget library
+├── Localization/            # enUS + base localization
 └── sounds/                  # Audio (step_complete.ogg)
 ```
 
@@ -156,16 +170,27 @@ X-PLORE/
 
 ## Skins
 
-X-PLORE includes a multi-skin system. Currently available:
+X-PLORE includes a multi-skin system matching Zygor's separated architecture. All 4 styles are fully populated in their own `Style.lua` files:
 
 | Skin | Status |
 |------|--------|
-| Stealth | ✅ Working |
 | Starlight | ✅ Working |
-| Default | 🔜 Coming |
-| Midnight | 🔜 Coming |
-| Starlight-glass | 🔜 Coming |
-| Stealth-glass | 🔜 Coming |
+| Stealth | ✅ Working |
+| Starlight-glass | ✅ Data populated |
+| Stealth-glass | ✅ Data populated |
+
+### Skin Architecture
+
+```
+Skins.lua                              ← engine only (SkinProto, API, helpers)
+Skins\Default\Skin.xml                 ← load order orchestration
+Skins\Default\ViewerFrame.lua/.xml     ← frame widget definitions
+Skins\Default\Skin.lua                 ← registers skin + 4 styles
+Skins\Default\Starlight\Style.lua      ← Starlight style data
+Skins\Default\Starlight-glass\Style.lua
+Skins\Default\Stealth\Style.lua        ← Stealth style data
+Skins\Default\Stealth-glass\Style.lua
+```
 
 ---
 
