@@ -62,14 +62,15 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Zygor guide parsing | ⚙️ Partial | Parser structures exist; guide loading in progress |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ⚙️ Partial | Custom tabs working; STEPS/LEVELING GUIDES tabs coming |
+#### 🔄 In Development — Session 44 Complete
 
-#### 🔄 In Development — Session 41 Complete
+**Hamburger Menu Button** (`1fd700a`): Viewer menu button now uses column 3 of `titlebuttons-thin` sprite sheet (hamburger/menu icon) instead of `INV_Misc_Map_01`. Matches Zygor's titlebar button layout (Lock=0, Menu=3, Settings=4, Close=5). Removed stale `UpdateSkin` reset that was overriding the sprite texture.
+
 **Arrow Theme System** (`f875935`): `XP:GetArrowThemes()`, `XP:SetArrowTheme()`, `XP:SetArrowScale()`, `XP:ToggleArrow()`, `XP:UpdateArrowSettings()`, `XP.Waypoints` proxy. 5 arrow themes available: Modern, Classic, Minimal, Circular, Waypoint. Theme auto-loaded from profile on arrow spawn.
 
 **Ant Trail Fix** (`915407d`): `UpdateAntLine` now calls `AddAntDots` for WotLK/Classic (no `SetWorldLine`). Fixed instanceID: `HBD:GetWorldCoordinatesFromZone` 3rd return value now captured and used instead of hardcoded 946.
 
 #### 🔜 Up Next
-- **A5** Hamburger menu icon — replace `INV_Misc_Map_01` on viewer button
 - **A6** STEPS / LEVELING GUIDES tabs — alongside existing custom tabs
 
 ---

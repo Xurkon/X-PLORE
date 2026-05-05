@@ -4,6 +4,24 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 44 — 2026-05-05
+
+### Summary
+
+**Hamburger menu button implemented.** The viewer frame's menu button now uses the hamburger/menu icon from Zygor's `titlebuttons-thin` sprite sheet (column 3 = menu/hamburger) instead of the generic `INV_Misc_Map_01` map icon. Also removed a stale `UpdateSkin` override that was resetting the button texture back to the old icon every skin refresh.
+
+### Changes
+
+#### Viewer Menu Button (Viewer.lua)
+
+1. **Sprite-sheet icon** — Menu button now uses `titleBtnPath` (`titlebuttons-thin`) with `SetTexCoord(3/8, 4/8, row)` to extract the hamburger icon from column 3, row 0 (normal), row 1 (pushed), row 2 (highlight)
+2. **Full button states** — Normal, pushed, and highlight textures all properly set (previously had no pushed/highlight states)
+3. **Removed stale override** — `UpdateSkin` function had a reset at line 477 that called `SetNormalTexture("Interface\\Icons\\INV_Misc_Map_01")` on the menu button, overriding the sprite — removed
+
+**Commit:** `1fd700a`
+
+---
+
 ## Session 39 — 2026-05-04
 
 ### Summary
