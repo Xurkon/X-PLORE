@@ -106,11 +106,28 @@ function XP:CreateViewerFrame()
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
     frame.CloseBtn = closeBtn
 
-    -- Menu button (opens guide browser) — no vertex color tint, shows icon in full color
+    -- Menu button (opens guide browser) — uses titlebuttons-thin sprite sheet, column 3 = hamburger/menu icon
     local menuBtn = CreateFrame("Button", nil, titleBar)
     menuBtn:SetSize(20, 20)
     menuBtn:SetPoint("RIGHT", closeBtn, "LEFT", -4, 0)
-    menuBtn:SetNormalTexture("Interface\\Icons\\INV_Misc_Map_01")
+    local menuNorm = menuBtn:CreateTexture(nil, "ARTWORK")
+    menuNorm:SetSize(16, 16)
+    menuNorm:SetPoint("CENTER", menuBtn, "CENTER", 0, 0)
+    menuNorm:SetTexture(titleBtnPath)
+    menuNorm:SetTexCoord(3/8, 4/8, 0, 1/4)
+    menuBtn:SetNormalTexture(menuNorm)
+    local menuPushed = menuBtn:CreateTexture(nil, "ARTWORK")
+    menuPushed:SetSize(16, 16)
+    menuPushed:SetPoint("CENTER", menuBtn, "CENTER", 0, 0)
+    menuPushed:SetTexture(titleBtnPath)
+    menuPushed:SetTexCoord(3/8, 4/8, 1/4, 1/2)
+    menuBtn:SetPushedTexture(menuPushed)
+    local menuHl = menuBtn:CreateTexture(nil, "HIGHLIGHT")
+    menuHl:SetAllPoints()
+    menuHl:SetTexture(titleBtnPath)
+    menuHl:SetTexCoord(3/8, 4/8, 1/2, 3/4)
+    menuHl:SetBlendMode("ADD")
+    menuBtn:SetHighlightTexture(menuHl)
     menuBtn:SetScript("OnClick", function() XP:ToggleMenu() end)
     frame.MenuBtn = menuBtn
 
@@ -455,10 +472,7 @@ function XP:CreateViewerFrame()
         if f.TitleText then
             XP:ApplyFont(f.TitleText, "bold", "cyan")
         end
-        -- Close button uses WoW's built-in textures, no custom coloring needed
-        if f.MenuBtn then
-            f.MenuBtn:SetNormalTexture("Interface\\Icons\\INV_Misc_Map_01")
-        end
+        -- Close + menu buttons use sprite-sheet textures — no skin-coloring needed
 
         -- Toolbar elements
         if f.PrevBtn and f.PrevBtn:GetFontString() then
