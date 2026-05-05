@@ -4,6 +4,30 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 54 — 2026-05-05
+
+### Summary
+
+**Guide registration pipeline fully fixed; guides now populate the Guide Menu.** Two compounding bugs prevented all registered guides from appearing in the UI. First, `_RegisterGuideFromZygor` was receiving `header=rawText, data=nil` for all Zygor-format guide files (2-arg calling convention not detected), causing silent discard of every guide. Second, `InitCategories()` in `GuideSorting.lua` was unconditionally resetting `GuidesByCategory = {}` on `ADDON_LOADED`, destroying all guide data that had already been registered during the loading screen. Both bugs are now fixed; guides load and appear in the Guide Menu.
+
+### Changes
+
+#### Guide.lua — 2-Arg Calling Convention Detection
+
+- **Bug (fixes bug: all guides silently discarded):** Zygor guide files call `:RegisterGuide(title, rawText)` (2 args). The shim dispatched to `XP:RegisterGuide(title, rawText, nil)`, but `_RegisterGuideFromZygor` expected `(header, data)` — receiving `header=rawText` and `data=nil`, it could not locate any `|S` data block and discarded every guide.
+- **Fix:** Added 2-arg detection at the top of `_RegisterGuideFromZygor`: when `type(header) == "string" and data == nil`, reassign `data = header; header = nil` before processing.
+
+**Commit:** `b20f87b`
+
+#### GuideSorting.lua — InitCategories No Longer Wipes Pre-Registered Guides
+
+- **Bug (fixes bug: guide menu empty on every load):** `InitCategories()` (called from `OnInitialize` / `ADDON_LOADED`) had `self.GuidesByCategory = {}` unconditionally. This ran *after* all guide files had already populated `GuidesByCategory` during the loading screen, silently wiping every registered guide before `CreateGuideMenu()` could read them.
+- **Fix:** `InitCategories()` now saves `existingGuides = self.GuidesByCategory or {}` before resetting, then restores each category's guide list after rebuilding the category map. Guides registered to unknown categories are also preserved via a fallback loop.
+
+**Commit:** `dffb9ec`
+
+---
+
 ## Session 53 — 2026-05-05
 
 ### Summary

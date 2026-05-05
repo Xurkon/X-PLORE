@@ -28,7 +28,7 @@
 
 ## ⚠️ Disclaimer
 
-**X-PLORE is in active development.** This repository hosts the in-progress codebase. The addon is loadable in-game with partial functionality: the guide menu, skin system, and options panel are functional, but core features like guide loading, waypoints, and goal tracking are still being implemented.
+**X-PLORE is in active development.** This repository hosts the in-progress codebase. The addon is loadable in-game with partial functionality: the guide menu, skin system, options panel, and guide loading are functional, but core features like waypoints and goal tracking are still being implemented.
 
 For a working reference implementation, see [ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer).
 
@@ -60,9 +60,13 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Ant trail | ✅ Functional | Dot fallback wired for WotLK/Classic (915407d); world line for Retail |
 | Goal tracker | ⚙️ Partial | Step/goal structures defined; display rendering in progress |
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
-| Zygor guide parsing | ⚙️ Partial | Parser structures exist; guide loading in progress |
+| Zygor guide parsing | ✅ Functional | Guides load and appear in Guide Menu (Session 54) |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
+
+#### 🔄 Recently Completed — Session 54
+
+**Guide Registration Pipeline Fixed** (`b20f87b`, `dffb9ec`): Two compounding bugs prevented guides from appearing in the Guide Menu. (1) `_RegisterGuideFromZygor` discarded all guides due to a 2-arg calling convention not being detected — fixed with early reassignment when `data == nil`. (2) `GuideSorting.lua::InitCategories()` wiped `GuidesByCategory = {}` on `ADDON_LOADED` after guides were already registered — fixed to save and restore guide data around the category rebuild. Guides now load and populate the Guide Menu.
 
 #### 🔄 Recently Completed — Sessions 49–50
 
