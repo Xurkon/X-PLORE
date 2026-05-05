@@ -947,9 +947,9 @@ function XP:UpdateAntLine(fromX, fromY, fromMap, toX, toY, toMap)
         return
     end
 
-    -- Convert to world coordinates
-    local pwX, pwY = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
-    local twX, twY = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
+    -- Convert to world coordinates (capture instanceID as 3rd return value)
+    local pwX, pwY, pwInst = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
+    local twX, twY, twInst = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
     if not pwX or not twX then
         XP:HideAntLine()
         return
@@ -985,13 +985,14 @@ function XP:UpdateAntLine(fromX, fromY, fromMap, toX, toY, toMap)
 
     local line = Waypoint.antLine
 
-    -- Use WorldLineSprite if available (modern WoW), otherwise hide (dot fallback)
+    -- Use WorldLineSprite if available (Retail), otherwise use dot fallback
     if line.SetWorldLine then
         line:SetWorldLine(length, angle, pwX, pwY, 0)
         line:Show()
     else
-        -- Fallback: hide the line; individual ant dots remain functional
+        -- WotLK/Classic fallback: draw ant dots along the line
         line:Hide()
+        XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
     end
 -- DEBUG: EXIT XP:UpdateAntLine()
 end
@@ -1020,9 +1021,9 @@ function XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
     self:RemoveAntDots()
     self:HideAntLine()  -- hide straight-line, show dots
 
-    -- Convert to world coordinates
-    local pwX, pwY = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
-    local twX, twY = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
+    -- Convert to world coordinates (capture instanceID as 3rd return value)
+    local pwX, pwY, pwInst = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
+    local twX, twY, twInst = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
 
     if not pwX or not twX then return end
 
@@ -1047,7 +1048,9 @@ function XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
         tex:SetTexture(1, 1, 0, 0.7)  -- yellow ant
         ant.Texture = tex
 
-        HBDPins:AddMinimapIconWorld(Waypoint, ant, pwX > 0 and 0 or 946, ax, ay, true)
+        -- Use player instanceID (pwInst) as the map instance; fallback to 0 (main world)
+        local instanceID = pwInst or 0
+        HBDPins:AddMinimapIconWorld(Waypoint, ant, instanceID, ax, ay, true)
 
         table.insert(Waypoint.antDots, ant)
     end
