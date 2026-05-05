@@ -177,12 +177,20 @@ function Tabs:CreateTab()
     text:SetText("Guide")
     tab.Text = text
 
-    -- Small guide-type icon (left side)
+    -- Small guide-type icon (left side); sprite set in AssignGuide
     local icon = btn:CreateTexture(nil, "ARTWORK")
     icon:SetSize(14, 14)
     icon:SetPoint("LEFT", btn, "LEFT", 4, 0)
-    XP.SetTexColor(icon, XP:ColorRGBA("cyan_dark"))
     tab.Icon = icon
+
+    -- Thin orange bottom bar shown only on the active tab
+    local accentBar = btn:CreateTexture(nil, "OVERLAY")
+    accentBar:SetHeight(2)
+    accentBar:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 0, 0)
+    accentBar:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", 0, 0)
+    XP.SetTexColor(accentBar, XP:ColorRGBA("orange"))
+    accentBar:Hide()
+    tab.AccentBar = accentBar
 
     -- Close button (right side)
     local closeBtn = CreateFrame("Button", nil, btn)
@@ -262,26 +270,22 @@ function Tabs:AssignGuide(guideID, step)
 
     self.Text:SetText(self.title)
 
-    -- Set icon based on guide category
+    -- Set icon from the sprite sheet (4×4 grid matching Zygor guideicons-small layout)
     local cat = guide.category or "LEVELING"
-    local iconMap = {
-        LEVELING      = { 0.0,  0.90, 1.0 },  -- cyan
-        DUNGEONS      = { 0.61, 0.19, 1.0 },  -- purple
-        GEAR          = { 1.0,  0.82, 0.0 },  -- yellow
-        QUESTS        = { 0.29, 0.87, 0.50 }, -- green
-        DAILIES       = { 0.0,  0.59, 0.65 }, -- teal
-        EVENTS        = { 1.0,  0.50, 0.0 },  -- orange
-        REPUTATIONS   = { 0.4,  0.4,  0.9 },  -- blue
-        GOLD          = { 1.0,  0.82, 0.0 },  -- gold
-        PROFESSIONS   = { 0.7,  0.5,  0.3 },  -- brown
-        PETS_MOUNTS   = { 0.9,  0.4,  0.6 },  -- pink
-        TITLES        = { 0.8,  0.8,  0.8 },  -- silver
-        ACHIEVEMENTS  = { 0.9,  0.7,  0.0 },  -- achievement gold
-        MACROS        = { 0.6,  0.6,  0.6 },  -- gray
-        FAVOURITES    = { 1.0,  0.3,  0.3 },  -- red
+    local GUIDE_ICON_COORDS = {
+        LEVELING     = {1, 1},  EVENTS       = {2, 1},
+        DAILIES      = {3, 1},  LOREMASTER   = {4, 1},
+        GOLD         = {1, 2},  PROFESSIONS  = {2, 2},
+        PETSMOUNTS   = {3, 2},  PETS_MOUNTS  = {3, 2},
+        ACHIEVEMENTS = {4, 2},  TITLES       = {1, 3},
+        REPUTATIONS  = {2, 3},  MACROS       = {3, 3},
+        DUNGEONS     = {4, 3},  GEAR         = {1, 4},
     }
-    local rgb = iconMap[cat] or { 0.0, 0.90, 1.0 }
-    XP.SetTexColor(self.Icon, rgb[1], rgb[2], rgb[3], 1.0)
+    local coords = GUIDE_ICON_COORDS[cat] or {4, 4}
+    local col, row = coords[1], coords[2]
+    local iconSheet = XP:SD("GuideMiniIconsTexture")
+    self.Icon:SetTexture(iconSheet)
+    self.Icon:SetTexCoord((col-1)/4, col/4, (row-1)/4, row/4)
 
     Tabs:SaveTabState()
     Tabs:ReanchorTabs()
@@ -316,12 +320,14 @@ function Tabs:SetAsCurrent()
         Tabs.ActiveTab.isActive = false
         XP:ApplyBackdrop(Tabs.ActiveTab.Button, "panel", "bg_medium", "border_dim")
         Tabs.ActiveTab.Text:SetTextColor(XP:ColorRGBA("text_muted"))
+        if Tabs.ActiveTab.AccentBar then Tabs.ActiveTab.AccentBar:Hide() end
     end
 
     Tabs.ActiveTab = self
     self.isActive = true
-    XP:ApplyBackdrop(self.Button, "panel", "bg_light", "cyan")
+    XP:ApplyBackdrop(self.Button, "panel", "bg_medium", "border_bright")
     self.Text:SetTextColor(XP:ColorRGBA("text_bright"))
+    if self.AccentBar then self.AccentBar:Show() end
 -- DEBUG: EXIT Tabs:SetAsCurrent()
 end
 
