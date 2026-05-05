@@ -18,13 +18,6 @@
     <Script file="Guide01.lua"/>
     <Script file="Guide02.lua"/>
 
-    <!-- Test guides -->
-    <Script file="Test_Alliance_1_10.lua"/>
-    <Script file="Test_Classic_1_10.lua"/>
-    <Script file="Test_Horde_1_10.lua"/>
-    <Script file="Test_TBC_60_70.lua"/>
-    <Script file="Test_WotLK_68_80.lua"/>
-
     <!-- Leveling -->
     <Script file="Leveling\Guide40.lua"/>
     <Script file="Leveling\XPLevelingAllianceCATA.lua"/>
