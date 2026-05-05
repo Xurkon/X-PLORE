@@ -4,31 +4,46 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+# X-PLORE Changelog
+
+All notable changes to X-PLORE are documented here.
+
+---
+
 ## Session 55 — 2026-05-05
 
 ### Summary
 
-**Guide folder hierarchy implemented.** Guides were displaying as a flat, unorganized list inside categories. Now clicking a category shows folder rows (grouped by the guide's immediate parent path segment), and clicking a folder drills into it to show the guides within. Breadcrumb navigation updates at each level (Home → Category → Folder). Row pool reused safely with `isFolder` flag gating Load/Fav button visibility on hover.
+**Guide folder hierarchy implemented; folder grouping and visual bugs fixed.** Two passes of work this session:
+
+**Pass 1 (commit `542648b`):** Guides displayed as a flat list; now clicking a category shows folder rows grouped by the guide-set section name, and clicking a folder drills in to show guides within.
+
+**Pass 2:** Three visual/logic bugs fixed after in-game testing:
+- Folder grouping used the wrong path segment (`pathParts[n-1]` → deep sub-zone names at top level). Fixed to always use `pathParts[2]` for depth-3+ guides and `pathParts[1]` for depth-2 guides.
+- Bare guides still appeared below folder rows at the category level. Now suppressed — category level shows ONLY folder rows when folders exist.
+- Guide rows had solid black backgrounds (`bg_deep` backdrop fill). Removed fill; rows are now transparent so the panel background shows through.
+- Hover highlight used `selection.tga` (opaque dark). Replaced with `SetColorTexture(1,1,1,0.08)` — subtle light-grey overlay matching Zygor.
 
 ### Changes
 
 #### Guide.lua — `folder` field on guide objects
 
-- Added `folder` field to `guideData` in `_RegisterGuideFromZygor`: set to `pathParts[#pathParts - 1]` (the path segment immediately above the leaf guide name), or `nil` if the guide has no parent folder.
-- Added `obj.folder = data.folder` in `Guide:New` so the field persists on the guide object.
+- `folder` in `guideData`: depth ≥ 3 → `pathParts[2]` (first sub-section); depth 2 → `pathParts[1]` (guide-set name); depth 1 → nil.
+- `obj.folder = data.folder` in `Guide:New` persists the field on the guide object.
 
 #### GuideMenu.lua — Folder hierarchy in the guide browser
 
-- **`currentFolder`** state variable added (nil when at category level, set when inside a folder).
-- **`MAX_GUIDE_ROWS`** raised from 20 → 100 to handle large guide sets.
-- **`GetFoldersForCategory(catID)`** — groups all guides in a category by their `.folder` field; returns `folders[]` (each with `name`, `count`, `guides[]`) and `bareGuides[]` (guides with no folder).
-- **`PopulateFolderList(folders, bareGuides)`** — renders folder rows (yellow-tinted icon, folder name, click → drill-in) followed by any bare guides directly below.
-- **`MenuNavigate("category", catID)`** — now calls `GetFoldersForCategory`; shows `PopulateFolderList` when folders exist, falls back to flat `PopulateGuideList` when no folders.
-- **`MenuNavigate("folder", catID, folderName)`** — new view level; updates breadcrumb to `All Guides > Category >`, sets back function to return to category, then calls `PopulateGuideList` with only the guides in that folder.
-- **`CreateGuideRows` OnEnter** — now checks `self_row.isFolder` before showing `LoadBtn`/`FavBtn`, preventing accidental button display on folder rows.
-- **`PopulateGuideList`** — sets `row.isFolder = false` and resets icon vertex color on each guide row to cleanly handle pool reuse.
+- **`currentFolder`** state variable added.
+- **`MAX_GUIDE_ROWS`** raised 20 → 100.
+- **`GetFoldersForCategory(catID)`** — groups guides by `.folder`, returns `folders[]` + `bareGuides[]`.
+- **`PopulateFolderList(folders, bareGuides)`** — renders folder rows then bare guides.
+- **`MenuNavigate("category")`** — bare guides suppressed at category level (`{}`) when folders exist.
+- **`MenuNavigate("folder", catID, folderName)`** — new drill-in view with breadcrumb.
+- **Row backdrop** — removed `"bg_deep"` fill; rows transparent.
+- **Selection highlight** — `SetColorTexture(1,1,1,0.08)` replaces dark `SelectionTexture`.
+- **`PopulateGuideList`** — resets `isFolder=false` and icon vertex color on reuse.
 
-**Commit:** `542648b`
+**Commits:** `542648b` + fix commit (this pass)
 
 ---
 

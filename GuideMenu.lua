@@ -821,12 +821,12 @@ function XP:CreateGuideRows(parent)
         row:SetHeight(26)
         row:Hide()
 
-        self:ApplyBackdrop(row, "none", "bg_deep")
+        self:ApplyBackdrop(row, "none")  -- transparent; background comes from parent frame
 
         -- Selection/hover highlight texture
         local selHl = row:CreateTexture(nil, "OVERLAY")
         selHl:SetAllPoints()
-        selHl:SetTexture(XP:SD("SelectionTexture"))
+        selHl:SetColorTexture(1, 1, 1, 0.08)  -- subtle light-grey hover, matches Zygor
         selHl:Hide()
         row.SelectionHighlight = selHl
 
@@ -3540,7 +3540,8 @@ function XP:MenuNavigate(view, param, param2)
 
         if #folders > 0 then
             -- Show folder list; guides inside each folder shown on drill-down
-            self:PopulateFolderList(folders, bareGuides)
+            -- At category level show ONLY folder rows (no individual guides mixed in)
+            self:PopulateFolderList(folders, {})
         else
             -- No folder grouping — show guides flat
             self:PopulateGuideList(bareGuides)

@@ -880,8 +880,11 @@ function XP:_RegisterGuideFromZygor(title, header, data)
         titlePath   = title,
         titleShort  = leafName,
         category    = category,
-        -- Immediate parent folder (pathParts[n-1]), nil when guide has no subfolder
-        folder      = #pathParts > 1 and pathParts[#pathParts - 1] or nil,
+        -- Top-level folder within the category (always pathParts[2] for depth 3+).
+        -- Depth-2 guides use pathParts[1] (the guide-set name) as their folder.
+        -- Depth-1 bare guides have no folder.
+        folder      = #pathParts >= 3 and pathParts[2]
+                      or (#pathParts == 2 and pathParts[1] or nil),
         faction     = faction,
         expansion   = expansion,
         rawData     = data,      -- Will be parsed on first access
