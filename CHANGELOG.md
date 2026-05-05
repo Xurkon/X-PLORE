@@ -68,6 +68,43 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 48 — 2026-05-05
+
+### Summary
+
+**Hamburger icon fix.** The menu button in the title bar was showing a wrong icon (column 3 of the titlebuttons sprite sheet produced a H/dumbbell shape) instead of the three horizontal lines. Fixed to use column 0 which contains the hamburger/menu icon. Also changed the highlight texture from ADD blend (overbright) to a proper highlight using the same row as hover state.
+
+### Changes
+
+#### Viewer.lua
+
+1. **Hamburger icon column** — Menu button `SetTexCoord` changed from `(3/8, 4/8, 0, 1/4)` to `(0, 1/8, 1/4, 2/4)` for normal, `(0, 1/8, 2/4, 3/4)` for pushed, `(0, 1/8, 1/4, 2/4)` for highlight
+2. **Highlight blend mode** — Removed `SetBlendMode("ADD")` from highlight texture (was causing overbright glow); highlight now uses standard alpha blend matching the hover row
+
+**Commit:** `ec3aa75`
+
+---
+
+## Session 47 — 2026-05-05
+
+### Summary
+
+**Empty state gap fix.** The viewer frame had an extra 28px "InfoBar" element between the title bar and tab bar that Zygor doesn't have. This created a large empty gap between the tab bar bottom and the dark gray body when no guide was loaded. Removed the InfoBar entirely — the tab bar now flows directly into the toolbar with no gap, matching Zygor's layout of: TitleBar → Tab bar → Toolbar → Dark gray body (no large blank area).
+
+### Changes
+
+#### Viewer.lua
+
+1. **Removed InfoBar** — Deleted the `InfoBar`, `InfoGuideName`, `InfoLevel`, `InfoStep`, `InfoBarDivider` elements and their update logic
+2. **Tab bar anchor fix** — `tabY` changed from `infoBarY - INFO_HEIGHT - 1` to `-(self:Size("titlebar_height") + 1)` so tab bar starts immediately after title divider
+3. **Removed TabDivider** — Deleted `TabDivider` (was an extra divider line between tab bar and toolbar that Zygor doesn't have)
+4. **Toolbar anchor fix** — `toolbarY` changed from `tabDivY - 1` to `-(self:Size("titlebar_height") + self:Size("tab_height") + 1)` so toolbar starts immediately after tab bar
+5. **ToolbarDivider color fix** — Removed `TabDivider` reference from `ApplySkin` divider list
+
+**Commit:** `1456671`
+
+---
+
 ## Session 39 — 2026-05-04
 
 ### Summary
