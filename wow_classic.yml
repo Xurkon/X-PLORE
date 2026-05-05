@@ -461,7 +461,3 @@ globals:
     args:
     - type: any
     must_use: false
-format:
-  type: function
-  args: []
-  must_use: false

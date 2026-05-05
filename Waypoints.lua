@@ -947,9 +947,9 @@ function XP:UpdateAntLine(fromX, fromY, fromMap, toX, toY, toMap)
         return
     end
 
-    -- Convert to world coordinates (capture instanceID as 3rd return value)
-    local pwX, pwY, pwInst = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
-    local twX, twY, twInst = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
+    -- Convert to world coordinates (instanceID not needed in UpdateAntLine itself)
+    local pwX, pwY = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
+    local twX, twY = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
     if not pwX or not twX then
         XP:HideAntLine()
         return
@@ -1021,9 +1021,9 @@ function XP:AddAntDots(fromX, fromY, fromMap, toX, toY, toMap)
     self:RemoveAntDots()
     self:HideAntLine()  -- hide straight-line, show dots
 
-    -- Convert to world coordinates (capture instanceID as 3rd return value)
+    -- Convert to world coordinates (pwInst used for instanceID; twInst not needed)
     local pwX, pwY, pwInst = HBD:GetWorldCoordinatesFromZone(fromX, fromY, fromMap)
-    local twX, twY, twInst = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
+    local twX, twY = HBD:GetWorldCoordinatesFromZone(toX, toY, toMap)
 
     if not pwX or not twX then return end
 
