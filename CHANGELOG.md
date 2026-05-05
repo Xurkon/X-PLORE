@@ -4,7 +4,35 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## Session 54 — 2026-05-05
+## Session 55 — 2026-05-05
+
+### Summary
+
+**Guide folder hierarchy implemented.** Guides were displaying as a flat, unorganized list inside categories. Now clicking a category shows folder rows (grouped by the guide's immediate parent path segment), and clicking a folder drills into it to show the guides within. Breadcrumb navigation updates at each level (Home → Category → Folder). Row pool reused safely with `isFolder` flag gating Load/Fav button visibility on hover.
+
+### Changes
+
+#### Guide.lua — `folder` field on guide objects
+
+- Added `folder` field to `guideData` in `_RegisterGuideFromZygor`: set to `pathParts[#pathParts - 1]` (the path segment immediately above the leaf guide name), or `nil` if the guide has no parent folder.
+- Added `obj.folder = data.folder` in `Guide:New` so the field persists on the guide object.
+
+#### GuideMenu.lua — Folder hierarchy in the guide browser
+
+- **`currentFolder`** state variable added (nil when at category level, set when inside a folder).
+- **`MAX_GUIDE_ROWS`** raised from 20 → 100 to handle large guide sets.
+- **`GetFoldersForCategory(catID)`** — groups all guides in a category by their `.folder` field; returns `folders[]` (each with `name`, `count`, `guides[]`) and `bareGuides[]` (guides with no folder).
+- **`PopulateFolderList(folders, bareGuides)`** — renders folder rows (yellow-tinted icon, folder name, click → drill-in) followed by any bare guides directly below.
+- **`MenuNavigate("category", catID)`** — now calls `GetFoldersForCategory`; shows `PopulateFolderList` when folders exist, falls back to flat `PopulateGuideList` when no folders.
+- **`MenuNavigate("folder", catID, folderName)`** — new view level; updates breadcrumb to `All Guides > Category >`, sets back function to return to category, then calls `PopulateGuideList` with only the guides in that folder.
+- **`CreateGuideRows` OnEnter** — now checks `self_row.isFolder` before showing `LoadBtn`/`FavBtn`, preventing accidental button display on folder rows.
+- **`PopulateGuideList`** — sets `row.isFolder = false` and resets icon vertex color on each guide row to cleanly handle pool reuse.
+
+**Commit:** `542648b`
+
+---
+
+
 
 ### Summary
 

@@ -61,8 +61,13 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Goal tracker | ⚙️ Partial | Step/goal structures defined; display rendering in progress |
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
 | Zygor guide parsing | ✅ Functional | Guides load and appear in Guide Menu (Session 54) |
+| Guide folder hierarchy | ✅ Functional | Category → Folder → Guide drill-down (Session 55) |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
+
+#### 🔄 Recently Completed — Session 55
+
+**Guide Folder Hierarchy** (`542648b`): Guides displayed as a flat, unorganized list inside each category. Now clicking a category shows **folder rows** (grouped by guide path's parent segment), and clicking a folder drills into it to show individual guides with full breadcrumb navigation. `guide.folder` field added; `GetFoldersForCategory`, `PopulateFolderList`, and `MenuNavigate("folder")` implemented. `MAX_GUIDE_ROWS` raised 20 → 100.
 
 #### 🔄 Recently Completed — Session 54
 
