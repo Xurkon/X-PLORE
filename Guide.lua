@@ -573,6 +573,7 @@ function Guide:New(data)
     obj.titlePath       = data.titlePath        -- Original backslash-delimited path
     obj.titleShort      = data.titleShort or obj.title
     obj.category        = data.category or "LEVELING"
+    obj.folder          = data.folder            -- Immediate parent folder (nil if no subfolder)
     obj.faction         = data.faction           -- "ALLIANCE", "HORDE", "NEUTRAL"
     obj.expansion       = data.expansion         -- "CLASSIC", "TBC", "WOTLK", ...
     obj.description     = data.description or ""
@@ -879,6 +880,8 @@ function XP:_RegisterGuideFromZygor(title, header, data)
         titlePath   = title,
         titleShort  = leafName,
         category    = category,
+        -- Immediate parent folder (pathParts[n-1]), nil when guide has no subfolder
+        folder      = #pathParts > 1 and pathParts[#pathParts - 1] or nil,
         faction     = faction,
         expansion   = expansion,
         rawData     = data,      -- Will be parsed on first access

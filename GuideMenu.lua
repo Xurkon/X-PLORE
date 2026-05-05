@@ -17,13 +17,14 @@ local OPTIONS_SIDEBAR_W = 200     -- width of the left sidebar in the options vi
 -----------------------------------------------------------------------
 -- State
 -----------------------------------------------------------------------
-local currentView     = "home"     -- "home", "category", "guide"
+local currentView     = "home"     -- "home", "category", "folder", "guide"
 local currentCategory = nil        -- selected category ID
+local currentFolder   = nil        -- selected folder name (within a category)
 local selectedGuideID = nil        -- guide shown in detail panel
 local guideListData   = {}         -- filtered list for display
 local guideRows       = {}         -- reusable row frames
 local categoryButtons = {}         -- sidebar category buttons
-local MAX_GUIDE_ROWS  = 20
+local MAX_GUIDE_ROWS  = 100
 
 -- Resolve icon name to full texture path (local or WoW built-in).
 -- DEBUG: ENTER ResolveIconPath()
@@ -901,11 +902,13 @@ function XP:CreateGuideRows(parent)
             GameTooltip:Hide()
         end)
 
-        -- Hover: show selection highlight + load button + fav button
+        -- Hover: show selection highlight + load button + fav button (not for folder rows)
         row:SetScript("OnEnter", function(self_row)
             if self_row.SelectionHighlight then self_row.SelectionHighlight:Show() end
-            if self_row.LoadBtn then self_row.LoadBtn:Show() end
-            if self_row.FavBtn then self_row.FavBtn:Show() end
+            if not self_row.isFolder then
+                if self_row.LoadBtn then self_row.LoadBtn:Show() end
+                if self_row.FavBtn then self_row.FavBtn:Show() end
+            end
         end)
         row:SetScript("OnLeave", function(self_row)
             if self_row.SelectionHighlight then self_row.SelectionHighlight:Hide() end
@@ -3303,12 +3306,131 @@ function XP:ShowGuideDetail(guideID)
 end
 
 -----------------------------------------------------------------------
+-- Folder Grouping Helpers
+-----------------------------------------------------------------------
+
+-- Returns a list of folder-info tables and a list of bare guides (no folder).
+-- folder-info: { name, count, guides[] }
+function XP:GetFoldersForCategory(catID)
+    local guides = self:GetGuidesForCategory(catID)
+    local folderMap   = {}
+    local folderOrder = {}
+    local bareGuides  = {}
+
+    for _, guide in ipairs(guides) do
+        local fn = guide.folder
+        if fn then
+            if not folderMap[fn] then
+                folderMap[fn] = { name = fn, count = 0, guides = {} }
+                table.insert(folderOrder, fn)
+            end
+            folderMap[fn].count = folderMap[fn].count + 1
+            table.insert(folderMap[fn].guides, guide)
+        else
+            table.insert(bareGuides, guide)
+        end
+    end
+
+    local folders = {}
+    for _, name in ipairs(folderOrder) do
+        table.insert(folders, folderMap[name])
+    end
+    return folders, bareGuides
+end
+
+-- Populate center list with folder rows (and any bare guides below them).
+function XP:PopulateFolderList(folders, bareGuides)
+    local listChild = self.MenuFrame and self.MenuFrame.ListChild
+    if not listChild then return end
+
+    for _, row in ipairs(guideRows) do row:Hide() end
+
+    local yOffset   = 0
+    local rowHeight = 26
+    local rowIdx    = 1
+    local catID     = currentCategory
+
+    for _, folder in ipairs(folders) do
+        if rowIdx > MAX_GUIDE_ROWS then break end
+        local row = guideRows[rowIdx]
+        if not row then break end
+
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
+        row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
+
+        -- Folder icon (yellow-tinted note icon as folder stand-in)
+        row.Icon:SetTexture("Interface\\Icons\\INV_Misc_Note_02")
+        row.Icon:SetTexCoord(0, 1, 0, 1)
+        row.Icon:SetVertexColor(1, 0.75, 0.1, 1)
+
+        row.Title:SetText(folder.name)
+        self:ApplyFont(row.Title, "normal", "text_bright")
+
+        row.isFolder = true
+        row.guide    = nil
+
+        if row.LoadBtn then row.LoadBtn:Hide() row.LoadBtn:SetScript("OnClick", nil) end
+        if row.FavBtn  then row.FavBtn:Hide()  end
+
+        local fn = folder.name  -- upvalue capture
+        row:SetScript("OnClick", function()
+            XP:MenuNavigate("folder", catID, fn)
+        end)
+
+        row:Show()
+        yOffset = yOffset + rowHeight + 1
+        rowIdx  = rowIdx + 1
+    end
+
+    -- Bare guides (no parent folder) listed after all folder rows
+    for _, guide in ipairs(bareGuides or {}) do
+        if rowIdx > MAX_GUIDE_ROWS then break end
+        local row = guideRows[rowIdx]
+        if not row then break end
+
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
+        row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
+
+        local cat = self:GetCategory(guide.category)
+        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+        row.Icon:SetTexture(iconPath)
+        row.Icon:SetTexCoord(l, r, t, b)
+        row.Icon:SetVertexColor(1, 1, 1, 1)
+
+        row.isFolder = false
+        row.guide    = guide
+        row.Title:SetText(guide.title or guide.titleShort or "Untitled")
+        self:ApplyFont(row.Title, "normal", "text_bright")
+
+        if row.LoadBtn then
+            row.LoadBtn:Hide()
+            row.LoadBtn:GetFontString():SetText("Load")
+            row.LoadBtn:SetScript("OnClick", function()
+                XP.Tabs:LoadGuideToTab(guide.id)
+                if XP.MenuFrame then XP.MenuFrame:Hide() end
+                if XP.ViewerFrame then XP.ViewerFrame:Show() end
+            end)
+        end
+        if row.FavBtn then row.FavBtn:Hide() end
+        row:SetScript("OnClick", function() XP:ShowGuideDetail(guide.id) end)
+
+        row:Show()
+        yOffset = yOffset + rowHeight + 1
+        rowIdx  = rowIdx + 1
+    end
+
+    listChild:SetHeight(math.max(yOffset, 1))
+end
+
+-----------------------------------------------------------------------
 -- Navigation
 -----------------------------------------------------------------------
 -- DEBUG: ENTER XP:MenuNavigate()
 -- DEBUG: PARAM view = [view]
 -- DEBUG: PARAM param = [param]
-function XP:MenuNavigate(view, param)
+function XP:MenuNavigate(view, param, param2)
     if not self.MenuFrame then return end
     local frame = self.MenuFrame
 
@@ -3384,6 +3506,7 @@ function XP:MenuNavigate(view, param)
 
     elseif view == "home" then
         currentCategory = nil
+        currentFolder   = nil
         if frame.HomeView then frame.HomeView:Show() end
         if frame.FeaturedView then frame.FeaturedView:Hide() end
         -- Update guide count on home
@@ -3398,25 +3521,60 @@ function XP:MenuNavigate(view, param)
 
     elseif view == "category" then
         currentCategory = param
+        currentFolder   = nil
         frame.SectionHeader:Show()
         frame.ListScroll:Show()
         if frame.ListScrollBar then frame.ListScrollBar:Show() end
         frame.HomeView:Hide()
 
         local cat = self:GetCategory(param)
-        -- Set breadcrumb: "All Guides > " in dim color, category name in bright
         frame.Breadcrumb:SetText("All Guides >")
         frame.Breadcrumb:SetTextColor(XP:ColorRGBA("text_dim"))
         frame.SectionName:SetText(cat and cat.name or param)
         frame.SectionName:SetTextColor(XP:ColorRGBA("text_bright"))
-        -- DEBUG: ENTER BreadcrumbBackFunc()
         frame.BreadcrumbBackFunc = function() XP:MenuNavigate("home") end
 
-        -- Get guides for this category
-        local guides = self:GetGuidesForCategory(param)
-        frame.GuideCount:SetText(#guides .. " guides")
+        local folders, bareGuides = self:GetFoldersForCategory(param)
+        local totalGuides = self:GetGuidesForCategory(param)
+        frame.GuideCount:SetText(#totalGuides .. " guides")
 
-        self:PopulateGuideList(guides)
+        if #folders > 0 then
+            -- Show folder list; guides inside each folder shown on drill-down
+            self:PopulateFolderList(folders, bareGuides)
+        else
+            -- No folder grouping — show guides flat
+            self:PopulateGuideList(bareGuides)
+        end
+
+    elseif view == "folder" then
+        -- param = catID, param2 = folderName
+        local catID      = param
+        local folderName = param2
+        currentCategory  = catID
+        currentFolder    = folderName
+        frame.SectionHeader:Show()
+        frame.ListScroll:Show()
+        if frame.ListScrollBar then frame.ListScrollBar:Show() end
+        frame.HomeView:Hide()
+
+        local cat = self:GetCategory(catID)
+        local catName = (cat and cat.name) or catID
+        frame.Breadcrumb:SetText("All Guides > " .. catName .. " >")
+        frame.Breadcrumb:SetTextColor(XP:ColorRGBA("text_dim"))
+        frame.SectionName:SetText(folderName or "")
+        frame.SectionName:SetTextColor(XP:ColorRGBA("text_bright"))
+        frame.BreadcrumbBackFunc = function() XP:MenuNavigate("category", catID) end
+
+        -- Find the folder's guides
+        local folders, _ = self:GetFoldersForCategory(catID)
+        local folderData = nil
+        for _, f in ipairs(folders) do
+            if f.name == folderName then folderData = f; break end
+        end
+
+        local folderGuides = folderData and folderData.guides or {}
+        frame.GuideCount:SetText(#folderGuides .. " guides")
+        self:PopulateGuideList(folderGuides)
 
     elseif view == "current" then
         currentCategory = nil
@@ -3514,6 +3672,11 @@ function XP:PopulateGuideList(guides)
         local iconPath, l, r, t, b = GetCategoryIconPath(cat)
         row.Icon:SetTexture(iconPath)
         row.Icon:SetTexCoord(l, r, t, b)
+        row.Icon:SetVertexColor(1, 1, 1, 1)  -- reset any folder tint
+
+        -- Mark as guide row (not a folder row)
+        row.isFolder = false
+        row.guide = guide
 
         -- Set title
         row.Title:SetText(guide.title or guide.titleShort or "Untitled")
@@ -3549,8 +3712,7 @@ function XP:PopulateGuideList(guides)
             end
         end
 
-        -- Store guide ref on row so favBtn callback can access it
-        row.guide = guide
+        -- Store guide ref on row so favBtn callback can access it (already set above)
 
         row:Show()
         yOffset = yOffset + rowHeight + 1
