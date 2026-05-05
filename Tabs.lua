@@ -59,6 +59,49 @@ function XP:InitTabs()
     end)
     Tabs.AddButton = addBtn
 
+    -- Create two static tabs (like Zygor's Tab1 "Guides" / Tab2 "Spots")
+    -- STEPS tab: mirrors Zygor's "Guides" tab — shows step content
+    local stepsTab = XP.CreateBackdropFrame("Button", "XPlore_StepsTab", Tabs.container)
+    stepsTab:SetSize(50, XP:Size("tab_height") - 2)
+    stepsTab:SetPoint("LEFT", Tabs.container, "LEFT", 2, 0)
+    stepsTab:SetNormalFontObject(GameFontNormalSmall)
+    stepsTab:SetText("STEPS")
+    stepsTab:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"):GetRGB())
+    XP:ApplyBackdrop(stepsTab, "panel", "bg_medium", "border_dim")
+    stepsTab:SetScript("OnClick", function()
+        XP:SetDisplayMode("guide")
+    end)
+    stepsTab:SetScript("OnEnter", function(self_btn)
+        GameTooltip:SetOwner(self_btn, "ANCHOR_BOTTOMLEFT")
+        GameTooltip:SetText("View guide steps")
+        GameTooltip:Show()
+    end)
+    stepsTab:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    Tabs.StepsTab = stepsTab
+
+    -- LEVELING GUIDES tab: opens the guide selector / menu
+    local levelingTab = XP.CreateBackdropFrame("Button", "XPlore_LevelingTab", Tabs.container)
+    levelingTab:SetSize(90, XP:Size("tab_height") - 2)
+    levelingTab:SetPoint("LEFT", stepsTab, "RIGHT", 1, 0)
+    levelingTab:SetNormalFontObject(GameFontNormalSmall)
+    levelingTab:SetText("LEVELING GUIDES")
+    levelingTab:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"):GetRGB())
+    XP:ApplyBackdrop(levelingTab, "panel", "bg_medium", "border_dim")
+    levelingTab:SetScript("OnClick", function()
+        XP:ToggleMenu()
+    end)
+    levelingTab:SetScript("OnEnter", function(self_btn)
+        GameTooltip:SetOwner(self_btn, "ANCHOR_BOTTOMLEFT")
+        GameTooltip:SetText("Open leveling guide selector")
+        GameTooltip:Show()
+    end)
+    levelingTab:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+    Tabs.LevelingTab = levelingTab
+
     -- Restore saved tabs from DB
     local saved = self.db and self.db.char and self.db.char.tabGuides
     if saved then
@@ -599,17 +642,20 @@ function Tabs:ReanchorTabs()
     end
 
     if count == 0 then
-        -- No tabs: just position the add button
+        -- No tabs: position add button after the static STEPS + LEVELING tabs
         if Tabs.AddButton then
+            local staticTabsWidth = 50 + 1 + 90 + 4  -- StepsTab + gap + LevelingTab + gap
             Tabs.AddButton:ClearAllPoints()
-            Tabs.AddButton:SetPoint("LEFT", Tabs.container, "LEFT", 4, 0)
+            Tabs.AddButton:SetPoint("LEFT", Tabs.container, "LEFT", staticTabsWidth, 0)
         end
         return
     end
 
     local containerWidth = Tabs.container:GetWidth()
     local addBtnWidth = Tabs.AddButton and Tabs.AddButton:GetWidth() or 24
-    local availWidth = containerWidth - addBtnWidth - 8 -- margins
+    -- Deduct static tabs (StepsTab 50px + LevelingTab 90px + 3 gaps ~144px) + add button
+    local staticTabsWidth = 50 + 1 + 90 + 4  -- StepsTab + gap + LevelingTab + gap
+    local availWidth = containerWidth - staticTabsWidth - addBtnWidth - 8 -- margins
     local tabWidth = math.min(availWidth / 2, math.max(80, (availWidth - count) / count))
     local tabHeight = XP:Size("tab_height") - 2
 
@@ -626,7 +672,8 @@ function Tabs:ReanchorTabs()
             if prev then
                 tab.Button:SetPoint("LEFT", prev, "RIGHT", 1, 0)
             else
-                tab.Button:SetPoint("LEFT", Tabs.container, "LEFT", 2, 0)
+                -- First Pool tab starts after LEVELING tab
+                tab.Button:SetPoint("LEFT", Tabs.LevelingTab, "RIGHT", 4, 0)
             end
 
             tab.Button:Show()

@@ -546,6 +546,21 @@ function XP:ToggleMenu()
 -- DEBUG: EXIT XP:ToggleMenu()
 end
 
+-- DEBUG: ENTER XP:SetDisplayMode()
+function XP:SetDisplayMode(mode)
+    -- Zygor parity: "guide" shows step content, "gold" shows gold spots.
+    -- X-PLORE only has guide content, so this primarily records the mode.
+    -- Currently "guide" is the only supported mode.
+    self.db = self.db or {}
+    self.db.profile = self.db.profile or {}
+    self.db.profile.displaymode = mode
+    -- Re-render the viewer to reflect any mode-specific UI changes
+    if self.ViewerFrame and self.ViewerFrameCreated then
+        self:UpdateViewer()
+    end
+-- DEBUG: EXIT XP:SetDisplayMode()
+end
+
 -- DEBUG: ENTER XP:ResetFrames()
 function XP:ResetFrames()
     if self.ViewerFrame then
