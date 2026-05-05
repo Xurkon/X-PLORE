@@ -51,16 +51,6 @@ function XP.ViewerFrame.ApplySkin(self)
     if f.TabDivider then
         XP.SetTexColor(f.TabDivider, XP:ColorRGBA("border_dim"))
     end
-    -- Tab decoration (TabsDecor IS the texture path, false if disabled)
-    if f.TabDecorTex then
-        local showTabsDecor = XP:SD("TabsDecor")
-        if showTabsDecor then
-            f.TabDecorTex:SetTexture(showTabsDecor)
-            f.TabDecorTex:Show()
-        else
-            f.TabDecorTex:Hide()
-        end
-    end
 
     -- Toolbar
     if f.ToolbarBg then

@@ -141,17 +141,6 @@ function XP:CreateViewerFrame()
     frame.TabBg:SetAllPoints()
     XP.SetTexColor(frame.TabBg, XP:ColorRGBA("bg_medium"))
 
-    -- Tab decoration overlay (viewer8-tabs.tga) — TabsDecor IS the texture path (false if disabled)
-    local tabDecorTex = tabContainer:CreateTexture(nil, "ARTWORK")
-    tabDecorTex:SetAllPoints()
-    local tabDecorPath = XP:SD("TabsDecor")
-    if tabDecorPath then
-        tabDecorTex:SetTexture(tabDecorPath)
-        tabDecorTex:Show()
-    else
-        tabDecorTex:Hide()
-    end
-    frame.TabDecorTex = tabDecorTex
 
     frame.TabContainer = tabContainer
 
@@ -431,16 +420,6 @@ function XP:CreateViewerFrame()
             XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
         end
 
-        -- Tab decoration texture (TabsDecor IS the texture path, false if disabled)
-        if f.TabDecorTex then
-            local tdPath = XP:SD("TabsDecor")
-            if tdPath then f.TabDecorTex:SetTexture(tdPath) end
-            if tdPath then
-                f.TabDecorTex:Show()
-            else
-                f.TabDecorTex:Hide()
-            end
-        end
 
         -- Toolbar background
         if f.ToolbarBg then

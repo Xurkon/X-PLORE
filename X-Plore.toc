@@ -24,14 +24,6 @@ ui\Templates.xml
 # ── Skins (loaded before Core so skin data is available at init) ───────────────
 Skins.lua
 Skins\Default\Skin.xml
-Skins\Default\Skin.lua
-Skins\Default\Midnight\Style.lua
-Skins\Default\Starlight\Style.lua
-Skins\Default\Starlight-glass\Style.lua
-Skins\Default\Stealth\Style.lua
-Skins\Default\Stealth-glass\Style.lua
-Skins\Default\ViewerFrame.xml
-Skins\Default\ViewerFrame.lua
 
 # ── Keybinding declarations (before Core so globals exist) ─────────────────────
 Bindings.xml

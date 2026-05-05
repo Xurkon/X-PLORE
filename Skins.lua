@@ -7,9 +7,7 @@
 --   SkinProto    - Represents a skin (e.g. "default")
 --   StyleProto   - Represents a style variant (e.g. "starlight", "starlight-glass")
 --   Styles inherit via __index metamethod
---
--- Two built-in skins:
---   "default" with styles: "starlight", "starlight-glass", "stealth", "stealth-glass"
+--   Skin/style data is registered by Skins\Default\Skin.lua and Style.lua files
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP
@@ -19,7 +17,6 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 local ADDON_DIR = "Interface\\AddOns\\" .. ADDON_NAME
 local SKINSDIR = ADDON_DIR .. "\\Skins\\"
-local SKINS_DIR = ADDON_DIR .. "\\Skins\\Default\\"
 local ICONSDIR = ADDON_DIR .. "\\Skins\\"
 local GUIDEICONS_DIR = SKINSDIR .. "guideicons"
 local WHITE_TEX = SKINSDIR .. "white"
@@ -116,11 +113,12 @@ function SkinProto:AddStyle(id, name, inherit)
     local style = StyleProto:New(id, name)
     style.skin = self
     if inherit then
-        style.inheritedStyle = self.styles[inherit]
+        style.inheritedStyle = type(inherit) == "table" and inherit or self.styles[inherit]
     end
     self.styles[id] = style
     if not self.defaultStyle then
         self.defaultStyle = id
+        self.defaultstyle = style
     end
     return style
 -- DEBUG: EXIT SkinProto:AddStyle()
@@ -129,13 +127,16 @@ end
 -- DEBUG: ENTER SkinProto:GetStyle()
 -- DEBUG: PARAM id = [id]
 function SkinProto:GetStyle(id)
-    return self.styles[id or self.defaultStyle]
+    if id then return self.styles[id] end
+    if type(self.defaultstyle) == "table" then return self.defaultstyle end
+    if type(self.defaultstyle) == "string" then return self.styles[self.defaultstyle] end
+    return self.styles[self.defaultStyle]
 -- DEBUG: EXIT SkinProto:GetStyle()
 end
 
 -- DEBUG: ENTER SkinProto:GetDir()
 function SkinProto:GetDir()
-    return SKINS_DIR .. self.id .. "\\"
+    return ADDON_DIR .. "\\Skins\\" .. self.id .. "\\"
 -- DEBUG: EXIT SkinProto:GetDir()
 end
 
@@ -164,7 +165,7 @@ end
 
 -- DEBUG: ENTER StyleProto:GetDir()
 function StyleProto:GetDir()
-    return self.skin:GetDir() .. self.id .. "\\"
+    return XP:GetSkinPath(self.skin, self)
 -- DEBUG: EXIT StyleProto:GetDir()
 end
 
@@ -186,7 +187,14 @@ function StyleProto:GetProp(propertyname, ...)
         return
     end
     local r = self[propertyname]
-    if r then
+    if r == nil and self.skin then
+        local defaultstyle = self.skin.defaultstyle or self.skin.defaultStyle
+        if type(defaultstyle) == "string" then defaultstyle = self.skin.styles[defaultstyle] end
+        if defaultstyle and defaultstyle ~= self then
+            r = defaultstyle[propertyname]
+        end
+    end
+    if r ~= nil then
         if type(r) == "function" then
             return r(...)
         else
@@ -220,678 +228,29 @@ XP.ActionIconPaths = {
 XP.StepIconsAreWoW = true
 
 -----------------------------------------------------------------------
--- Default Skin with All Styles
+-- Skin Registration Helpers
 -----------------------------------------------------------------------
-local DEFAULT_SKIN = SkinProto:New("default", "Default")
-skins["default"] = DEFAULT_SKIN
-
-local SKINSDIR_DEFAULT = SKINS_DIR
-
------------------------------------------------------------------------
--- Style: STARLIGHT
------------------------------------------------------------------------
-local STARLIGHT = DEFAULT_SKIN:AddStyle("starlight", "Starlight")
-
-STARLIGHT.StyleName = "Starlight"
-STARLIGHT.StyleID = "starlight"
-STARLIGHT.GUIHidden = false
-STARLIGHT.AccentColor = HTML("#FE6100FF")
-STARLIGHT.FontFace = SKINSDIR .. "opensans.ttf"
-STARLIGHT.FontFaceBold = SKINSDIR .. "opensansb.ttf"
-STARLIGHT.FontFaceHeader = "Fonts\\MORPHEUS.TTF"
-STARLIGHT.UseOpacity = false
-
-STARLIGHT.ViewerWidth = 320
-STARLIGHT.ViewerHeight = 450
-STARLIGHT.MenuWidth = 825
-STARLIGHT.MenuHeight = 630
-STARLIGHT.TitleBarHeight = 34
-STARLIGHT.TabHeight = 28
-STARLIGHT.ToolbarHeight = 30
-STARLIGHT.SidebarWidth = 170
-STARLIGHT.CategoryHeight = 28
-STARLIGHT.StepHeight = 50
-STARLIGHT.FooterHeight = 32
-STARLIGHT.ViewerMargin = 0
-STARLIGHT.StepSpacing = 2
-STARLIGHT.TabsHeight = 20
-STARLIGHT.TabsIconSize = 12
-STARLIGHT.StepNumFontSize = 14
-STARLIGHT.StepNumWidth = 40
-STARLIGHT.TitleButtonSize = 16
-STARLIGHT.ProgressBarWidth = 4
-STARLIGHT.ProgressBarOffsetX = 5
-STARLIGHT.ProgressBarOffsetY = -4
-STARLIGHT.ScrollBarButtonSize = {16, 16}
-STARLIGHT.TopHeight = 55.5
-STARLIGHT.StepFontSizeMod = 1
-STARLIGHT.TitleButtonStepPrevNextSize = 14
-STARLIGHT.TitleButtonInset = 2
-STARLIGHT.TitleButtonInsetHighlight = -3
-STARLIGHT.TitleButtonHighlightAlpha = 0.6
-STARLIGHT.StyleAceGUI = true
-
-STARLIGHT.MainBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque", 90, 0)
-STARLIGHT.MainBackdropColor = HTML("#111111FF")
-STARLIGHT.MainBackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.PanelBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small", 32, 31)
-STARLIGHT.PanelBackdropColor = HTML("#202020FF")
-STARLIGHT.PanelBackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.SmallBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 32, 31)
-STARLIGHT.SmallBackdropColor = HTML("#111111FF")
-STARLIGHT.SmallBackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.NoEdgeBackdrop = NoEdgeBackdrop()
-STARLIGHT.Backdrop = STARLIGHT.MainBackdrop
-STARLIGHT.BackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.BackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.WindowBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque", 90, 0)
-STARLIGHT.WindowBackdropColor = {0, 0, 0, 0}
-STARLIGHT.WindowBackdropBorderColor = HTML("#111111FF")
-
-STARLIGHT.WindowBottomBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small", 32, 31)
-STARLIGHT.WindowBottomBackdropColor = HTML("#202020FF")
-STARLIGHT.WindowBottomBackdropBorderColor = HTML("#202020FF")
-
-STARLIGHT.StepBackdrop = NoEdgeBackdrop()
-STARLIGHT.StepBorderBackdrop = SolidBackdrop(SKINSDIR_DEFAULT .. "starlight\\border-glow", 4, 0)
-STARLIGHT.StepBackdropColor = HTML("#202020FF")
-STARLIGHT.StepBackdropBorderColor = HTML("#202020FF")
-STARLIGHT.StepBackdropPersistentBorder = true
-STARLIGHT.StepPaddingTop = 0
-STARLIGHT.StepPaddingBottom = 0
-STARLIGHT.StepPaddingWidth = 0
-STARLIGHT.StepStickyBarSpace = 5
-STARLIGHT.StepStickyBarHeight = 1
-STARLIGHT.StepStickySeparatorColor = HTML("#3B3B3BFF")
-
-STARLIGHT.TabBackdrop = NoEdgeBackdrop()
-STARLIGHT.TabBackdropColor = {0, 0, 0, 0}
-
-STARLIGHT.ButtonBackdrop1 = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\button-small-opaque", 8, 2)
-STARLIGHT.ButtonColor1 = HTML("#333333FF")
-STARLIGHT.ButtonBorderColor1 = {0, 0, 0, 0}
-STARLIGHT.ButtonHighlightColor1 = HTML("#444444FF")
-STARLIGHT.ButtonTextColor1Out = HTML("#FFFFFFFF")
-STARLIGHT.ButtonTextColor1Over = HTML("#FFFFFF77")
-
-STARLIGHT.ButtonBackdrop2 = STARLIGHT.SmallBackdrop
-STARLIGHT.ButtonColor2 = HTML("#E5661AFF")
-STARLIGHT.ButtonHighlightColor2 = HTML("#EA8548")
-
-STARLIGHT.ButtonBackdrop3 = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\button-small-opaque", 2, 2)
-STARLIGHT.ButtonBorderColor3 = HTML("#333333FF")
-STARLIGHT.ButtonHighlightColor3 = HTML("#444444FF")
-
-STARLIGHT.SystemBarBackdropColor = HTML("#3B3B3BFF")
-STARLIGHT.SystemBarBackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.ProgressBarBackdrop = SolidBackdrop(WHITE_TEX, 1, 1)
-STARLIGHT.ProgressBarBackdropColor = HTML("#454545FF")
-STARLIGHT.ProgressBarBackdropBorderColor = {0, 0, 0, 0}
-STARLIGHT.ProgressBarTextureFile = WHITE_TEX
-STARLIGHT.ProgressBarTextureColor = HTML("#00CC01FF")
-STARLIGHT.ProgressBarTextureFileOffset = {0, 0.5, 0, 0.5}
-STARLIGHT.ProgressBarDecorUse = 0
-STARLIGHT.ProgressBarDecorFileOffset = {0, 0, 0, 0}
-STARLIGHT.ProgressBarCaps = SKINSDIR_DEFAULT .. "starlight\\progressbarcaps"
-STARLIGHT.ProgressBarWidth = 4
-STARLIGHT.ProgressBarCapsColor = HTML("#202020FF")
-STARLIGHT.ProgressBarOffsetX = 5
-STARLIGHT.ProgressBarOffsetY = -4
-STARLIGHT.ProgressBarTexture = {1.0, 1.0, 1.0, 1.0}
-STARLIGHT.ProgressBarTextureHeight = 5
-STARLIGHT.ProgressBarHeight = 7
-STARLIGHT.ProgressBarInset = 0
-STARLIGHT.ProgressBarColor = {0.0, 0.8, 0.0, 1.0}
-STARLIGHT.ProgressBarColor2 = {1/255, 162/255, 253/255, 1.0}
-STARLIGHT.ProgressBarSpaceHeight = 16
-
-STARLIGHT.ScrollBackColor = {0, 0, 0, 0}
-STARLIGHT.ScrollBarColor = HTML("#666666FF")
-STARLIGHT.ScrollBarTexture = SKINSDIR_DEFAULT .. "starlight\\scroll-bar"
-STARLIGHT.ScrollArrowsTexture = SKINSDIR_DEFAULT .. "starlight\\scroll-arrows"
-STARLIGHT.ScrollBarDecorHeight = 16
-
-STARLIGHT.GuideMenuMargin = 0
-STARLIGHT.GuideMenuHeaderFooterBackground = {0, 0, 0, 0}
-STARLIGHT.GuideMenuHeaderFooterBorder = {0, 0, 0, 0}
-STARLIGHT.GuideMenuSectionBorder = {0, 0, 0, 0}
-STARLIGHT.GuideMenuContentBackground = HTML("#202020FF")
-STARLIGHT.GuideMenuDetailsBackground = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuMenuBackground = HTML("#2B2B2BFF")
-STARLIGHT.SearchEditBackdropColor = HTML("#0D0D0DFF")
-STARLIGHT.SearchEditBorderColor = HTML("#0D0D0DFF")
-STARLIGHT.GuideMenuSearchTexture = SKINSDIR_DEFAULT .. "starlight\\search-bgr"
-STARLIGHT.GuideMenuFooterElementsOffset = 13
-STARLIGHT.GuideMenuGuideButtonDecorColor = STARLIGHT.AccentColor
-
-STARLIGHT.TabsMargin = 0
-STARLIGHT.TabsIcons = GUIDEICONS_DIR .. "-big"
-STARLIGHT.GuideMenuSmallIcons = GUIDEICONS_DIR .. "-small"
-STARLIGHT.TabsBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.TabsBackdropActive = HTML("#202020FF")
-STARLIGHT.TabsBackdropInactive = {0, 0, 0, 0}
-STARLIGHT.TabsContainerBackdropActive = HTML("#3B3B3BFF")
-STARLIGHT.TabsContainerBackdropInactive = HTML("#111111FF")
-STARLIGHT.TabsBorderColor = {0, 0, 0, 0}
-STARLIGHT.TabsTextColor = {1, 1, 1, 1}
-STARLIGHT.TabsTextColorOver = HTML("#FFFFFF77")
-STARLIGHT.TabsBusyIcon = SKINSDIR .. "loading"
-STARLIGHT.TabsDecor = SKINSDIR_DEFAULT .. "starlight\\viewer8-tabs"
-STARLIGHT.TabsDecorWidth = 8
-STARLIGHT.TabsTopOffset = -5
-STARLIGHT.TabsSeparatorColor = {0, 0, 0, 0}
-STARLIGHT.TabsSeparatorTexture = WHITE_TEX
-STARLIGHT.TabsFirstOffset = 4
-
-STARLIGHT.StepIconsTexture = SKINSDIR_DEFAULT .. "starlight\\stepicons"
-STARLIGHT.StepLineIcons = SKINSDIR_DEFAULT .. "starlight\\stepicons"
-STARLIGHT.StepLineBackBackdrop = TiledBackdrop(WHITE_TEX, nil, 0, 0)
-STARLIGHT.StepLineBackBackdropColor = {0, 0, 0, 0}
-STARLIGHT.StepLineBackBackdropBorderColor = {0, 0, 0, 0}
-STARLIGHT.StepLineClickerBackdrop = STARLIGHT.StepLineBackBackdrop
-STARLIGHT.StepLinePaddingWidth = 3
-STARLIGHT.StepLinePaddingHeight = 3
-STARLIGHT.StepLineIconOffset = 3
-STARLIGHT.StepLineTextOffset = 0
-STARLIGHT.StepLineIconSize = 1.1
-STARLIGHT.StepLineIconMarginRight = 3
-STARLIGHT.StepLineSpacing = 0
-
-STARLIGHT.TitleButtonsTexture = SKINSDIR_DEFAULT .. "starlight\\titlebuttons-thin"
-STARLIGHT.CheckRadioTexture = SKINSDIR_DEFAULT .. "starlight\\checkradio-thin"
-STARLIGHT.FloatingButtonsTexture = SKINSDIR_DEFAULT .. "starlight\\floatingbuttons-thin"
-STARLIGHT.BorderGlowTexture = SKINSDIR_DEFAULT .. "starlight\\border-glow"
-
-STARLIGHT.UISliderBgTexture = SKINSDIR_DEFAULT .. "starlight\\ui-sliderbar-background"
-STARLIGHT.UISliderBorderTexture = SKINSDIR_DEFAULT .. "starlight\\ui-sliderbar-border"
-STARLIGHT.OptionsSliderButton = SKINSDIR_DEFAULT .. "starlight\\options-slider-button"
-
-STARLIGHT.SelectionTexture = SKINSDIR_DEFAULT .. "starlight\\selection"
-STARLIGHT.MapArrowTexture = SKINSDIR_DEFAULT .. "starlight\\mv-arrow"
-STARLIGHT.GuideMiniIconsTexture = SKINSDIR_DEFAULT .. "starlight\\guideicons-small"
-STARLIGHT.GuideBigIconsTexture = SKINSDIR .. "guideicons-big"
-
-STARLIGHT.MinimapIcon = SKINSDIR_DEFAULT .. "starlight\\minimap-icon"
-STARLIGHT.LoadingTexture = SKINSDIR .. "loading"
-
-STARLIGHT.ToastMessageBg = SKINSDIR .. "messagetoastbg"
-STARLIGHT.ToastMessageBgWOTLK = SKINSDIR .. "messagetoastbg-classicwotlk"
-
-STARLIGHT.NotificationBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.NotificationBackdropColor = {0, 0, 0, 1}
-STARLIGHT.NotificationBackdropBorderColor = {0, 0, 0, 1}
-STARLIGHT.NotificationDecorColor = HTML("#3B3B3BFF")
-STARLIGHT.NotificationTextColor = {0.8, 0.8, 0.8, 1}
-STARLIGHT.NotificationTextColorOver = {1, 1, 1, 1}
-STARLIGHT.NotificationBubbleColor = STARLIGHT.AccentColor
-STARLIGHT.NotificationPopupShowHeader = false
-STARLIGHT.NotificationPopupHeaderBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.NotificationPopupHeaderBackdropColor = {0, 0, 0, 1}
-STARLIGHT.NotificationPopupHeaderBackdropBorderColor = {0, 0, 0, 1}
-STARLIGHT.NotificationPopupContentBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.NotificationPopupContentBackdropColor = HTML("#222222FF")
-STARLIGHT.NotificationPopupContentBackdropBorderColor = HTML("#222222FF")
-
-STARLIGHT.MessageWarning = HTML("#FF3300FF")
-STARLIGHT.MessageNotify = HTML("#FE6100FF")
-
-STARLIGHT.FloatMenuBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 32, 31)
-STARLIGHT.FloatMenuBackdropColor = {0, 0, 0, 1}
-STARLIGHT.FloatMenuBackdropBorderColor = {1, 1, 1, 1}
-STARLIGHT.FloatMenuSeparatorColor = HTML("#666666FF")
-
-STARLIGHT.FloatMenuSmallBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 12, 12)
-STARLIGHT.FloatMenuSmallBackdropColor = {0, 0, 0, 1}
-STARLIGHT.FloatMenuSmallBackdropBorderColor = {1, 1, 1, 1}
-
-STARLIGHT.SearchBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\search-bgr", 20, 10)
-STARLIGHT.SearchEditBackdropColor = HTML("#0D0D0DFF")
-STARLIGHT.SearchEditBorderColor = HTML("#0D0D0DFF")
-STARLIGHT.SearchEditTextColor = HTML("#666666FF")
-STARLIGHT.SearchEditTextColorActive = {1, 1, 1, 1}
-
-STARLIGHT.AceGUIInputTexture = SKINSDIR_DEFAULT .. "starlight\\dropdown-opaque"
-STARLIGHT.AceGUIDropDownBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 32, 31)
-STARLIGHT.AceGUIDropDownBackdropColor = {0, 0, 0, 1}
-STARLIGHT.AceGUIDropDownBackdropBorderColor = {1, 1, 1, 1}
-STARLIGHT.AceGUIEditBackdrop = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 16, 15)
-STARLIGHT.AceGUIEditBackdropMultiline = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 32, 31)
-STARLIGHT.AceGUIEditBackdropColor = {0, 0, 0, 1}
-STARLIGHT.AceGUIEditBackdropBorderColor = {1, 1, 1, 1}
-STARLIGHT.AceGUIButtonTexture = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\search-bgr", 20, 10)
-STARLIGHT.AceGUIButtonTextureColor = HTML("#666666FF")
-STARLIGHT.AceGUIButtonTextColor = {1, 1, 1, 1}
-STARLIGHT.AceGUIButtonTextColorDisabled = {1, 1, 1, 0.6}
-STARLIGHT.AceGUISliderBackdrop = TiledBackdrop(STARLIGHT.UISliderBgTexture, STARLIGHT.UISliderBorderTexture, 8, 3)
-STARLIGHT.AceGUISliderThumb = SKINSDIR_DEFAULT .. "starlight\\options-slider-button"
-
-STARLIGHT.ActionBarBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.ActionBarBackdropColor = STARLIGHT.SmallBackdropColor
-STARLIGHT.ActionBarBackdropBorderColor = STARLIGHT.SmallBackdropBorderColor
-
-STARLIGHT.FindNearestBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.FindNearestBackdropColor = STARLIGHT.SmallBackdropColor
-STARLIGHT.FindNearestBackdropBorderColor = STARLIGHT.SmallBackdropBorderColor
-
-STARLIGHT.GoldguideBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GoldguideBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.GoldguideBackdropBorderColor = STARLIGHT.MainBackdropBorderColor
-STARLIGHT.GoldguideHeaderFooterColor = STARLIGHT.GuideMenuHeaderFooterBackground
-
-STARLIGHT.WorldQuestBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.WorldQuestBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.WorldQuestBackdropBorderColor = STARLIGHT.MainBackdropBorderColor
-STARLIGHT.WorldQuestMargin = 0
-
-STARLIGHT.AuctionToolsMargin = 0
-STARLIGHT.AuctionToolsBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.AuctionToolsBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.AuctionToolsBackdropBorderColor = STARLIGHT.MainBackdropBorderColor
-STARLIGHT.AuctionToolsPriceIcons = SKINSDIR .. "goldpricestatusicons"
-STARLIGHT.AuctionToolsHeaderFooterBackground = {0, 0, 0, 0}
-STARLIGHT.AuctionToolsHeaderFooterBorder = {0, 0, 0, 0}
-
-STARLIGHT.BugBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.BugBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.BugBackdropBorderColor = STARLIGHT.MainBackdropBorderColor
-STARLIGHT.BugEditBackdrop = STARLIGHT.NoEdgeBackdrop
-STARLIGHT.BugEditBackdropColor = HTML("#202020FF")
-
-STARLIGHT.GearFinderBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GearFinderBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.GearFinderBackdropBorderColor = STARLIGHT.MainBackdropBorderColor
-
-STARLIGHT.WidgetsBackdrop = STARLIGHT.SmallBackdrop
-STARLIGHT.WidgetsBackdropColor = STARLIGHT.SmallBackdropColor
-STARLIGHT.WidgetsBackdropBorderColor = STARLIGHT.SmallBackdropBorderColor
-STARLIGHT.WidgetsPopupBackdropColor = HTML("#202020FF")
-STARLIGHT.WidgetsPopupBackdropBorderColor = HTML("#202020FF")
-STARLIGHT.WidgetsTextColor = {1, 1, 1, 1}
-STARLIGHT.WidgetsDragColor = HTML("#333333FF")
-
-STARLIGHT.CreatureBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.CreatureBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.CreatureBackdropBorderColor = {0, 0, 0, 0}
-STARLIGHT.CreatureViewerLabelBackground = STARLIGHT.NoEdgeBackdrop
-STARLIGHT.CreatureViewerLabelColor = {1.0, 1.0, 1.0, 1.0}
-STARLIGHT.CreatureViewerGap = {-10, 0}
-STARLIGHT.CVNoModelTexture = SKINSDIR .. "zygor_mascot"
-
-STARLIGHT.MoneyBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.MoneyBackdropColor = STARLIGHT.MainBackdropColor
-STARLIGHT.MoneyBackdropBorderColor = {0, 0, 0, 0}
-
-STARLIGHT.GuideMenuBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GuideMenuBackdropColor = HTML("#111111FF")
-STARLIGHT.GuideMenuBackdropBorderColor = HTML("#111111FF")
-STARLIGHT.GuideMenuMenuBackgroundColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuMenuBackdropBorderColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuDetailsBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GuideMenuDetailsBackdropColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuDetailsBackdropBorderColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuContentBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GuideMenuContentBackdropColor = HTML("#202020FF")
-STARLIGHT.GuideMenuContentBackdropBorderColor = HTML("#202020FF")
-STARLIGHT.GuideMenuExpandedBackdrop = STARLIGHT.MainBackdrop
-STARLIGHT.GuideMenuExpandedBackdropColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuExpandedBackdropBorderColor = HTML("#2B2B2BFF")
-STARLIGHT.GuideMenuFeaturedDropdown = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "starlight\\backdrop-opaque-small-outline", 32, 31)
-STARLIGHT.GuideMenuFeaturedDropdownBackdropColor = {0, 0, 0, 1}
-STARLIGHT.GuideMenuFeaturedDropdownBackdropBorderColor = {1, 1, 1, 1}
-STARLIGHT.GuideMenuTinyMargin = 0
-
-STARLIGHT.TitleLogo = SKINSDIR_DEFAULT .. "starlight\\zygorlogo"
-STARLIGHT.TitleLogoSize = {100, 25}
-
-STARLIGHT.TransparencyPrimary = 1
-STARLIGHT.TransparencySecondary = 1
-
-STARLIGHT.TabBackdrop = TiledBackdrop(WHITE_TEX, nil, 0, 0)
-STARLIGHT.TabBackdropColor = {0, 0, 0, 0.0}
-STARLIGHT.StepnumBackdropColor = {0, 0, 0, 0.0}
-
------------------------------------------------------------------------
--- Style: STARLIGHT-GLASS (inherits from starlight, adds transparency)
------------------------------------------------------------------------
-local STARLIGHT_GLASS = DEFAULT_SKIN:AddStyle("starlight-glass", "Starlight Glass", "starlight")
-
-STARLIGHT_GLASS.StyleName = "Starlight Glass"
-STARLIGHT_GLASS.StyleID = "starlight-glass"
-STARLIGHT_GLASS.GUIHidden = true
-STARLIGHT_GLASS.UseOpacity = true
-STARLIGHT_GLASS.TransparencyPrimary = 0.8
-STARLIGHT_GLASS.TransparencySecondary = 0.6
-STARLIGHT_GLASS.MainBackdropColor = HTML("#11111180")
-STARLIGHT_GLASS.WindowBackdropColor = HTML("#11111180")
-STARLIGHT_GLASS.StepBackdropColor = HTML("#20202060")
-
------------------------------------------------------------------------
--- Style: STEALTH
------------------------------------------------------------------------
-local STEALTH = DEFAULT_SKIN:AddStyle("stealth", "Stealth")
-
-STEALTH.StyleName = "Stealth"
-STEALTH.StyleID = "stealth"
-STEALTH.GUIHidden = false
-STEALTH.AccentColor = HTML("#FE6100FF")
-STEALTH.FontFace = SKINSDIR .. "opensans.ttf"
-STEALTH.FontFaceBold = SKINSDIR .. "opensansb.ttf"
-STEALTH.FontFaceHeader = "Fonts\\MORPHEUS.TTF"
-STEALTH.UseOpacity = false
-
-STEALTH.ViewerWidth = 320
-STEALTH.ViewerHeight = 450
-STEALTH.MenuWidth = 825
-STEALTH.MenuHeight = 630
-STEALTH.TitleBarHeight = 34
-STEALTH.TabHeight = 28
-STEALTH.ToolbarHeight = 30
-STEALTH.SidebarWidth = 170
-STEALTH.CategoryHeight = 28
-STEALTH.StepHeight = 50
-STEALTH.FooterHeight = 32
-STEALTH.ViewerMargin = 10
-STEALTH.StepSpacing = 2
-STEALTH.TabsHeight = 20
-STEALTH.TabsIconSize = 12
-STEALTH.StepNumFontSize = 14
-STEALTH.StepNumWidth = 40
-STEALTH.TitleButtonSize = 16
-STEALTH.ProgressBarWidth = 0
-STEALTH.ProgressBarOffsetX = 0
-STEALTH.ProgressBarOffsetY = 0
-STEALTH.ScrollBarButtonSize = {16, 16}
-STEALTH.TopHeight = 60.0
-STEALTH.StepFontSizeMod = 1
-STEALTH.TitleButtonStepPrevNextSize = 14
-STEALTH.TitleButtonInset = 0
-STEALTH.TitleButtonInsetHighlight = 0
-STEALTH.TitleButtonHighlightAlpha = 0.6
-STEALTH.StyleAceGUI = false
-STEALTH.IconIndent = 17
-
-STEALTH.MainBackdrop = TiledBackdrop(WHITE_TEX, WHITE_TEX, 1, 0)
-STEALTH.MainBackdropColor = {0, 0, 0, 1}
-STEALTH.MainBackdropBorderColor = {0.49, 0.49, 0.49, 1}
-
-STEALTH.PanelBackdrop = TiledBackdrop(WHITE_TEX, WHITE_TEX, 1, 0)
-STEALTH.PanelBackdropColor = HTML("#222222FF")
-
-STEALTH.SmallBackdrop = TiledBackdrop(WHITE_TEX, WHITE_TEX, 1, 0)
-STEALTH.SmallBackdropColor = HTML("#222222FF")
-
-STEALTH.NoEdgeBackdrop = NoEdgeBackdrop()
-STEALTH.Backdrop = STEALTH.MainBackdrop
-STEALTH.BackdropColor = STEALTH.MainBackdropColor
-STEALTH.BackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.WindowBackdrop = STEALTH.MainBackdrop
-STEALTH.WindowBackdropColor = STEALTH.MainBackdropColor
-STEALTH.WindowBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.WindowBottomBackdrop = TiledBackdrop(WHITE_TEX, WHITE_TEX, 1, 0)
-STEALTH.WindowBottomBackdropColor = {0, 0, 0, 0}
-STEALTH.WindowBottomBackdropBorderColor = {0, 0, 0, 0}
-
-STEALTH.StepBackdrop = NoEdgeBackdrop()
-STEALTH.StepBorderBackdrop = SolidBackdrop(SKINSDIR_DEFAULT .. "stealth\\border-glow", 4, 0)
-STEALTH.StepBackdropColor = HTML("#222222FF")
-STEALTH.StepBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.StepBackdropPersistentBorder = true
-STEALTH.StepPaddingTop = 0
-STEALTH.StepPaddingBottom = 0
-STEALTH.StepPaddingWidth = 0
-STEALTH.StepStickyBarSpace = 5
-STEALTH.StepStickyBarHeight = 1
-STEALTH.StepStickySeparatorColor = HTML("#222222FF")
-
-STEALTH.TabBackdrop = NoEdgeBackdrop()
-STEALTH.TabBackdropColor = {0, 0, 0, 0}
-
-STEALTH.ButtonBackdrop1 = STEALTH.MainBackdrop
-STEALTH.ButtonColor1 = HTML("#333333FF")
-STEALTH.ButtonBorderColor1 = {0.50, 0.50, 0.50, 1}
-STEALTH.ButtonHighlightColor1 = HTML("#444444FF")
-STEALTH.ButtonTextColor1Out = HTML("#FFFFFFFF")
-STEALTH.ButtonTextColor1Over = HTML("#FFFFFF77")
-
-STEALTH.ButtonBackdrop2 = STEALTH.NoEdgeBackdrop
-STEALTH.ButtonColor2 = HTML("#E5661AFF")
-STEALTH.ButtonHighlightColor2 = HTML("#EA8548")
-
-STEALTH.ButtonBackdrop3 = STEALTH.ButtonBackdrop1
-STEALTH.ButtonBorderColor3 = STEALTH.ButtonBorderColor1
-STEALTH.ButtonHighlightColor3 = HTML("#444444FF")
-
-STEALTH.SystemBarBackdropColor = HTML("#222222FF")
-STEALTH.SystemBarBackdropBorderColor = HTML("#222222FF")
-
-STEALTH.ProgressBarBackdrop = SolidBackdrop(WHITE_TEX, 1, 1)
-STEALTH.ProgressBarBackdropColor = HTML("#222222FF")
-STEALTH.ProgressBarBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.ProgressBarTextureFile = SKINSDIR_DEFAULT .. "stealth\\progressbar"
-STEALTH.ProgressBarTextureColor = {1, 1, 1, 1}
-STEALTH.ProgressBarTextureFileOffset = {0, 0.5, 0, 0.5}
-STEALTH.ProgressBarDecorUse = 0
-STEALTH.ProgressBarDecorFileOffset = {0.5, 1, 0, 0.5}
-STEALTH.ProgressBarCaps = SKINSDIR_DEFAULT .. "stealth\\progressbarcaps"
-STEALTH.ProgressBarWidth = 0
-STEALTH.ProgressBarCapsColor = {0, 0, 0, 0}
-STEALTH.ProgressBarOffsetX = 0
-STEALTH.ProgressBarOffsetY = 0
-STEALTH.ProgressBarTexture = {1.0, 1.0, 1.0, 1.0}
-STEALTH.ProgressBarTextureHeight = 5
-STEALTH.ProgressBarHeight = 7
-STEALTH.ProgressBarInset = 0
-STEALTH.ProgressBarColor = {0.0, 0.8, 0.0, 1.0}
-STEALTH.ProgressBarColor2 = {1/255, 162/255, 253/255, 1.0}
-STEALTH.ProgressBarSpaceHeight = 12
-
-STEALTH.ScrollBackColor = HTML("#333333FF")
-STEALTH.ScrollBarColor = HTML("#666666FF")
-STEALTH.ScrollBarTexture = WHITE_TEX
-STEALTH.ScrollArrowsTexture = SKINSDIR_DEFAULT .. "stealth\\scroll-arrows"
-STEALTH.ScrollBarDecorHeight = 0
-
-STEALTH.GuideMenuMargin = 0
-STEALTH.GuideMenuHeaderFooterBackground = {0, 0, 0, 0}
-STEALTH.GuideMenuHeaderFooterBorder = {0, 0, 0, 1}
-STEALTH.GuideMenuSectionBorder = {0, 0, 0, 1}
-STEALTH.GuideMenuContentBackground = HTML("#222222FF")
-STEALTH.GuideMenuDetailsBackground = HTML("#2B2B2BFF")
-STEALTH.GuideMenuMenuBackground = HTML("#2B2B2BFF")
-STEALTH.SearchEditBackdropColor = {1, 1, 1, 1}
-STEALTH.SearchEditBorderColor = {1, 1, 1, 1}
-STEALTH.GuideMenuSearchTexture = SKINSDIR_DEFAULT .. "stealth\\search-bgr"
-STEALTH.GuideMenuFooterElementsOffset = 5
-STEALTH.GuideMenuGuideButtonDecorColor = {0, 0, 0, 0}
-
-STEALTH.TabsMargin = 10
-STEALTH.TabsIcons = GUIDEICONS_DIR .. "-big"
-STEALTH.GuideMenuSmallIcons = GUIDEICONS_DIR .. "-small"
-STEALTH.TabsBackdrop = STEALTH.MainBackdrop
-STEALTH.TabsBackdropActive = HTML("#222222FF")
-STEALTH.TabsBackdropInactive = HTML("#101010FF")
-STEALTH.TabsContainerBackdropActive = HTML("#222222FF")
-STEALTH.TabsContainerBackdropInactive = {0, 0, 0, 1}
-STEALTH.TabsBorderColor = {0, 0, 0, 1}
-STEALTH.TabsTextColor = {1, 1, 1, 1}
-STEALTH.TabsTextColorOver = HTML("#FFFFFF77")
-STEALTH.TabsBusyIcon = SKINSDIR .. "loading"
-STEALTH.TabsDecor = false
-STEALTH.TabsDecorWidth = 0
-STEALTH.TabsTopOffset = 0
-STEALTH.TabsSeparatorColor = HTML("#555555FF")
-STEALTH.TabsSeparatorTexture = WHITE_TEX
-STEALTH.TabsFirstOffset = 0
-
-STEALTH.StepIconsTexture = SKINSDIR_DEFAULT .. "stealth\\stepicons"
-STEALTH.StepLineIcons = SKINSDIR_DEFAULT .. "stealth\\stepicons"
-STEALTH.StepLineBackBackdrop = TiledBackdrop(WHITE_TEX, nil, 0, 0)
-STEALTH.StepLineBackBackdropColor = {0, 0, 0, 0}
-STEALTH.StepLineBackBackdropBorderColor = {0, 0, 0, 0}
-STEALTH.StepLineClickerBackdrop = STEALTH.StepLineBackBackdrop
-STEALTH.StepLinePaddingWidth = 3
-STEALTH.StepLinePaddingHeight = 3
-STEALTH.StepLineIconOffset = 0
-STEALTH.StepLineTextOffset = 0
-STEALTH.StepLineIconSize = 1.1
-STEALTH.StepLineIconMarginRight = 3
-STEALTH.StepLineSpacing = 0
-
-STEALTH.TitleButtonsTexture = SKINSDIR_DEFAULT .. "stealth\\titlebuttons-thick"
-STEALTH.CheckRadioTexture = SKINSDIR_DEFAULT .. "stealth\\checkradio-thick"
-STEALTH.FloatingButtonsTexture = SKINSDIR_DEFAULT .. "stealth\\floatingbuttons-thick"
-STEALTH.BorderGlowTexture = SKINSDIR_DEFAULT .. "stealth\\border-glow"
-
-STEALTH.SelectionTexture = SKINSDIR_DEFAULT .. "stealth\\selection"
-STEALTH.MapArrowTexture = SKINSDIR_DEFAULT .. "stealth\\mv-arrow"
-STEALTH.GuideMiniIconsTexture = SKINSDIR_DEFAULT .. "stealth\\guideicons-small"
-STEALTH.GuideBigIconsTexture = SKINSDIR .. "guideicons-big"
-
-STEALTH.MinimapIcon = SKINSDIR_DEFAULT .. "stealth\\minimap-icon"
-STEALTH.LoadingTexture = SKINSDIR .. "loading"
-
-STEALTH.ToastMessageBg = SKINSDIR .. "messagetoastbg"
-STEALTH.ToastMessageBgWOTLK = SKINSDIR .. "messagetoastbg-classicwotlk"
-
-STEALTH.NotificationBackdrop = STEALTH.MainBackdrop
-STEALTH.NotificationBackdropColor = HTML("#222222FF")
-STEALTH.NotificationBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.NotificationDecorColor = STEALTH.MainBackdropBorderColor
-STEALTH.NotificationTextColor = {0.8, 0.8, 0.8, 1}
-STEALTH.NotificationTextColorOver = {1, 1, 1, 1}
-STEALTH.NotificationBubbleColor = HTML("#FE6100FF")
-STEALTH.NotificationPopupShowHeader = true
-STEALTH.NotificationPopupHeaderBackdrop = STEALTH.MainBackdrop
-STEALTH.NotificationPopupHeaderBackdropColor = STEALTH.MainBackdropColor
-STEALTH.NotificationPopupHeaderBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.NotificationPopupContentBackdrop = STEALTH.MainBackdrop
-STEALTH.NotificationPopupContentBackdropColor = HTML("#222222FF")
-STEALTH.NotificationPopupContentBackdropBorderColor = HTML("#222222FF")
-
-STEALTH.MessageWarning = HTML("#FF3300FF")
-STEALTH.MessageNotify = HTML("#FE6100FF")
-
-STEALTH.FloatMenuBackdrop = STEALTH.MainBackdrop
-STEALTH.FloatMenuBackdropColor = STEALTH.MainBackdropColor
-STEALTH.FloatMenuBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.FloatMenuSeparatorColor = HTML("#333333FF")
-
-STEALTH.FloatMenuSmallBackdrop = STEALTH.FloatMenuBackdrop
-STEALTH.FloatMenuSmallBackdropColor = STEALTH.MainBackdropColor
-STEALTH.FloatMenuSmallBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.SearchBackdrop = TiledBackdrop(WHITE_TEX, WHITE_TEX, 1, 1)
-STEALTH.SearchEditBackdropColor = {1, 1, 1, 1}
-STEALTH.SearchEditBorderColor = {1, 1, 1, 1}
-STEALTH.SearchEditTextColor = {0, 0, 0, 1}
-STEALTH.SearchEditTextColorActive = {0, 0, 0, 1}
-
-STEALTH.ActionBarBackdrop = STEALTH.MainBackdrop
-STEALTH.ActionBarBackdropColor = STEALTH.MainBackdropColor
-STEALTH.ActionBarBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.FindNearestBackdrop = HTML("#222222FF")
-STEALTH.FindNearestBackdropColor = STEALTH.MainBackdropColor
-STEALTH.FindNearestBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.GoldguideBackdrop = STEALTH.MainBackdrop
-STEALTH.GoldguideBackdropColor = STEALTH.MainBackdropColor
-STEALTH.GoldguideBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.GoldguideHeaderFooterColor = STEALTH.GuideMenuHeaderFooterBackground
-
-STEALTH.WorldQuestBackdrop = STEALTH.MainBackdrop
-STEALTH.WorldQuestBackdropColor = STEALTH.MainBackdropColor
-STEALTH.WorldQuestBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.WorldQuestMargin = 10
-
-STEALTH.AuctionToolsMargin = 0
-STEALTH.AuctionToolsBackdrop = STEALTH.MainBackdrop
-STEALTH.AuctionToolsBackdropColor = STEALTH.MainBackdropColor
-STEALTH.AuctionToolsBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.AuctionToolsPriceIcons = SKINSDIR .. "goldpricestatusicons"
-STEALTH.AuctionToolsHeaderFooterBackground = {0, 0, 0, 1}
-STEALTH.AuctionToolsHeaderFooterBorder = {0, 0, 0, 1}
-
-STEALTH.BugBackdrop = STEALTH.MainBackdrop
-STEALTH.BugBackdropColor = STEALTH.MainBackdropColor
-STEALTH.BugBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.BugEditBackdrop = STEALTH.NoEdgeBackdrop
-STEALTH.BugEditBackdropColor = HTML("#222222FF")
-
-STEALTH.GearFinderBackdrop = STEALTH.MainBackdrop
-STEALTH.GearFinderBackdropColor = STEALTH.MainBackdropColor
-STEALTH.GearFinderBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.WidgetsBackdrop = STEALTH.MainBackdrop
-STEALTH.WidgetsBackdropColor = STEALTH.MainBackdropColor
-STEALTH.WidgetsBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.WidgetsTextColor = {1, 1, 1, 1}
-STEALTH.WidgetsDragColor = HTML("#333333FF")
-STEALTH.WidgetsPopupBackdropColor = {0, 0, 0, 1}
-STEALTH.WidgetsPopupBackdropBorderColor = {0, 0, 0, 1}
-
-STEALTH.CreatureBackdrop = STEALTH.MainBackdrop
-STEALTH.CreatureBackdropColor = STEALTH.MainBackdropColor
-STEALTH.CreatureBackdropBorderColor = STEALTH.MainBackdropBorderColor
-STEALTH.CreatureViewerLabelBackground = STEALTH.NoEdgeBackdrop
-STEALTH.CreatureViewerLabelColor = {1.0, 1.0, 1.0, 1.0}
-STEALTH.CreatureViewerGap = {-10, 0}
-STEALTH.CVNoModelTexture = SKINSDIR .. "zygor_mascot"
-
-STEALTH.MoneyBackdrop = STEALTH.MainBackdrop
-STEALTH.MoneyBackdropColor = STEALTH.MainBackdropColor
-STEALTH.MoneyBackdropBorderColor = STEALTH.MainBackdropBorderColor
-
-STEALTH.GuideMenuBackdrop = STEALTH.MainBackdrop
-STEALTH.GuideMenuBackdropColor = STEALTH.MainBackdropColor
-STEALTH.GuideMenuBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.GuideMenuMenuBackgroundColor = HTML("#2B2B2BFF")
-STEALTH.GuideMenuMenuBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.GuideMenuDetailsBackdrop = STEALTH.MainBackdrop
-STEALTH.GuideMenuDetailsBackdropColor = HTML("#2B2B2BFF")
-STEALTH.GuideMenuDetailsBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.GuideMenuContentBackdrop = STEALTH.MainBackdrop
-STEALTH.GuideMenuContentBackdropColor = HTML("#222222FF")
-STEALTH.GuideMenuContentBackdropBorderColor = {0, 0, 0, 1}
-STEALTH.GuideMenuExpandedBackdrop = STEALTH.MainBackdrop
-STEALTH.GuideMenuExpandedBackdropColor = HTML("#2B2B2BFF")
-STEALTH.GuideMenuExpandedBackdropBorderColor = HTML("#2B2B2BFF")
-STEALTH.GuideMenuFeaturedDropdown = TiledBackdrop(WHITE_TEX, SKINSDIR_DEFAULT .. "stealth\\backdrop-opaque-small-outline", 32, 31)
-STEALTH.GuideMenuFeaturedDropdownBackdropColor = {0, 0, 0, 1}
-STEALTH.GuideMenuFeaturedDropdownBackdropBorderColor = {1, 1, 1, 1}
-STEALTH.GuideMenuTinyMargin = 1
-
-STEALTH.TitleLogo = SKINSDIR_DEFAULT .. "stealth\\zygorlogo"
-STEALTH.TitleLogoSize = {110, 27.5}
-
-STEALTH.TransparencyPrimary = 1
-STEALTH.TransparencySecondary = 1
-
-STEALTH.TabBackdrop = TiledBackdrop(WHITE_TEX, nil, 0, 0)
-STEALTH.TabBackdropColor = {0, 0, 0, 0.0}
-STEALTH.StepnumBackdropColor = {0, 0, 0, 0.0}
-
------------------------------------------------------------------------
--- Style: STEALTH-GLASS (inherits from stealth, adds transparency)
------------------------------------------------------------------------
-local STEALTH_GLASS = DEFAULT_SKIN:AddStyle("stealth-glass", "Stealth Glass", "stealth")
-
-STEALTH_GLASS.StyleName = "Stealth Glass"
-STEALTH_GLASS.StyleID = "stealth-glass"
-STEALTH_GLASS.GUIHidden = true
-STEALTH_GLASS.UseOpacity = true
-STEALTH_GLASS.TransparencyPrimary = 0.8
-STEALTH_GLASS.TransparencySecondary = 0.6
-STEALTH_GLASS.MainBackdropColor = {0, 0, 0, 0.8}
-STEALTH_GLASS.WindowBackdropColor = {0, 0, 0, 0.8}
-STEALTH_GLASS.StepBackdropColor = {0.13, 0.13, 0.13, 0.6}
+XP.HTML = HTML
+XP.SolidBackdrop = SolidBackdrop
+XP.TiledBackdrop = TiledBackdrop
+XP.NoEdgeBackdrop = NoEdgeBackdrop
+XP.SkinProto = SkinProto
+XP.StyleProto = StyleProto
+
+function XP:AddSkin(id, name)
+    local skin = SkinProto:New(id, name)
+    skins[id] = skin
+    return skin
+end
+
+function XP:GetSkinPath(skin, style)
+    if type(skin) == "table" then skin = skin.id end
+    if type(style) == "table" then style = style.id end
+    local path = ADDON_DIR .. "\\Skins\\"
+    if skin then path = path .. skin .. "\\" end
+    if style then path = path .. style .. "\\" end
+    return path
+end
 
 -----------------------------------------------------------------------
 -- Colors Table (Zygor-compatible)
@@ -930,10 +289,6 @@ local function InitColors(style)
 -- DEBUG: EXIT InitColors()
 end
 
-InitColors(STARLIGHT)
-InitColors(STARLIGHT_GLASS)
-InitColors(STEALTH)
-InitColors(STEALTH_GLASS)
 
 -----------------------------------------------------------------------
 -- Fonts Table (Zygor-compatible)
@@ -952,10 +307,6 @@ local function InitFonts(style)
 -- DEBUG: EXIT InitFonts()
 end
 
-InitFonts(STARLIGHT)
-InitFonts(STARLIGHT_GLASS)
-InitFonts(STEALTH)
-InitFonts(STEALTH_GLASS)
 
 -----------------------------------------------------------------------
 -- Sizes Table (Zygor-compatible)
@@ -979,10 +330,6 @@ local function InitSizes(style)
 -- DEBUG: EXIT InitSizes()
 end
 
-InitSizes(STARLIGHT)
-InitSizes(STARLIGHT_GLASS)
-InitSizes(STEALTH)
-InitSizes(STEALTH_GLASS)
 
 -----------------------------------------------------------------------
 -- Backdrops Table (Zygor-compatible)
@@ -1001,10 +348,13 @@ local function InitBackdrops(style)
 -- DEBUG: EXIT InitBackdrops()
 end
 
-InitBackdrops(STARLIGHT)
-InitBackdrops(STARLIGHT_GLASS)
-InitBackdrops(STEALTH)
-InitBackdrops(STEALTH_GLASS)
+
+function XP.InitStyleTables(style)
+    InitColors(style)
+    InitFonts(style)
+    InitSizes(style)
+    InitBackdrops(style)
+end
 
 -----------------------------------------------------------------------
 -- Public API
@@ -1056,11 +406,16 @@ function XP:SetSkin(skinID, styleID)
     end
     
     self:CreateFrame()
+    self:UpdateSkin()
+    self:UpdateLocking()
 -- DEBUG: EXIT XP:SetSkin()
 end
 
 -- DEBUG: ENTER XP:CreateFrame()
 function XP:CreateFrame()
+    if self.CurrentSkin and self.CurrentSkin.CreateFrame then
+        return self.CurrentSkin:CreateFrame()
+    end
     if self.MenuFrame and self.MenuFrame.ApplySkin then
         self.MenuFrame:ApplySkin()
     end
@@ -1068,6 +423,27 @@ function XP:CreateFrame()
         self.ViewerFrame:ApplySkin()
     end
 -- DEBUG: EXIT XP:CreateFrame()
+end
+
+function XP:UpdateSkin()
+    if self.CurrentSkin and self.CurrentSkin.UpdateSkin then
+        return self.CurrentSkin:UpdateSkin()
+    end
+    if self.ViewerFrame and self.ViewerFrame.ApplySkin then
+        self.ViewerFrame:ApplySkin()
+    end
+end
+
+function XP:UpdateLocking()
+    if self.CurrentSkin and self.CurrentSkin.UpdateLocking then
+        return self.CurrentSkin:UpdateLocking()
+    end
+end
+
+function XP:AlignFrame()
+    if self.CurrentSkin and self.CurrentSkin.AlignFrame then
+        return self.CurrentSkin:AlignFrame()
+    end
 end
 
 -- DEBUG: ENTER XP:RegisterSkinSubscriber()
@@ -1871,23 +1247,8 @@ end
 -----------------------------------------------------------------------
 -- Legacy Aliases
 -----------------------------------------------------------------------
-XP.SkinDir = SKINSDIR
-XP.StyleDir = SKINSDIR .. "default\\starlight\\"
-
------------------------------------------------------------------------
--- Initialize with default
------------------------------------------------------------------------
-activeSkin = skins["default"]
-activeStyle = skins["default"]:GetStyle("starlight")
-
------------------------------------------------------------------------
--- Shim for Legacy Zygor Style.lua Files
------------------------------------------------------------------------
-ADDON_TABLE.Skins = skins
-ADDON_TABLE.SKINSDIR = SKINSDIR
-ADDON_TABLE.DIR = ADDON_DIR
-ADDON_TABLE.HTMLColor = HTML
-ADDON_TABLE.F = { HTMLColor = HTML }
+XP.SkinDir = nil
+XP.StyleDir = nil
 
 
 -- DEBUG: ENTER GetSkin()
