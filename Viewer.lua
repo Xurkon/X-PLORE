@@ -547,11 +547,10 @@ local function CreateStepLine(parent, index)
     XP.SetTexColor(edge, XP:ColorRGBA("cyan"))
     line.Edge = edge
 
-    -- Action icon (14×14, left-aligned with vertical centering)
+    -- Action icon (14×14, left-aligned; LEFT anchor inherently centers vertically)
     local icon = line:CreateTexture(nil, "ARTWORK")
     icon:SetSize(14, 14)
     icon:SetPoint("LEFT", line, "LEFT", 6, 0)
-    icon:SetPoint("CENTER", line, "CENTER", 0, 0)
     line.Icon = icon
 
     -- Step number badge (small circle with number, left of title)
@@ -576,7 +575,6 @@ local function CreateStepLine(parent, index)
     -- Status indicator (right side — shows check or progress)
     local status = line:CreateFontString(nil, "OVERLAY")
     status:SetPoint("RIGHT", line, "RIGHT", -6, 0)
-    status:SetPoint("MIDDLE", line, "MIDDLE", 0, 0)
     XP:ApplyFont(status, "small", "text_dim")
     line.Status = status
 
