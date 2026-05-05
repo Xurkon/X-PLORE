@@ -1,5 +1,5 @@
 -- Localization factory for X-Plore
--- Mirrors ZygorGuidesViewer_L() architecture:
+-- Mirrors XPViewer_L() architecture:
 --   X_Plore_L(name, locale, translations) returns a locale-specific string table
 --   Missing keys auto-return the key name itself (via __index metatable)
 

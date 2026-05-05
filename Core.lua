@@ -109,10 +109,10 @@ function XP:OnInitialize()
     self:RegisterChatCommand("xp", "SlashCommand")
     self:RegisterChatCommand("xplore", "SlashCommand")
 
-    -- Initialize options system (mirrors Zygor's Options_Initialize)
+    -- Initialize options system (mirrors XP's Options_Initialize)
     self:Options_Initialize()
 
-    -- Run Config profile management (mirrors Zygor's Config:Run)
+    -- Run Config profile management (mirrors XP's Config:Run)
     if XP.Config and XP.Config.Run then
         XP.Config:Run()
     end
@@ -551,7 +551,7 @@ end
 
 -- DEBUG: ENTER XP:SetDisplayMode()
 function XP:SetDisplayMode(mode)
-    -- Zygor parity: "guide" shows step content, "gold" shows gold spots.
+    -- XP parity: "guide" shows step content, "gold" shows gold spots.
     -- X-PLORE only has guide content, so this primarily records the mode.
     -- Currently "guide" is the only supported mode.
     self.db = self.db or {}

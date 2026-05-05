@@ -4,7 +4,7 @@
 -- Provides the data structures for guide content.
 -- Supports two registration modes:
 --   1) Table-based: XP:RegisterGuide({ id=..., steps={...} })
---   2) Zygor-format: XP:RegisterGuide("Path\\Title", {header}, [[data]])
+--   2) XP-format: XP:RegisterGuide("Path\\Title", {header}, [[data]])
 --
 -- Parsing of raw guide text is delegated to Parser.lua.
 -----------------------------------------------------------------------
@@ -280,7 +280,7 @@ function Goal:GetDisplayText()
     local prefix = ""
     local action = (self.action or "text"):upper()
 
-    -- Zygor-style action names
+    -- XP-style action names
     if action == "ACCEPT" or action == "ACCEPT_QUEST" then
         prefix = "Accept: "
     elseif action == "TURNIN" or action == "TURNIN_QUEST" then
@@ -340,7 +340,7 @@ end
 -- DEBUG: ENTER Goal:GetActionIcon()
 function Goal:GetActionIcon()
     local iconMap = {
-        -- Zygor-style names
+        -- XP-style names
         accept        = "accept_quest",
         turnin        = "turnin_quest",
         kill          = "kill",
@@ -559,7 +559,7 @@ XP.Step = Step
 -----------------------------------------------------------------------
 -- Guide Prototype
 -- A guide is a named, categorized collection of steps.
--- Can be created from structured data or from raw Zygor-format text.
+-- Can be created from structured data or from raw XP-format text.
 -----------------------------------------------------------------------
 local Guide = {}
 Guide.__index = Guide
@@ -589,7 +589,7 @@ function Guide:New(data)
     obj.parsed          = false
 
     -- Raw data for deferred parsing
-    obj.rawData         = data.rawData           -- String (Zygor format)
+    obj.rawData         = data.rawData           -- String (XP format)
     obj.rawHeader       = data.rawHeader         -- Header table
 
     -- Condition functions (from header)
@@ -786,7 +786,7 @@ XP.GuidesByCategory = XP.GuidesByCategory or {}
 -- 1) Table-based (legacy/simple):
 --    XP:RegisterGuide({ id="myguide", title="My Guide", steps={...} })
 --
--- 2) Zygor-format (title, header, data):
+-- 2) XP-format (title, header, data):
 --    XP:RegisterGuide("Leveling\\Alliance\\1-10", { description="..." }, [[step\naccept Quest##123]])
 -----------------------------------------------------------------------
 -- DEBUG: ENTER XP:RegisterGuide()
@@ -799,7 +799,7 @@ function XP:RegisterGuide(titleOrData, header, data)
         -- Mode 1: table-based
         return self:_RegisterGuideFromTable(titleOrData)
     elseif type(titleOrData) == "string" then
-        -- Mode 2: Zygor-format (title, header, data)
+        -- Mode 2: XP-format (title, header, data)
         return self:_RegisterGuideFromZygor(titleOrData, header, data)
     else
         if self.Print then
@@ -835,12 +835,12 @@ function XP:_RegisterGuideFromTable(tbl)
 end
 
 -----------------------------------------------------------------------
--- _RegisterGuideFromZygor: Zygor-format registration
+-- _RegisterGuideFromXP: XP-format registration
 -- title: backslash-delimited path "Leveling\\Alliance\\1-10"
 -- header: metadata table { description, condition_suggested, ... }
 -- data: raw multi-line guide text string
 -----------------------------------------------------------------------
--- DEBUG: ENTER XP:_RegisterGuideFromZygor()
+-- DEBUG: ENTER XP:_RegisterGuideFromXP()
 -- DEBUG: PARAM title = [title]
 -- DEBUG: PARAM header = [header]
 -- DEBUG: PARAM data = [data]
@@ -897,7 +897,7 @@ function XP:_RegisterGuideFromZygor(title, header, data)
     self.GuidesByCategory[category][#self.GuidesByCategory[category] + 1] = guide
 
     return guide
--- DEBUG: EXIT XP:_RegisterGuideFromZygor()
+-- DEBUG: EXIT XP:_RegisterGuideFromXP()
 end
 
 -----------------------------------------------------------------------

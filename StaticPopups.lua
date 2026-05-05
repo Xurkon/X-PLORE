@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 -- X-Plore: StaticPopups.lua
 -- Static popup dialog definitions using WoW's built-in StaticPopup system.
--- Mirrors Zygor's approach: StaticPopupDialogs table + helper API.
+-- Mirrors XP's approach: StaticPopupDialogs table + helper API.
 -- Loaded early via TOC (before Core.lua) so popups are available at init.
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...

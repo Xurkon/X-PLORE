@@ -5,7 +5,7 @@
 --
 -- Loading strategies:
 --   1. Native X-PLORE format: files call XP:RegisterGuide() directly
---   2. Zygor adapter: intercepts ZygorGuidesViewer:RegisterGuide()
+--   2. XP/Zygor adapter: intercepts ZygorGuidesViewer:RegisterGuide()
 --   3. Manual registration: other addons call the API at runtime
 --
 -- Guide data files are loaded via Guides/Autoload.xml in the TOC.
@@ -25,14 +25,16 @@ Loader.loadedGuides = 0
 Loader.errors       = {}
 
 -----------------------------------------------------------------------
--- Zygor Compatibility Shim
--- Many guide data files are written for Zygor and call:
+-- XP/Zygor Compatibility Shim
+-- Many guide data files are written for the legacy compatibility API and call:
 --   ZygorGuidesViewer:RegisterGuide(title, header, data)
 --   ZygorGuidesViewer:RegisterInclude(name, text)
 --   ZygorGuidesViewer:RegisterGuidePlaceholder(title, header)
+--   XPViewer:RegisterGuide(title, header, data)
 --
--- We create a fake ZygorGuidesViewer global that redirects to XP.
--- This allows loading unmodified Zygor guide data files.
+-- We create compatibility globals for ZygorGuidesViewer (legacy) and
+-- XPViewer/XPV (XP aliases) that redirect to XP.
+-- This allows loading unmodified legacy guide data files.
 -----------------------------------------------------------------------
 -- DEBUG: ENTER Loader:InstallZygorShim()
 function Loader:InstallZygorShim()
@@ -41,6 +43,7 @@ function Loader:InstallZygorShim()
     if _G.ZygorGuidesViewer then return end
 
     local shim = {}
+    local _mutexes = {}
 
     -- DEBUG: ENTER RegisterGuide()
     -- DEBUG: PARAM self_or_title = [self_or_title]
@@ -48,17 +51,17 @@ function Loader:InstallZygorShim()
     -- DEBUG: PARAM headerOrData = [headerOrData]
     -- DEBUG: PARAM dataOrNil = [dataOrNil]
     shim.RegisterGuide = function(self_or_title, titleOrHeader, headerOrData, dataOrNil)
-        -- Handle both ZygorGuidesViewer:RegisterGuide(t,h,d) and
-        -- ZygorGuidesViewer.RegisterGuide(self,t,h,d) calling conventions
+        -- Handle both ZygorGuidesViewer/XPViewer:RegisterGuide(t,h,d) and
+        -- ZygorGuidesViewer/XPViewer.RegisterGuide(self,t,h,d) calling conventions
         local title, header, data
 
         if type(self_or_title) == "string" then
-            -- Called as ZGV:RegisterGuide(title, header, data) — self was consumed
+            -- Called as ZGV/XPV:RegisterGuide(title, header, data) — self was consumed
             title = self_or_title
             header = titleOrHeader
             data = headerOrData
         elseif type(self_or_title) == "table" then
-            -- Called with explicit self: ZGV.RegisterGuide(self, title, header, data)
+            -- Called with explicit self: ZGV/XPV.RegisterGuide(self, title, header, data)
             title = titleOrHeader
             header = headerOrData
             data = dataOrNil
@@ -112,10 +115,52 @@ function Loader:InstallZygorShim()
     -- DEBUG: EXIT RegisterGuidePlaceholder()
     end
 
+    shim.DoMutex = function(self_or_key, keyOrNil)
+        local key = type(self_or_key) == "string" and self_or_key or keyOrNil
+        if not key then return false end
+        if _mutexes[key] then return true end
+        _mutexes[key] = true
+        return false
+    end
+
+    shim.RegisterGuideSorting = function(self_or_order, orderOrNil)
+        local order = orderOrNil
+        if type(self_or_order) == "table" and orderOrNil == nil then
+            order = self_or_order
+        end
+        if type(order) ~= "table" then return end
+        shim.GuideSorting = order
+        if XP.RegisterGuideSorting then
+            XP:RegisterGuideSorting(order)
+        end
+    end
+
+    shim.FocusStep = function() end
+    shim.FocusStepQuiet = function() end
+    shim.GetReputation = function() return 0 end
+    shim.DoEmote = function() end
+    shim.SetGuide = function() end
+    shim.Print = function() end
+
+    shim.AllianceInstalled = true
+    shim.HordeInstalled = true
+    shim.AllianceDailiesInstalled = true
+    shim.HordeDailiesInstalled = true
+    shim.CommonGear = true
+    shim.CommonPets = true
+    shim.guide_images_installed = true
+    shim.guidesets = {}
+    shim.questsbyid = {}
+    shim.completedQuests = {}
+    shim.completioninterval = 1
+    shim.ItemScore = {}
+
     _G.ZygorGuidesViewer = shim
 
     -- Also alias common short names
     _G.ZGV = shim
+    _G.XPViewer = shim
+    _G.XPV = shim
 -- DEBUG: EXIT Loader:InstallZygorShim()
 end
 
@@ -151,7 +196,7 @@ end
 -----------------------------------------------------------------------
 -- DEBUG: ENTER Loader:Init()
 function Loader:Init()
-    -- Install the Zygor compatibility shim FIRST, before any guide
+    -- Install the XP/Zygor compatibility shim FIRST, before any guide
     -- data files execute. This is called from Init.lua or very early
     -- in the load order.
     self:InstallZygorShim()

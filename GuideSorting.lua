@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 -- X-Plore: GuideSorting.lua
 -- Guide category definitions and registration.
--- Mirrors Zygor's GuideSorting.lua category system.
+-- Mirrors XP's GuideSorting.lua category system.
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP
@@ -23,6 +23,7 @@ local CATEGORIES = {
     { id = "TITLES",       name = "Titles",          icon = {1, 3}, order = 9  },
     { id = "ACHIEVEMENTS", name = "Achievements",   icon = {4, 2}, order = 10 },
     { id = "FAVOURITES",   name = "Favourites",     icon = {4, 4}, order = 11 },
+    { id = "MACROS",       name = "Macros",         icon = {3, 3}, order = 12 },
 }
 
 -----------------------------------------------------------------------
@@ -145,4 +146,38 @@ function XP:GetFavouriteGuides()
     end
     return result
 -- DEBUG: EXIT XP:GetFavouriteGuides()
+end
+
+-- Accept category sort order from guide files (RegisterGuideSorting calls)
+function XP:RegisterGuideSorting(order)
+    if type(order) ~= "table" then return end
+    -- Update category display order based on the supplied list
+    local orderMap = {}
+    for i, name in ipairs(order) do
+        orderMap[name:upper()] = i
+    end
+    -- Map common guide category names to our IDs
+    local nameToID = {
+        LEVELING = "LEVELING",
+        LOREMASTER = "LEVELING",
+        DAILIES = "DAILIES",
+        EVENTS = "EVENTS",
+        DUNGEONS = "DUNGEONS",
+        GEAR = "DUNGEONS",
+        PROFESSIONS = "PROFESSIONS",
+        ACHIEVEMENTS = "ACHIEVEMENTS",
+        ["PETS & MOUNTS"] = "PETS_MOUNTS",
+        TITLES = "TITLES",
+        REPUTATIONS = "REPUTATIONS",
+        MACROS = "MACROS",
+        BETA = "LEVELING",
+    }
+    for _, cat in ipairs(self.Categories or {}) do
+        local mapped = nameToID[cat.id] or cat.id
+        local idx = orderMap[mapped] or orderMap[cat.name:upper()]
+        if idx then cat.order = idx end
+    end
+    if self.Categories then
+        table.sort(self.Categories, function(a, b) return (a.order or 99) < (b.order or 99) end)
+    end
 end

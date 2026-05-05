@@ -2,7 +2,7 @@
 -- X-Plore: GuideMenu.lua
 -- The guide browser / menu popup.
 -- Large frame for browsing, searching, and selecting guides.
--- Mirrors Zygor's GuideMenu system.
+-- Mirrors XP's GuideMenu system.
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP
@@ -11,8 +11,8 @@ local L = XP.L
 -----------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------
-local DETAIL_WIDTH    = 219       -- width of the right detail panel (matches Zygor)
-local OPTIONS_SIDEBAR_W = 200     -- width of the left sidebar in the options view (matches Zygor MenuOptions)
+local DETAIL_WIDTH    = 219       -- width of the right detail panel (matches XP)
+local OPTIONS_SIDEBAR_W = 200     -- width of the left sidebar in the options view (matches XP MenuOptions)
 
 -----------------------------------------------------------------------
 -- State
@@ -116,7 +116,7 @@ function XP:CreateGuideMenu()
     logoText:SetText("X-PLORE")
     frame.LogoText = logoText
 
-    -- Header close button (using Zygor's titlebuttons-thin sprite sheet)
+    -- Header close button (using XP's titlebuttons-thin sprite sheet)
     local closeBtn = CreateFrame("Button", nil, header)
     closeBtn:SetSize(16, 16)
     closeBtn:SetPoint("RIGHT", header, "RIGHT", -10, 0)
@@ -231,7 +231,7 @@ function XP:CreateGuideMenu()
         self_eb:ClearFocus()
     end)
 
-    -- Placeholder text ("Search" — Zygor uses short placeholder)
+    -- Placeholder text ("Search" — XP uses short placeholder)
     searchBox:SetTextInsets(0, 24, 0, 0)
     local phText = searchFrame:CreateFontString(nil, "OVERLAY")
     phText:SetPoint("LEFT", searchBox, "LEFT", 2, 0)
@@ -302,7 +302,7 @@ function XP:CreateGuideMenu()
     centerCol:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(DETAIL_WIDTH + 1), 0)
     frame.CenterColumn = centerCol
 
-    -- Center column background (darker than sidebar per Zygor)
+    -- Center column background (darker than sidebar per XP)
     local centerBg = centerCol:CreateTexture(nil, "BACKGROUND")
     centerBg:SetAllPoints()
     local _cBgC = XP:SD("GuideMenuContentBackground")
@@ -731,7 +731,7 @@ function XP:CreateCategoryButtons(sidebar)
         leftDecor:Hide()
         btn.LeftDecor = leftDecor
 
-        -- Hover highlight: solid medium-gray backdrop (Zygor style — no gradient/texture)
+        -- Hover highlight: solid medium-gray backdrop (XP style — no gradient/texture)
         btn:SetScript("OnEnter", function(self_btn)
             if currentCategory ~= cat.id then
                 if self_btn.SetBackdropColor then
@@ -829,7 +829,7 @@ function XP:CreateGuideRows(parent)
         selHl:Hide()
         row.SelectionHighlight = selHl
 
-        -- Icon (15x15, bottom-aligned, matching Zygor)
+        -- Icon (15x15, bottom-aligned, matching XP)
         local icon = row:CreateTexture(nil, "ARTWORK")
         icon:SetSize(15, 15)
         icon:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 12, 5)
@@ -1189,7 +1189,7 @@ end
 -----------------------------------------------------------------------
 -- Inline Options Panel (rendered inside the center column)
 -- Replaces the external AceConfigDialog popup with a themed panel.
--- Uses tabbed interface matching Zygor's style.
+-- Uses tabbed interface matching XP's style.
 -----------------------------------------------------------------------
 local OPTIONS_TABS = {
     { id = "display",      name = "Display" },
@@ -1210,7 +1210,7 @@ local OPTIONS_TABS = {
 -- DEBUG: ENTER XP:CreateInlineOptions()
 -- DEBUG: PARAM parent = [parent]
 function XP:CreateInlineOptions(parent)
-    -- Zygor-style layout: left sidebar of icon tabs, content area to the right.
+    -- XP-style layout: left sidebar of icon tabs, content area to the right.
     -- Sidebar fills the left portion of parent; content area fills the rest.
 
     -- ===== SIDEBAR (icon button list) =====

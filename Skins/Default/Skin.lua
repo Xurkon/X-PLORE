@@ -1,5 +1,5 @@
 -- Skins\Default\Skin.lua
--- Default skin registration. Matches Zygor's Skins\Default\Skin.lua architecture.
+-- Default skin registration. Matches XP's Skins\Default\Skin.lua architecture.
 -- Styles are defined (data-less) here; each Style.lua file populates its data.
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP

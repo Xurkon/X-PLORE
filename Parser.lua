@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 -- X-Plore: Parser.lua
--- Parses Zygor-format guide text into Step/Goal objects.
+-- Parses XP-format guide text into Step/Goal objects.
 -- Handles the pipe-delimited DSL: step keywords, goal types,
 -- coordinates, quest IDs, modifiers, includes, conditions.
 --
--- Based on analysis of ZygorGuidesViewer's Parser.lua architecture.
+-- Based on analysis of XPViewer's Parser.lua architecture.
 -- Compatible with Lua 5.0+ (no Lua 5.1+ features).
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
@@ -1064,7 +1064,7 @@ function Parser:FormatText(text)
     -- {color}text{} -> text
     text = text:gsub("{%w-}(.-){}", "%1")
 
-    -- _gold_text_ -> text (Zygor gold highlighting uses underscores)
+    -- _gold_text_ -> text (XP gold highlighting uses underscores)
     -- Be careful not to strip legitimate underscores
     -- Only convert _word_ patterns
     text = text:gsub("_([^_]+)_", "%1")
@@ -1340,7 +1340,7 @@ end
 
 -----------------------------------------------------------------------
 -- ParseGuidePath: split "Leveling Guides\\Alliance\\1-10" into
--- category parts. Zygor uses backslash-delimited paths.
+-- category parts. XP uses backslash-delimited paths.
 -- Returns: array of path segments, leaf name
 -----------------------------------------------------------------------
 -- DEBUG: ENTER Parser:ParseGuidePath()
@@ -1381,6 +1381,13 @@ function Parser:DeriveCategory(pathParts)
     if top:find("gold") then return "GOLD" end
     if top:find("title") then return "TITLES" end
     if top:find("poi") then return "EXPLORATION" end
+    if top:find("macro") then return "MACROS" end
+    if top:find("gear") then return "DUNGEONS" end
+    if top:find("include") then return "LEVELING" end
+    if top:find("starter") then return "LEVELING" end
+    if top:find("scenario") then return "DUNGEONS" end
+    if top:find("hunter") then return "PETS_MOUNTS" end
+    if top:find("battle pet") or top:find("battlepet") then return "PETS_MOUNTS" end
 
     return "LEVELING"
 -- DEBUG: EXIT Parser:DeriveCategory()

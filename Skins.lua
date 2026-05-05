@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 -- X-Plore: Skins.lua
--- Complete skin system with 1:1 parity to Zygor's skin architecture.
+-- Complete skin system with 1:1 parity to XP's skin architecture.
 -- Universal Lua 5.0+ compatible (no closures, no __pairs metamethods)
 --
 -- Architecture:
@@ -90,7 +90,7 @@ local function NoEdgeBackdrop()
 end
 
 -----------------------------------------------------------------------
--- Skin Prototype System (Zygor-compatible)
+-- Skin Prototype System (XP-compatible)
 -----------------------------------------------------------------------
 local SkinProto = {}
 local StyleProto = {}
@@ -253,7 +253,7 @@ function XP:GetSkinPath(skin, style)
 end
 
 -----------------------------------------------------------------------
--- Colors Table (Zygor-compatible)
+-- Colors Table (XP-compatible)
 -----------------------------------------------------------------------
 -- DEBUG: ENTER InitColors()
 -- DEBUG: PARAM style = [style]
@@ -291,7 +291,7 @@ end
 
 
 -----------------------------------------------------------------------
--- Fonts Table (Zygor-compatible)
+-- Fonts Table (XP-compatible)
 -----------------------------------------------------------------------
 -- DEBUG: ENTER InitFonts()
 -- DEBUG: PARAM style = [style]
@@ -309,7 +309,7 @@ end
 
 
 -----------------------------------------------------------------------
--- Sizes Table (Zygor-compatible)
+-- Sizes Table (XP-compatible)
 -----------------------------------------------------------------------
 -- DEBUG: ENTER InitSizes()
 -- DEBUG: PARAM style = [style]
@@ -332,7 +332,7 @@ end
 
 
 -----------------------------------------------------------------------
--- Backdrops Table (Zygor-compatible)
+-- Backdrops Table (XP-compatible)
 -----------------------------------------------------------------------
 -- DEBUG: ENTER InitBackdrops()
 -- DEBUG: PARAM style = [style]
@@ -494,7 +494,7 @@ function XP:GetSkin(id)
 end
 
 -----------------------------------------------------------------------
--- SkinData Accessor (Zygor-compatible)
+-- SkinData Accessor (XP-compatible)
 -- XP:SD("KeyName") or XP.SkinData("KeyName")
 -----------------------------------------------------------------------
 -- DEBUG: ENTER XP:SD()
@@ -664,7 +664,7 @@ end
 -- DO NOT define it here. It uses SetColorTexture/SetTexture(r,g,b,a) not SetVertexColor
 
 -----------------------------------------------------------------------
--- Icon Sets (Zygor-compatible)
+-- Icon Sets (XP-compatible)
 -----------------------------------------------------------------------
 XP.IconSets = {}
 
@@ -954,7 +954,7 @@ function XP:CreateIconSets()
 end
 
 -----------------------------------------------------------------------
--- Button Sets (Zygor-compatible)
+-- Button Sets (XP-compatible)
 -----------------------------------------------------------------------
 XP.ButtonSets = {}
 
@@ -1166,7 +1166,7 @@ function XP:CreateButtonSets()
 end
 
 -----------------------------------------------------------------------
--- Scrollbar Styling (Zygor-compatible)
+-- Scrollbar Styling (XP-compatible)
 -----------------------------------------------------------------------
 -- DEBUG: ENTER XP:AddStyleToBlizzardScrollBar()
 -- DEBUG: PARAM scrollbar = [scrollbar]
@@ -1213,7 +1213,7 @@ function XP:AddStyleToBlizzardScrollBar(scrollbar)
 end
 
 -----------------------------------------------------------------------
--- Arrow Skin System (Zygor-compatible placeholder)
+-- Arrow Skin System (XP-compatible placeholder)
 -- Full implementation would be in a separate ArrowSkin.lua file
 -----------------------------------------------------------------------
 XP.ArrowSkins = {}

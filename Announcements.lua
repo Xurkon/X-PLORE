@@ -2,7 +2,7 @@
 -- X-Plore: Announcements.lua
 -- Optional chat output when the player advances guide steps.
 --
--- Mirrors Zygor's Announcements.lua (4 symbols) but extended:
+-- Mirrors XP's Announcements.lua (4 symbols) but extended:
 --   * Step-advance message to self (always, if enabled)
 --   * Optional party/raid broadcast
 --   * Zone-change message when entering a new zone relevant to the guide

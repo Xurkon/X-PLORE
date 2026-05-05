@@ -46,7 +46,7 @@ XP.Waypoints = {
 
 local PI2 = math.pi * 2
 local ARROW_UPDATE_INTERVAL = 0.05  -- 20fps updates
-local ARRIVAL_RADIUS = 8           -- yards, same as Zygor's WAYPOINT_RADIUS_GUIDE_GROUND
+local ARRIVAL_RADIUS = 8           -- yards, same as XP's WAYPOINT_RADIUS_GUIDE_GROUND
 local SMOOTH_FACTOR = 20            -- angle lerp speed (higher = snappier)
 
 -- Current waypoints (multi-waypoint support)
@@ -63,7 +63,7 @@ Waypoint.antSpacing = 40    -- yards between ant dots
 Waypoint.antLine = nil
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- Audio cue state (Zygor parity)
+-- Audio cue state (XP parity)
 ---------------------------------------------------------------------------------------------------------------------------------------
 local lastplayerangle
 local lastturntime = 0
@@ -74,7 +74,7 @@ local cuedinged = false
 local lastbeepingdist = -1  -- track distance at last beep to avoid rapid re-beeps
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- ETA calculation state (Zygor parity)
+-- ETA calculation state (XP parity)
 ---------------------------------------------------------------------------------------------------------------------------------------
 local etacalc_elapsed = 0
 local last_eta = 0
@@ -186,7 +186,7 @@ function XP:CreateWaypointArrow()
         frame:StopMovingOrSizing()
     end)
 
-    -- Mousewheel zoom (same as Zygor: Ctrl+scroll to adjust arrow scale)
+    -- Mousewheel zoom (same as XP: Ctrl+scroll to adjust arrow scale)
     frame:SetScript("OnMouseWheel", function(self_frame, delta)
         if IsControlKeyDown() then
             local newScale = (XP.db.profile.arrow.scale or 1.0) + (delta > 0 and 0.05 or -0.05)
@@ -337,7 +337,7 @@ function XP:CreateWaypointArrow()
                 self_frame.ETAText:SetText("")
             end
 
-            -- Audio cues (Zygor parity: flying + beelining + wrong direction)
+            -- Audio cues (XP parity: flying + beelining + wrong direction)
             if self_frame.arrow:IsVisible() and IsFlying and IsFlying() then
                 local playerangle
                 if playerMapID == tMap then
@@ -379,7 +379,7 @@ function XP:CreateWaypointArrow()
             end
 
             if targetangle then
-                -- Smooth angle lerp (same approach as Zygor)
+                -- Smooth angle lerp (same approach as XP)
                 local diff = targetangle - self_frame.smoothAngle
                 while diff > 3.14159 do diff = diff - 6.28319 end
                 while diff < -3.14159 do diff = diff + 6.28319 end
@@ -450,7 +450,7 @@ function XP:CreateWaypointArrow()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- Speed calculation (rolling average) — Zygor parity
+-- Speed calculation (rolling average) — XP parity
 -- Uses real accumulated elapsed time, not the fixed throttle interval.
 -- Guards against negative speed (e.g. rounding back up on a path) and
 -- falling back to BASE_MOVEMENT_SPEED when stationary.
@@ -504,7 +504,7 @@ function XP:CalculateSpeed(frame, dist)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- ETA calculation (Zygor parity)
+-- ETA calculation (XP parity)
 -- Uses rolling average of speed samples and recalculates every ~0.9s.
 -- Returns 0 if ETA cannot be meaningfully estimated.
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -540,7 +540,7 @@ function XP:CalculateETA(speed, dist)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- Audio cues (Zygor parity)
+-- Audio cues (XP parity)
 -- Conditions:
 --   - Player is flying (IsFlying)
 --   - Player is beelining: started moving <1s ago, stopped >3s ago, turned >5s ago
@@ -596,7 +596,7 @@ function XP:DoAudioCues(frame, playerangle, dist)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
--- ShowWarning: flash the arrow red briefly (Zygor parity)
+-- ShowWarning: flash the arrow red briefly (XP parity)
 -- Called when player is flying but heading is significantly off-course.
 ---------------------------------------------------------------------------------------------------------------------------------------
 -- DEBUG: ENTER XP:ShowWarning()

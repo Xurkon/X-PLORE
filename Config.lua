@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 -- Config.lua
--- Profile/db settings system, mirroring ZygorGuidesViewer's Config.lua
+-- Profile/db settings system, mirroring XPViewer's Config.lua
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP

@@ -1,3 +1,3 @@
--- ZygorGuidesViewerMenuFrame.lua
+-- XPViewerMenuFrame.lua
 -- Menu frame stub
 -- TODO: Implement

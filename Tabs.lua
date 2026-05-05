@@ -2,7 +2,7 @@
 -- X-Plore: Tabs.lua
 -- Tab management for the Viewer frame.
 -- Allows multiple guides to be open simultaneously with clickable tabs.
--- Modeled after Zygor's Tabs.lua architecture:
+-- Modeled after XP's Tabs.lua architecture:
 --   Pool of tab objects, each with a tab Button + Close button.
 --   Active tab drives XP.CurrentGuide / XP.CurrentStep.
 --   Tabs saved/restored via AceDB char.tabGuides.
@@ -93,7 +93,7 @@ function XP:InitTabs()
 
     Tabs.container = self.ViewerFrame.TabContainer
 
-    -- Create the "+" (add tab) button — skinned like Zygor's classic tabs
+    -- Create the "+" (add tab) button — skinned like XP's classic tabs
     local addBtn = XP.CreateBackdropFrame("Button", nil, Tabs.container)
     addBtn:SetSize(20, GetTabButtonHeight())
     SkinTabButton(addBtn, "+")
@@ -157,7 +157,7 @@ function XP:InitTabs()
 
     Tabs:ReanchorTabs()
 
-    -- Create tab menu dropdown frame (like Zygor's Tabs.TabMenuFrame)
+    -- Create tab menu dropdown frame (like XP's Tabs.TabMenuFrame)
     local tabMenuFrame = CreateFrame("Frame", "XPlore_TabMenuFrame", Tabs.container, "UIDropDownForkTemplate")
     tabMenuFrame:SetPoint("LEFT", Tabs.container, "LEFT", 100, 0)  -- Will be repositioned when shown
     tabMenuFrame:Hide()
@@ -225,7 +225,7 @@ function Tabs:CreateTab()
     end
     tab.Text = text
 
-    -- Zygor's classic viewer tabs are text-only.
+    -- XP's classic viewer tabs are text-only.
     local icon = btn:CreateTexture(nil, "ARTWORK")
     icon:Hide()
     tab.Icon = icon
@@ -384,7 +384,7 @@ function Tabs:HandleClick()
 end
 
 --------------------------------------------------------------------
--- Build and display the tab context menu (Zygor-style)
+-- Build and display the tab context menu (XP-style)
 --------------------------------------------------------------------
 -- DEBUG: ENTER Tabs:ShowTabMenu()
 function Tabs:ShowTabMenu()
@@ -396,7 +396,7 @@ function Tabs:ShowTabMenu()
 
     -- Recent guides section
     table.insert(menu, {
-        text = "Recent Guides",  -- Would be L["tabsmenu_recent"] in Zygor
+        text = "Recent Guides",  -- Would be L["tabsmenu_recent"] in XP
         isTitle = true,
     })
 
@@ -503,7 +503,7 @@ function Tabs:ShowInteraction()
         self.CloseBtn:Show()
     end
 
-    -- Hover colour: dim the backdrop slightly (match Zygor's hover cue)
+    -- Hover colour: dim the backdrop slightly (match XP's hover cue)
     if not self.isActive and self.Button then
         local c = XP:SD("TabsBackdropActive") or {0.125, 0.125, 0.125, 1}
         if self.Button.SetBackdropColor then
@@ -838,7 +838,7 @@ function Tabs:ReanchorTabs()
         end
     end
 
-    -- Show overflow button if there are overflowed tabs; position at far right (Zygor: [tabs][+][>])
+    -- Show overflow button if there are overflowed tabs; position at far right (XP: [tabs][+][>])
     local hasOverflowed = false
     if overflowBtn then
         for _, tab in ipairs(Pool) do
@@ -856,7 +856,7 @@ function Tabs:ReanchorTabs()
         end
     end
 
-    -- Add "+" button: left of ">" when overflow shown, far right when no overflow (Zygor style)
+    -- Add "+" button: left of ">" when overflow shown, far right when no overflow (XP style)
     if addBtn then
         addBtn:ClearAllPoints()
         if hasOverflowed then

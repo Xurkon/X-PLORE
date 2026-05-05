@@ -1,12 +1,12 @@
 -----------------------------------------------------------------------
 -- Options.lua
--- Full settings/options UI panel, mirroring ZygorGuidesViewer's Options.lua
+-- Full settings/options UI panel, mirroring XPViewer's Options.lua
 -- Uses AceConfig-3.0 + AceConfigDialog-3.0 + AceDB-3.0
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP
 
--- Localization — mirrors Zygor's ZGV.L
+-- Localization — mirrors XP's XPV.L
 -- XP.L is set by Localizers.lua via X_Plore_L("Main")
 -- Core_enUS.lua registers enUS strings into the shared "Main" table
 local L = XP.L
@@ -2010,7 +2010,7 @@ end
 -----------------------------------------------------------------------
 -- XP:OpenOptions(group)
 -- Opens the options panel. Called from GuideMenu's Options tab,
--- slash commands, and Zygor compatibility.
+-- slash commands, and XP compatibility.
 -----------------------------------------------------------------------
 -- DEBUG: ENTER XP:OpenOptions()
 -- DEBUG: PARAM group = [group]

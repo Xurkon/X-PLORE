@@ -2,7 +2,7 @@
 -- X-Plore: Viewer.lua
 -- The compact step-by-step guide viewer frame.
 -- This is the always-visible frame showing current guide progress.
--- Mirrors Zygor's main viewer (ZygorGuidesViewerFrame).
+-- Mirrors XP's main viewer (XPViewerFrame).
 -----------------------------------------------------------------------
 local ADDON_NAME, ADDON_TABLE = ...
 local XP = ADDON_TABLE.XP
@@ -97,7 +97,7 @@ function XP:CreateViewerFrame()
     frame.MenuBtn = menuBtn
 
     local titleBtnPath = XP:SD("TitleButtonsTexture")
-    -- Close button (using Zygor's titlebuttons-thin sprite sheet — FAR RIGHT)
+    -- Close button (using XP's titlebuttons-thin sprite sheet — FAR RIGHT)
     local closeBtn = CreateFrame("Button", nil, titleBar)
     closeBtn:SetSize(16, 16)
     closeBtn:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
@@ -127,7 +127,7 @@ function XP:CreateViewerFrame()
     frame.TitleDivider = self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
 
     ---------------------------------------------------------------
-    -- Tab Container (no InfoBar — Zygor has no info bar between title and tabs)
+    -- Tab Container (no InfoBar — XP has no info bar between title and tabs)
     -- The tab bar fills the space directly below the title divider.
     ---------------------------------------------------------------
     local tabContainer = CreateFrame("Frame", nil, frame)
@@ -145,7 +145,7 @@ function XP:CreateViewerFrame()
 
     frame.TabContainer = tabContainer
 
-    -- No tab divider — tab bar flows directly into toolbar (Zygor style)
+    -- No tab divider — tab bar flows directly into toolbar (XP style)
     -- Toolbar starts immediately after tab bar bottom
     local toolbarY = -(self:Size("titlebar_height") + self:Size("tab_height") + 1)
     local toolbar = CreateFrame("Frame", nil, frame)
