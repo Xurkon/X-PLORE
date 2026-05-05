@@ -135,8 +135,11 @@ function XP:OnEnable()
         self:ClearWaypoints()
     end)
 
-    -- Initialize tabs
-    self:InitTabs()
+    -- Initialize tabs (guard against re-entry from second OnEnable fire)
+    if not self.tabsInitialized then
+        self.tabsInitialized = true
+        self:InitTabs()
+    end
 
     -- Initialize minimap button
     if XP.Minimap then
