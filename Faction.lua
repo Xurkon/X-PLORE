@@ -263,6 +263,10 @@ end
 -- DEBUG: ENTER Faction:UpdateForStep()
 -- DEBUG: PARAM step = [step]
 function Faction:UpdateForStep(step)
+    -- Accept either a step index (number) or a step object
+    if type(step) == "number" then
+        step = XP.CurrentGuide and XP.CurrentGuide:GetStep(step)
+    end
     if not step then
         self:HideRepBar()
         return

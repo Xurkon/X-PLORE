@@ -196,6 +196,10 @@ end
 function ActionBar:UpdateForStep(step)
     self:ClearHighlights()
 
+    -- Accept either a step index (number) or a step object
+    if type(step) == "number" then
+        step = XP.CurrentGuide and XP.CurrentGuide:GetStep(step)
+    end
     if not step then return end
     if not XP.db or not XP.db.profile.actionBar or
        not XP.db.profile.actionBar.enabled then return end

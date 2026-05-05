@@ -24,7 +24,7 @@ function XP.ViewerFrame.ApplySkin(self)
     if not f then return end
 
     -- Main frame backdrop
-    XP:ApplyBackdrop(f, "main", "bg_deep", "border")
+    XP:ApplyBackdrop(f, "WindowBackdrop", "bg_deep", "border")
 
     -- Title bar
     if f.TitleBar then
@@ -51,14 +51,11 @@ function XP.ViewerFrame.ApplySkin(self)
     if f.TabDivider then
         XP.SetTexColor(f.TabDivider, XP:ColorRGBA("border_dim"))
     end
-    -- Tab decoration
+    -- Tab decoration (TabsDecor IS the texture path, false if disabled)
     if f.TabDecorTex then
         local showTabsDecor = XP:SD("TabsDecor")
         if showTabsDecor then
-            local tabDecorPath = XP:SD("TabsDecorTexture")
-            if tabDecorPath then
-                f.TabDecorTex:SetTexture(tabDecorPath)
-            end
+            f.TabDecorTex:SetTexture(showTabsDecor)
             f.TabDecorTex:Show()
         else
             f.TabDecorTex:Hide()

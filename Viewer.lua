@@ -96,6 +96,7 @@ function XP:CreateViewerFrame()
     menuBtn:SetScript("OnClick", function() XP:ToggleMenu() end)
     frame.MenuBtn = menuBtn
 
+    local titleBtnPath = XP:SD("TitleButtonsTexture")
     -- Close button (using Zygor's titlebuttons-thin sprite sheet — FAR RIGHT)
     local closeBtn = CreateFrame("Button", nil, titleBar)
     closeBtn:SetSize(16, 16)
@@ -140,14 +141,12 @@ function XP:CreateViewerFrame()
     frame.TabBg:SetAllPoints()
     XP.SetTexColor(frame.TabBg, XP:ColorRGBA("bg_medium"))
 
-    -- Tab decoration overlay (viewer8-tabs.tga) — shown when skin TabsDecor == true
+    -- Tab decoration overlay (viewer8-tabs.tga) — TabsDecor IS the texture path (false if disabled)
     local tabDecorTex = tabContainer:CreateTexture(nil, "ARTWORK")
     tabDecorTex:SetAllPoints()
-    local _tabDecorPath = XP:SD("TabsDecorTexture")
-    if _tabDecorPath then
-        tabDecorTex:SetTexture(_tabDecorPath)
-    end
-    if XP:SD("TabsDecor") then
+    local tabDecorPath = XP:SD("TabsDecor")
+    if tabDecorPath then
+        tabDecorTex:SetTexture(tabDecorPath)
         tabDecorTex:Show()
     else
         tabDecorTex:Hide()
@@ -251,6 +250,7 @@ function XP:CreateViewerFrame()
     scrollBar:SetOrientation("VERTICAL")
     scrollBar:SetMinMaxValues(0, 1)
     scrollBar:SetValue(0)
+    scrollBar:Hide()  -- hidden by default; OnScrollRangeChanged shows it when content overflows
 
     local sbTrack = scrollBar:CreateTexture(nil, "BACKGROUND")
     sbTrack:SetAllPoints()
@@ -292,9 +292,16 @@ function XP:CreateViewerFrame()
     scrollFrame:SetScrollChild(scrollChild)
     frame.ScrollChild = scrollChild
 
-    -- Empty-state "Welcome to Zygor Guides" + "Click here" (centered in scroll area)
-    local emptyTitle = scrollChild:CreateFontString(nil, "OVERLAY")
-    emptyTitle:SetPoint("CENTER", scrollChild, "CENTER", 0, 10)
+    -- Store layout values for dynamic re-anchoring in UpdateViewer (empty vs loaded state)
+    frame._scrollTop  = scrollTop
+    frame._scrollbarW = scrollbarW + 2
+    frame._footerH    = footerH + progressH
+    frame._titleH     = self:Size("titlebar_height")
+
+    -- Empty-state "Welcome to X-PLORE" + "Click here" (centered in viewport, not scrollChild)
+    -- Parented to scrollFrame so they're positioned relative to the visible viewport and not clipped
+    local emptyTitle = scrollFrame:CreateFontString(nil, "OVERLAY")
+    emptyTitle:SetPoint("CENTER", scrollFrame, "CENTER", 0, 10)
     emptyTitle:SetJustifyH("CENTER")
     emptyTitle:SetJustifyV("MIDDLE")
     XP:ApplyFont(emptyTitle, "normal", "text_bright")
@@ -302,8 +309,8 @@ function XP:CreateViewerFrame()
     emptyTitle:Hide()
     frame.EmptyTitleText = emptyTitle
 
-    local emptyText = scrollChild:CreateFontString(nil, "OVERLAY")
-    emptyText:SetPoint("CENTER", scrollChild, "CENTER", 0, -10)
+    local emptyText = scrollFrame:CreateFontString(nil, "OVERLAY")
+    emptyText:SetPoint("CENTER", scrollFrame, "CENTER", 0, -10)
     emptyText:SetJustifyH("CENTER")
     emptyText:SetJustifyV("MIDDLE")
     XP:ApplyFont(emptyText, "normal", "accent")
@@ -312,14 +319,14 @@ function XP:CreateViewerFrame()
     frame.EmptyStateText = emptyText
 
     -- Make empty text clickable to open guide menu
-    local emptyClickArea = CreateFrame("Button", nil, scrollChild)
+    local emptyClickArea = CreateFrame("Button", nil, scrollFrame)
     emptyClickArea:SetAllPoints(emptyText)
     emptyClickArea:SetScript("OnClick", function() XP:ToggleMenu() end)
     emptyClickArea:SetScript("OnEnter", function()
         emptyText:SetTextColor(XP:ColorRGBA("orange"))
     end)
     emptyClickArea:SetScript("OnLeave", function()
-        emptyText:SetTextColor(XP:ColorRGBA("text_muted"))
+        emptyText:SetTextColor(XP:ColorRGBA("accent"))  -- restore original accent color
     end)
     frame.EmptyStateClickArea = emptyClickArea
 
@@ -424,11 +431,11 @@ function XP:CreateViewerFrame()
             XP.SetTexColor(f.TabBg, XP:ColorRGBA("bg_medium"))
         end
 
-        -- Tab decoration texture (skin-specific TGA, shown when TabsDecor == true)
+        -- Tab decoration texture (TabsDecor IS the texture path, false if disabled)
         if f.TabDecorTex then
-            local tdPath = XP:SD("TabsDecorTexture")
+            local tdPath = XP:SD("TabsDecor")
             if tdPath then f.TabDecorTex:SetTexture(tdPath) end
-            if XP:SD("TabsDecor") then
+            if tdPath then
                 f.TabDecorTex:Show()
             else
                 f.TabDecorTex:Hide()
@@ -562,7 +569,7 @@ local function CreateStepLine(parent, index)
     title:SetJustifyH("LEFT")
     title:SetJustifyV("MIDDLE")
     title:SetNonSpaceWrap(false)
-    title:SetMaxLines(1)
+    if title.SetMaxLines then title:SetMaxLines(1) end  -- not available in all WoW versions
     XP:ApplyFont(title, "small", "text_bright")
     line.Title = title
 
@@ -589,11 +596,19 @@ function XP:UpdateViewer()
 
     local guide = self.CurrentGuide
     if not guide then
-        -- No guide loaded: show empty state (guard against nil sub-elements)
-        if frame.StepNum then frame.StepNum:SetText("No Guide") end
-        if frame.GuideName then frame.GuideName:SetText("") end
-        if frame.ProgressPercent then frame.ProgressPercent:SetText("--") end
-        if frame.ProgressBar then frame.ProgressBar:SetValue(0) end
+        -- No guide: hide all chrome, extend scroll area to fill full height, show welcome text
+        if frame.TabContainer then frame.TabContainer:Hide() end
+        if frame.Toolbar then frame.Toolbar:Hide() end
+        if frame.ToolbarDivider then frame.ToolbarDivider:Hide() end
+        if frame.ProgressArea then frame.ProgressArea:Hide() end
+        if frame.Footer then frame.Footer:Hide() end
+        if frame.ScrollBar then frame.ScrollBar:Hide() end
+        -- Extend scroll frame to fill the whole viewer below the title bar
+        if frame.ScrollFrame and frame._titleH then
+            frame.ScrollFrame:ClearAllPoints()
+            frame.ScrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -frame._titleH)
+            frame.ScrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        end
         -- Show empty state, hide step lines
         if frame.EmptyTitleText then frame.EmptyTitleText:Show() end
         if frame.EmptyStateText then frame.EmptyStateText:Show() end
@@ -604,7 +619,17 @@ function XP:UpdateViewer()
         return
     end
 
-    -- Guide is loaded — hide empty state
+    -- Guide is loaded — restore chrome, restore scroll frame anchors, hide empty state
+    if frame.TabContainer then frame.TabContainer:Show() end
+    if frame.Toolbar then frame.Toolbar:Show() end
+    if frame.ToolbarDivider then frame.ToolbarDivider:Show() end
+    if frame.ProgressArea then frame.ProgressArea:Show() end
+    if frame.Footer then frame.Footer:Show() end
+    if frame.ScrollFrame and frame._scrollTop then
+        frame.ScrollFrame:ClearAllPoints()
+        frame.ScrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, frame._scrollTop)
+        frame.ScrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -frame._scrollbarW, frame._footerH)
+    end
     if frame.EmptyTitleText then frame.EmptyTitleText:Hide() end
     if frame.EmptyStateText then frame.EmptyStateText:Hide() end
     if frame.EmptyStateClickArea then frame.EmptyStateClickArea:Hide() end

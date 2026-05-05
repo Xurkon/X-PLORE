@@ -1650,7 +1650,7 @@ function XP:CreateButtonSets()
         WAND = {n = 41}, BAGMANY = {n = 42},
         BAGONE = {n = 43}, BAGLIST = {n = 44},
         VIEWER = {n = 45},
-        file = self:SD("TitleButtons") or SKINSDIR .. "titlebuttons-thin",
+        file = self:SD("TitleButtonsTexture") or SKINSDIR .. "titlebuttons-thin",
         count = 64,
         width = 1,
         height = 1,

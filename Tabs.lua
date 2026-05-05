@@ -622,42 +622,106 @@ end
 
 -- DEBUG: ENTER Tabs:ShowOverflowMenu()
 function Tabs:ShowOverflowMenu()
-    if not Tabs.OverflowMenu then
-        -- Create the overflow dropdown frame (simple menu, not forked)
-        local menu = CreateFrame("Frame", "XPlore_OverflowMenu", Tabs.container, "UIDropDownMenuTemplate")
-        menu:SetPoint("TOPRIGHT", Tabs.OverflowButton, "BOTTOMRIGHT", 0, -2)
-        menu:Hide()
-        Tabs.OverflowMenu = menu
-    end
-
-    local menu = Tabs.OverflowMenu
-
-    -- Count overflow tabs (tabs beyond the visible ones)
+    -- Collect overflowed tabs
     local overflowTabs = {}
     for _, tab in ipairs(Pool) do
         if tab.guideID and tab.isOverflowed then
             table.insert(overflowTabs, tab)
         end
     end
-
     if #overflowTabs == 0 then return end
 
-    UIDropDownMenu_SetWidth(menu, 180)
+    -- Build the dropdown frame once (reused across calls)
+    if not Tabs.OverflowMenu then
+        local menu = XP.CreateBackdropFrame("Frame", "XPlore_OverflowMenu", UIParent)
+        menu:SetFrameStrata("TOOLTIP")
+        menu:SetFrameLevel(100)
+        menu:EnableMouse(true)
+        menu:Hide()
+        menu.rows = {}
+        Tabs.OverflowMenu = menu
 
-    UIDropDownMenu_Initialize(menu, function()
-        for _, tab in ipairs(overflowTabs) do
-            local info = {
-                text = tab.title or tab.guideID,
-                notCheckable = 1,
-                func = function()
-                    tab:ActivateGuide()
-                    Tabs:HideOverflowMenu()
-                end,
-            }
-            UIDropDownMenu_AddButton(info, menu)
+        -- Fullscreen click-catcher to close menu when clicking outside
+        local catcher = CreateFrame("Frame", nil, UIParent)
+        catcher:SetAllPoints(UIParent)
+        catcher:SetFrameStrata("DIALOG")
+        catcher:SetFrameLevel(50)
+        catcher:EnableMouse(true)
+        catcher:Hide()
+        catcher:SetScript("OnMouseDown", function() Tabs:HideOverflowMenu() end)
+        Tabs.OverflowMenuCatcher = catcher
+    end
+
+    local menu = Tabs.OverflowMenu
+    XP:ApplyBackdrop(menu, "FloatMenuBackdrop", "bg_deep", "border")
+
+    -- Hide existing rows before rebuilding
+    for _, row in ipairs(menu.rows) do row:Hide() end
+    menu.rows = {}
+
+    local rowH     = 22
+    local padV     = 6
+    local padH     = 8
+    local iconSize = 16
+    local iconGap  = 4
+    local maxTextW = 0
+
+    for i, tab in ipairs(overflowTabs) do
+        local row = CreateFrame("Button", nil, menu)
+        row:SetHeight(rowH)
+        row:SetPoint("TOPLEFT", menu, "TOPLEFT", padH, -(padV + (i - 1) * rowH))
+
+        -- Guide-type icon
+        local icon = row:CreateTexture(nil, "ARTWORK")
+        icon:SetSize(iconSize, iconSize)
+        icon:SetPoint("LEFT", row, "LEFT", 0, 0)
+        if tab.Icon then
+            local tex = tab.Icon:GetTexture()
+            if tex then icon:SetTexture(tex) end
+            local r, g, b = tab.Icon:GetVertexColor()
+            XP.SetTexColor(icon, r or 1, g or 1, b or 1, 1)
+        else
+            XP.SetTexColor(icon, XP:ColorRGBA("cyan_dark"))
         end
-    end)
-    ToggleDropDownMenu(1, nil, menu, nil, 0, 0)
+
+        -- Guide title label
+        local label = row:CreateFontString(nil, "OVERLAY")
+        label:SetPoint("LEFT", row, "LEFT", iconSize + iconGap, 0)
+        label:SetJustifyH("LEFT")
+        XP:ApplyFont(label, "small", "text_bright")
+        label:SetText(tab.title or tab.guideID or "")
+        row.Label = label
+
+        local capturedTab = tab
+        row:SetScript("OnClick", function()
+            Tabs:HideOverflowMenu()
+            capturedTab:ActivateGuide()
+        end)
+        row:SetScript("OnEnter", function()
+            label:SetTextColor(XP:ColorRGBA("cyan"))
+        end)
+        row:SetScript("OnLeave", function()
+            XP:ApplyFont(label, "small", "text_bright")
+        end)
+
+        row:Show()
+        menu.rows[i] = row
+
+        local tw = label:GetStringWidth() + iconSize + iconGap + padH * 2
+        if tw > maxTextW then maxTextW = tw end
+    end
+
+    local dropW = math.max(160, maxTextW)
+    local dropH = #overflowTabs * rowH + padV * 2
+    menu:SetSize(dropW, dropH)
+    for _, row in ipairs(menu.rows) do
+        row:SetWidth(dropW - padH * 2)
+    end
+
+    menu:ClearAllPoints()
+    menu:SetPoint("TOPRIGHT", Tabs.OverflowButton, "BOTTOMRIGHT", 0, -2)
+    Tabs.OverflowMenuCatcher:Show()
+    menu:Show()
 -- DEBUG: EXIT Tabs:ShowOverflowMenu()
 end
 
@@ -665,6 +729,9 @@ end
 function Tabs:HideOverflowMenu()
     if Tabs.OverflowMenu then
         Tabs.OverflowMenu:Hide()
+    end
+    if Tabs.OverflowMenuCatcher then
+        Tabs.OverflowMenuCatcher:Hide()
     end
 -- DEBUG: EXIT Tabs:HideOverflowMenu()
 end
@@ -741,9 +808,9 @@ function Tabs:ReanchorTabs()
         end
     end
 
-    -- Show overflow button if there are overflowed tabs
+    -- Show overflow button if there are overflowed tabs; position at far right (Zygor: [tabs][+][>])
+    local hasOverflowed = false
     if overflowBtn then
-        local hasOverflowed = false
         for _, tab in ipairs(Pool) do
             if tab.guideID and tab.isOverflowed then
                 hasOverflowed = true
@@ -753,16 +820,20 @@ function Tabs:ReanchorTabs()
         if hasOverflowed then
             overflowBtn:Show()
             overflowBtn:ClearAllPoints()
-            overflowBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin - addBtnWidth - addBtnGap - overflowBtnGap, 0)
+            overflowBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin, 0)
         else
             overflowBtn:Hide()
         end
     end
 
-    -- Position add button at the far right (Zygor style)
+    -- Add "+" button: left of ">" when overflow shown, far right when no overflow (Zygor style)
     if addBtn then
         addBtn:ClearAllPoints()
-        addBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin, 0)
+        if hasOverflowed then
+            addBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin - overflowBtnWidth - overflowBtnGap - addBtnGap, 0)
+        else
+            addBtn:SetPoint("RIGHT", Tabs.container, "RIGHT", -rightMargin, 0)
+        end
     end
 
     -- If only one tab, hide its close button
