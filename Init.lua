@@ -22,9 +22,9 @@ XP.Skins      = {}   -- Theme / skin data
 XP.Waypoint   = {}   -- Waypoint arrow
 
 -- Texture and sound paths
-XP.TEXTURE_PATH = "Interface\\AddOns\\X-Plore\\Skins\\"
-XP.ICON_PATH    = "Interface\\AddOns\\X-Plore\\Skins\\"
-XP.SOUND_PATH   = "Interface\\AddOns\\X-Plore\\sounds\\"
+XP.TEXTURE_PATH = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\"
+XP.ICON_PATH    = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\"
+XP.SOUND_PATH   = "Interface\\AddOns\\" .. ADDON_NAME .. "\\sounds\\"
 
 -- Open a URL in the default browser (uses StaticPopup confirmation first)
 -- DEBUG: ENTER XP:OpenURL()

@@ -123,7 +123,7 @@ function XP:CreateGuideMenu()
     local closeNorm = closeBtn:CreateTexture(nil, "ARTWORK")
     closeNorm:SetSize(16, 16)
     closeNorm:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
-    local titleBtnPath = "Interface\\AddOns\\X-Plore\\Skins\\titlebuttons-thin"
+    local titleBtnPath = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\titlebuttons-thin"
     closeNorm:SetTexture(titleBtnPath)
     local padding = 1/16/64
     closeNorm:SetTexCoord(5/64 + padding, 6/64 - padding, 1/4 + padding, 1/2 - padding)

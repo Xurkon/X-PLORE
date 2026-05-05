@@ -17,9 +17,10 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------
-local SKINSDIR = "Interface\\AddOns\\X-Plore\\Skins\\"
-local SKINS_DIR = "Interface\\AddOns\\X-Plore\\Skins\\Default\\"
-local ICONSDIR = "Interface\\AddOns\\X-Plore\\Skins\\"
+local ADDON_DIR = "Interface\\AddOns\\" .. ADDON_NAME
+local SKINSDIR = ADDON_DIR .. "\\Skins\\"
+local SKINS_DIR = ADDON_DIR .. "\\Skins\\Default\\"
+local ICONSDIR = ADDON_DIR .. "\\Skins\\"
 local GUIDEICONS_DIR = SKINSDIR .. "guideicons"
 local WHITE_TEX = SKINSDIR .. "white"
 
@@ -1884,7 +1885,7 @@ activeStyle = skins["default"]:GetStyle("starlight")
 -----------------------------------------------------------------------
 ADDON_TABLE.Skins = skins
 ADDON_TABLE.SKINSDIR = SKINSDIR
-ADDON_TABLE.DIR = "Interface\\AddOns\\X-Plore"
+ADDON_TABLE.DIR = ADDON_DIR
 ADDON_TABLE.HTMLColor = HTML
 ADDON_TABLE.F = { HTMLColor = HTML }
 
