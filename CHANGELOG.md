@@ -22,6 +22,29 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## Session 45 — 2026-05-05
+
+### Summary
+
+**STEPS and LEVELING GUIDES static tabs added.** Two permanent tabs now anchor the left side of the tab bar — `STEPS` (opens guide steps view) and `LEVELING GUIDES` (opens guide selector menu). `XP:SetDisplayMode()` added to Core.lua as a Zygor parity function. `ReanchorTabs()` updated to account for the 145px static tab width when distributing dynamic guide tabs.
+
+### Changes
+
+#### Tabs.lua
+
+1. **STEPS tab** — 50px static leftmost tab; `OnClick → XP:SetDisplayMode("guide")`; stored as `Tabs.StepsTab`
+2. **LEVELING GUIDES tab** — 90px static second tab; `OnClick → XP:ToggleMenu()`; stored as `Tabs.LevelingTab`
+3. **ReanchorTabs() zero-tab case** — add button now starts at `x=145` (after both static tabs) instead of `x=4`
+4. **ReanchorTabs() multi-tab case** — first Pool tab starts after `LevelingTab + 4px`; `availWidth` subtracts `staticTabsWidth=145`
+
+#### Core.lua
+
+1. **XP:SetDisplayMode(mode)** — Zygor parity function; stores `mode` in `self.db.profile.displaymode`; calls `self:UpdateViewer()` if `ViewerFrame` exists; debug-logged ENTER/EXIT
+
+**Commit:** `7c6dac2`
+
+---
+
 ## Session 39 — 2026-05-04
 
 ### Summary

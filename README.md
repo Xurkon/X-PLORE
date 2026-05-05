@@ -61,17 +61,17 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
 | Zygor guide parsing | ⚙️ Partial | Parser structures exist; guide loading in progress |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
-| Tabs system | ⚙️ Partial | Custom tabs working; STEPS/LEVELING GUIDES tabs coming |
-#### 🔄 In Development — Session 44 Complete
+| Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs |
+#### 🔄 In Development — Session 45 Complete
 
-**Hamburger Menu Button** (`1fd700a`): Viewer menu button now uses column 3 of `titlebuttons-thin` sprite sheet (hamburger/menu icon) instead of `INV_Misc_Map_01`. Matches Zygor's titlebar button layout (Lock=0, Menu=3, Settings=4, Close=5). Removed stale `UpdateSkin` reset that was overriding the sprite texture.
+**STEPS + LEVELING GUIDES Tabs** (`7c6dac2`): Two static tabs now anchor the left side of the tab bar — STEPS (50px, opens guide steps view) and LEVELING GUIDES (90px, opens guide selector menu). `XP:SetDisplayMode()` added to Core.lua as Zygor parity. `ReanchorTabs()` accounts for 145px static tab width when distributing dynamic guide tabs.
 
 **Arrow Theme System** (`f875935`): `XP:GetArrowThemes()`, `XP:SetArrowTheme()`, `XP:SetArrowScale()`, `XP:ToggleArrow()`, `XP:UpdateArrowSettings()`, `XP.Waypoints` proxy. 5 arrow themes available: Modern, Classic, Minimal, Circular, Waypoint. Theme auto-loaded from profile on arrow spawn.
 
 **Ant Trail Fix** (`915407d`): `UpdateAntLine` now calls `AddAntDots` for WotLK/Classic (no `SetWorldLine`). Fixed instanceID: `HBD:GetWorldCoordinatesFromZone` 3rd return value now captured and used instead of hardcoded 946.
 
 #### 🔜 Up Next
-- **A6** STEPS / LEVELING GUIDES tabs — alongside existing custom tabs
+- **A4** Arrow theme selector UI in Options panel — dropdown/select widget for MODERN/CLASSIC/MINIMAL/CIRCULAR/WAYPOINT
 
 ---
 
