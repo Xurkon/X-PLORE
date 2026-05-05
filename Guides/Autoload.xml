@@ -1,0 +1,112 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+    <!--
+        X-Plore: Guides/Autoload.xml
+        Lists all guide data files to load. Files call ZygorGuidesViewer:RegisterGuide()
+        which is intercepted by GuideLoader.lua's shim and forwarded to XP:RegisterGuide().
+
+        Load order mirrors Zygor's Autoload.xml pattern:
+          1. Common / shared includes first
+          2. Named guide bundles (Alliance, Horde, Dailies, etc.)
+          3. User guide slots (Guide##.lua)
+          4. Subfolders (Leveling, Dailies, Dungeons, Achievements, etc.)
+    -->
+
+    <!-- ── Common / Shared ─────────────────────────────────────────── -->
+    <Script file="ZygorCommon.lua"/>
+    <Script file="ZygorMacros.lua"/>
+    <Script file="Images\Images.lua"/>
+
+    <!-- ── Leveling (Alliance & Horde root bundles) ────────────────── -->
+    <Script file="ZygorGuidesAlliance.lua"/>
+    <Script file="ZygorGuidesHorde.lua"/>
+    <Script file="ZygorIncludesAlliance.lua"/>
+    <Script file="ZygorIncludesHorde.lua"/>
+
+    <!-- ── Dailies (root bundles) ──────────────────────────────────── -->
+    <Script file="ZygorDailiesAlliance.lua"/>
+    <Script file="ZygorDailiesHorde.lua"/>
+
+    <!-- ── Achievements (root bundle) ─────────────────────────────── -->
+    <Script file="ZygorAchievementAlliance.lua"/>
+
+    <!-- ── User Guide Slots (Guide01..GuideNN) ─────────────────────── -->
+    <Script file="Guide01.lua"/>
+    <Script file="Guide02.lua"/>
+
+    <!-- ── Test / Sample Guides ─────────────────────────────────────── -->
+    <Script file="Test_Alliance_1_10.lua"/>
+    <Script file="Test_Horde_1_10.lua"/>
+    <Script file="Test_Classic_1_10.lua"/>
+    <Script file="Test_TBC_60_70.lua"/>
+    <Script file="Test_WotLK_68_80.lua"/>
+
+    <!-- ── Leveling (subfolder) ─────────────────────────────────────── -->
+    <Script file="Leveling\Guide40.lua"/>
+    <Script file="Leveling\ZygorLevelingAllianceCATA.lua"/>
+    <Script file="Leveling\ZygorLevelingAllianceMOP.lua"/>
+    <Script file="Leveling\ZygorLevelingHordeCATA.lua"/>
+    <Script file="Leveling\ZygorLevelingHordeMOP.lua"/>
+    <Script file="Leveling\ZygorLevelingPandaStarterMOP.lua"/>
+
+    <!-- ── Dailies (subfolder) ──────────────────────────────────────── -->
+    <Script file="Dailies\ZygorDailiesAllianceCATA.lua"/>
+    <Script file="Dailies\ZygorDailiesAllianceMOP.lua"/>
+    <Script file="Dailies\ZygorDailiesHordeCATA.lua"/>
+    <Script file="Dailies\ZygorDailiesHordeMOP.lua"/>
+
+    <!-- ── Dungeons ─────────────────────────────────────────────────── -->
+    <Script file="Dungeons\ZygorGearCommon.lua"/>
+    <Script file="Dungeons\ZygorGearAlliance.lua"/>
+    <Script file="Dungeons\ZygorGearHorde.lua"/>
+    <Script file="Dungeons\ZygorDungeonAllianceMOP.lua"/>
+    <Script file="Dungeons\ZygorDungeonHordeMOP.lua"/>
+    <Script file="Dungeons\ZygorDungeonScenariosAlliance_MoP.lua"/>
+    <Script file="Dungeons\ZygorDungeonScenariosHorde_MoP.lua"/>
+
+    <!-- ── Achievements (subfolder) ─────────────────────────────────── -->
+    <Script file="Achievements\ZygorAchievementsCommon.lua"/>
+    <Script file="Achievements\ZygorAchievementsAllianceCATA.lua"/>
+    <Script file="Achievements\ZygorAchievementsAllianceMOP.lua"/>
+    <Script file="Achievements\ZygorAchievementsHordeCATA.lua"/>
+    <Script file="Achievements\ZygorAchievementsHordeMOP.lua"/>
+
+    <!-- ── Professions ──────────────────────────────────────────────── -->
+    <Script file="Professions\ZygorProfessionsCommon.lua"/>
+    <Script file="Professions\ZygorProfessionsCommonMOP.lua"/>
+    <Script file="Professions\ZygorProfessionsAllianceCATA.lua"/>
+    <Script file="Professions\ZygorProfessionsAllianceMOP.lua"/>
+    <Script file="Professions\ZygorProfessionsHordeCATA.lua"/>
+    <Script file="Professions\ZygorProfessionsHordeMOP.lua"/>
+
+    <!-- ── Reputations ──────────────────────────────────────────────── -->
+    <Script file="Reputations\ZygorReputationsAllianceCATA.lua"/>
+    <Script file="Reputations\ZygorReputationsAllianceMOP.lua"/>
+    <Script file="Reputations\ZygorReputationsHordeCATA.lua"/>
+    <Script file="Reputations\ZygorReputationsHordeMOP.lua"/>
+
+    <!-- ── Pets & Mounts ────────────────────────────────────────────── -->
+    <Script file="PetsMounts\ZygorPetsCommonCATA.lua"/>
+    <Script file="PetsMounts\ZygorPetsCommonMOP.lua"/>
+    <Script file="PetsMounts\ZygorPetsAllianceCATA.lua"/>
+    <Script file="PetsMounts\ZygorPetsAllianceMOP.lua"/>
+    <Script file="PetsMounts\ZygorPetsHordeCATA.lua"/>
+    <Script file="PetsMounts\ZygorPetsHordeMOP.lua"/>
+    <Script file="PetsMounts\ZygorMountsAllianceCATA.lua"/>
+    <Script file="PetsMounts\ZygorMountsAllianceMOP.lua"/>
+    <Script file="PetsMounts\ZygorMountsHordeCATA.lua"/>
+    <Script file="PetsMounts\ZygorMountsHordeMOP.lua"/>
+    <Script file="PetsMounts\ZygorHunterPetAllianceCATA.lua"/>
+    <Script file="PetsMounts\ZygorHunterPetAllianceMOP.lua"/>
+    <Script file="PetsMounts\ZygorHunterPetHordeCATA.lua"/>
+    <Script file="PetsMounts\ZygorHunterPetHordeMOP.lua"/>
+    <Script file="PetsMounts\ZygorBattlePetQuestsAllianceMOP.lua"/>
+    <Script file="PetsMounts\ZygorBattlePetQuestsHordeMOP.lua"/>
+
+    <!-- ── Titles ───────────────────────────────────────────────────── -->
+    <Script file="Titles\ZygorTitlesAllianceCATA.lua"/>
+    <Script file="Titles\ZygorTitlesAllianceMOP.lua"/>
+    <Script file="Titles\ZygorTitlesHordeCATA.lua"/>
+    <Script file="Titles\ZygorTitlesHordeMOP.lua"/>
+
+</Ui>

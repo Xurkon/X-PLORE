@@ -700,11 +700,11 @@ function XP:UpdateViewer()
         if iconName and (iconName:find("^Interface") or iconName:find("^interface")) then
             iconPath = iconName
         elseif iconName and iconName ~= "" then
-            iconPath = XP.ICON_PATH .. iconName .. ".tga"
-        else
-            iconPath = nil
+            -- Bare names are WoW built-in spell/ability icons — use Interface\Icons
+            iconPath = "Interface\\Icons\\" .. iconName
         end
-        line.Icon:SetTexture(iconPath)
+        -- Explicitly clear texture when no icon to avoid white placeholder squares
+        line.Icon:SetTexture(iconPath or "")
 
         -- Style based on ACTUAL goal completion (event-driven), not position
         local stepComplete = step:IsComplete()

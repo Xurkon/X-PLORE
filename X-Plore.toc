@@ -49,7 +49,7 @@ GuideSorting.lua
 GuideLoader.lua
 
 # ── Guide Data (loaded after GuideLoader installs the shim) ───────────────────
-Guides-Retail\Autoload.xml
+Guides\Autoload.xml
 
 # ── Navigation / Map ───────────────────────────────────────────────────────────
 MapCoords.lua
