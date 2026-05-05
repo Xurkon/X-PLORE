@@ -553,7 +553,7 @@ local function CreateStepLine(parent, index)
     local icon = line:CreateTexture(nil, "ARTWORK")
     icon:SetSize(14, 14)
     icon:SetPoint("LEFT", line, "LEFT", 6, 0)
-    icon:SetPoint("MIDDLE", line, "MIDDLE", 0, 0)
+    icon:SetPoint("CENTER", line, "CENTER", 0, 0)
     line.Icon = icon
 
     -- Step number badge (small circle with number, left of title)
