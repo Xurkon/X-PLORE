@@ -18,6 +18,12 @@ Thumbs.db
 
 # Development docs (export-ignore in .gitattributes — tracked but excluded from releases)
 .env.example
+
+# Selene linting (dev-only — local config, not committed)
+selene.toml
+wow_classic.yml
+
+# Progress / planning docs (dev-only)
 PARITY_REPORT.md
 PROGRESS.md
 ViewerPlan.md
