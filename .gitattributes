@@ -13,6 +13,11 @@
 # Export-ignore: exclude these from release archives (git archive)
 .env.example export-ignore
 test_skins.lua export-ignore
+PARITY_REPORT.md export-ignore
+PROGRESS.md export-ignore
+ViewerPlan.md export-ignore
+selene.toml export-ignore
+wow_classic.yml export-ignore
 
 # Ensure consistent line endings
 *.lua text eol=lf
