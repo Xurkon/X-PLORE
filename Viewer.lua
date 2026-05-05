@@ -42,8 +42,12 @@ function XP:CreateViewerFrame()
     frame:SetFrameLevel(10)
     frame:EnableMouse(true)
 
-    -- Apply skin backdrop
-    self:ApplyBackdrop(frame, "main", "bg_deep", "border")
+    -- Apply skin backdrop — use WindowBackdrop for rounded corners + hairline border
+    self:ApplyBackdrop(frame, "WindowBackdrop", "bg_deep", nil)
+    -- Apply the hairline border color separately (WindowBackdrop has transparent bg, border is the edge)
+    if frame.SetBackdropBorderColor then
+        frame:SetBackdropBorderColor(XP:ColorRGBA("border"))
+    end
 
     self.ViewerFrame = frame
     self.ViewerFrameCreated = true
@@ -86,7 +90,7 @@ function XP:CreateViewerFrame()
     local closeNorm = closeBtn:CreateTexture(nil, "ARTWORK")
     closeNorm:SetSize(16, 16)
     closeNorm:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
-    local titleBtnPath = "Interface\\AddOns\\X-Plore\\Skins\\titlebuttons-thin"
+    local titleBtnPath = XP:SD("TitleButtons") or "Interface\\AddOns\\X-Plore\\Skins\\titlebuttons-thin"
     closeNorm:SetTexture(titleBtnPath)
     local padding = 1/16/64
     closeNorm:SetTexCoord(5/64 + padding, 6/64 - padding, 1/4 + padding, 1/2 - padding)
@@ -346,6 +350,37 @@ function XP:CreateViewerFrame()
     scrollFrame:SetScrollChild(scrollChild)
     frame.ScrollChild = scrollChild
 
+    -- Empty-state "Welcome to Zygor Guides" + "Click here" (centered in scroll area)
+    local emptyTitle = scrollChild:CreateFontString(nil, "OVERLAY")
+    emptyTitle:SetPoint("CENTER", scrollChild, "CENTER", 0, 10)
+    emptyTitle:SetJustifyH("CENTER")
+    emptyTitle:SetJustifyV("MIDDLE")
+    XP:ApplyFont(emptyTitle, "normal", "text_bright")
+    emptyTitle:SetText("Welcome to Zygor Guides")
+    emptyTitle:Hide()
+    frame.EmptyTitleText = emptyTitle
+
+    local emptyText = scrollChild:CreateFontString(nil, "OVERLAY")
+    emptyText:SetPoint("CENTER", scrollChild, "CENTER", 0, -10)
+    emptyText:SetJustifyH("CENTER")
+    emptyText:SetJustifyV("MIDDLE")
+    XP:ApplyFont(emptyText, "normal", "accent")
+    emptyText:SetText("Click here")
+    emptyText:Hide()
+    frame.EmptyStateText = emptyText
+
+    -- Make empty text clickable to open guide menu
+    local emptyClickArea = CreateFrame("Button", nil, scrollChild)
+    emptyClickArea:SetAllPoints(emptyText)
+    emptyClickArea:SetScript("OnClick", function() XP:ToggleMenu() end)
+    emptyClickArea:SetScript("OnEnter", function()
+        emptyText:SetTextColor(XP:ColorRGBA("orange"))
+    end)
+    emptyClickArea:SetScript("OnLeave", function()
+        emptyText:SetTextColor(XP:ColorRGBA("text_muted"))
+    end)
+    frame.EmptyStateClickArea = emptyClickArea
+
     ---------------------------------------------------------------
     -- Progress Area (between scroll content and footer bar)
     ---------------------------------------------------------------
@@ -436,8 +471,11 @@ function XP:CreateViewerFrame()
         local f = XP.ViewerFrame
         if not f then return end
 
-        -- Main frame backdrop
-        XP:ApplyBackdrop(f, "main", "bg_deep", "border")
+        -- Main frame backdrop — WindowBackdrop with rounded corners
+        XP:ApplyBackdrop(f, "WindowBackdrop", "bg_deep", nil)
+        if f.SetBackdropBorderColor then
+            f:SetBackdropBorderColor(XP:ColorRGBA("border"))
+        end
 
         -- Tab bar background
         if f.TabBg then
@@ -618,12 +656,20 @@ function XP:UpdateViewer()
         if frame.InfoGuideName then frame.InfoGuideName:SetText("") end
         if frame.InfoLevel then frame.InfoLevel:SetText("") end
         if frame.InfoStep then frame.InfoStep:SetText("") end
-        -- Clear step lines
+        -- Show empty state, hide step lines
+        if frame.EmptyTitleText then frame.EmptyTitleText:Show() end
+        if frame.EmptyStateText then frame.EmptyStateText:Show() end
+        if frame.EmptyStateClickArea then frame.EmptyStateClickArea:Show() end
         for _, line in ipairs(activeStepLines) do
             line:Hide()
         end
         return
     end
+
+    -- Guide is loaded — hide empty state
+    if frame.EmptyTitleText then frame.EmptyTitleText:Hide() end
+    if frame.EmptyStateText then frame.EmptyStateText:Hide() end
+    if frame.EmptyStateClickArea then frame.EmptyStateClickArea:Hide() end
 
     local currentStep = self.CurrentStep or 1
     local numSteps = guide:GetNumSteps()  -- triggers Parse() if not yet parsed
