@@ -18,6 +18,7 @@ PROGRESS.md export-ignore
 ViewerPlan.md export-ignore
 selene.toml export-ignore
 wow_classic.yml export-ignore
+wow_classic_additions.yml export-ignore
 
 # Ensure consistent line endings
 *.lua text eol=lf

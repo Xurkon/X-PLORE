@@ -22,6 +22,7 @@ Thumbs.db
 # Selene linting (dev-only — local config, not committed)
 selene.toml
 wow_classic.yml
+wow_classic_additions.yml
 
 # Progress / planning docs (dev-only)
 PARITY_REPORT.md
