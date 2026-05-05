@@ -26,22 +26,45 @@ All notable changes to X-PLORE are documented here.
 
 ### Summary
 
-**STEPS and LEVELING GUIDES static tabs added.** Two permanent tabs now anchor the left side of the tab bar — `STEPS` (opens guide steps view) and `LEVELING GUIDES` (opens guide selector menu). `XP:SetDisplayMode()` added to Core.lua as a Zygor parity function. `ReanchorTabs()` updated to account for the 145px static tab width when distributing dynamic guide tabs.
+**Tab bar visual parity fixes.** Three key visual issues addressed based on Zygor screenshot analysis: (1) Main viewer frame backdrop changed from `"main"` to `"WindowBackdrop"` for rounded glass corners instead of sharp square corners. (2) Empty state now shows "Welcome to Zygor Guides" title + "Click here to load a guide" text centered in the scroll area. (3) Tab bar styling cleaned up — tabs use flat dark background with text icons (no panel backdrop borders).
+
+### Changes
+
+#### Viewer.lua
+
+1. **WindowBackdrop** — Main viewer frame now uses `ApplyBackdrop(frame, "WindowBackdrop", "bg_deep", nil)` + `SetBackdropBorderColor` for hairline border; produces rounded glass corners matching Zygor
+2. **Empty state title** — Added `EmptyTitleText:CreateFontString` with "Welcome to Zygor Guides" in `text_bright` 18pt above the click-here text
+3. **Title button path** — `titleBtnPath` now uses `XP:SD("TitleButtons")` for style-specific skin path instead of hardcoded root path
+4. **RegisterSkinSubscriber backdrop** — Updated to use same WindowBackdrop approach
+
+#### Tabs.lua
+
+1. **ReanchorTabs() + button anchor** — + button now anchored RIGHT of container at all times; tabs anchor LEFT and fill left-to-right
+2. **Flat tab styling** — Removed panel backdrop from tabs (tabs use flat dark background with text+icon, matching Zygor)
+
+**Commit:** `7a133bc`
+
+---
+
+## Session 46 — 2026-05-05
+
+### Summary
+
+**Tab overflow system implemented.** When too many guide tabs are open to fit in the tab bar width, tabs shrink to minimum 60px and overflowed tabs are hidden. A ">" overflow button appears at the right side of the tab bar (before the + button) showing how many tabs are hidden. Clicking ">" opens a dropdown listing overflowed guide tabs — clicking one activates it. Zygor pattern: `> [+]` at right edge, tabs fill left-to-right.
 
 ### Changes
 
 #### Tabs.lua
 
-1. **STEPS tab** — 50px static leftmost tab; `OnClick → XP:SetDisplayMode("guide")`; stored as `Tabs.StepsTab`
-2. **LEVELING GUIDES tab** — 90px static second tab; `OnClick → XP:ToggleMenu()`; stored as `Tabs.LevelingTab`
-3. **ReanchorTabs() zero-tab case** — add button now starts at `x=145` (after both static tabs) instead of `x=4`
-4. **ReanchorTabs() multi-tab case** — first Pool tab starts after `LevelingTab + 4px`; `availWidth` subtracts `staticTabsWidth=145`
+1. **OverflowButton** — New `>` button created in `InitTabs()` next to AddButton; hidden when all tabs fit, shown when overflow exists
+2. **isOverflowed flag** — Each tab tracks `isOverflowed = true/false`; set during `ReanchorTabs()` based on whether the tab's right edge fits before the overflow button zone
+3. **ReanchorTabs() overflow logic** — Rewritten: hides all tabs first, then reveals only tabs whose right edge fits before the overflow button zone; tab width shrinks to `math.max(60, floor(availWidth / count))`; overflow button positioned before + button
+4. **ToggleOverflowMenu()** — Toggles overflow dropdown visibility
+5. **ShowOverflowMenu()** — Creates dropdown (if needed) using `UIDropDownMenuTemplate` + `UIDropDownMenu_Initialize`; lists all overflowed tabs with their titles; `ToggleDropDownMenu(1, nil, menu)` to open
+6. **HideOverflowMenu()** — Hides the overflow dropdown
+7. **Empty tab bar case** — With no tabs, + button now anchors LEFT (not RIGHT)
 
-#### Core.lua
-
-1. **XP:SetDisplayMode(mode)** — Zygor parity function; stores `mode` in `self.db.profile.displaymode`; calls `self:UpdateViewer()` if `ViewerFrame` exists; debug-logged ENTER/EXIT
-
-**Commit:** `7c6dac2`
+**Commit:** `790ddde`
 
 ---
 
