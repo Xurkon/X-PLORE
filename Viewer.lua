@@ -69,51 +69,18 @@ function XP:CreateViewerFrame()
     titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
     frame.TitleBar = titleBar
 
-    -- Logo icon
-    local logoIcon = titleBar:CreateTexture(nil, "ARTWORK")
-    logoIcon:SetSize(16, 16)
-    logoIcon:SetPoint("LEFT", titleBar, "LEFT", 8, 0)
-    logoIcon:SetTexture("Interface\\AddOns\\X-Plore\\Skins\\logo")
-    frame.LogoIcon = logoIcon
-
-    -- Title text
+    -- Title text (centered in title bar — no logo)
     local titleText = titleBar:CreateFontString(nil, "OVERLAY")
-    titleText:SetPoint("LEFT", logoIcon, "RIGHT", 6, 0)
-    self:ApplyFont(titleText, "bold", "cyan")
+    titleText:SetPoint("CENTER", titleBar, "CENTER", 0, 0)
+    self:ApplyFont(titleText, "bold", "white")
     titleText:SetText("X-PLORE")
     frame.TitleText = titleText
 
-    -- Close button (using Zygor's titlebuttons-thin sprite sheet)
-    local closeBtn = CreateFrame("Button", nil, titleBar)
-    closeBtn:SetSize(16, 16)
-    closeBtn:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
-    local closeNorm = closeBtn:CreateTexture(nil, "ARTWORK")
-    closeNorm:SetSize(16, 16)
-    closeNorm:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
-    local titleBtnPath = XP:SD("TitleButtons") or "Interface\\AddOns\\X-Plore\\Skins\\titlebuttons-thin"
-    closeNorm:SetTexture(titleBtnPath)
-    local padding = 1/16/64
-    closeNorm:SetTexCoord(5/64 + padding, 6/64 - padding, 1/4 + padding, 1/2 - padding)
-    closeBtn:SetNormalTexture(closeNorm)
-    local closePushed = closeBtn:CreateTexture(nil, "ARTWORK")
-    closePushed:SetSize(16, 16)
-    closePushed:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
-    closePushed:SetTexture(titleBtnPath)
-    closePushed:SetTexCoord(5/64 + padding, 6/64 - padding, 2/4 + padding, 3/4 - padding)
-    closeBtn:SetPushedTexture(closePushed)
-    local hlTex = closeBtn:CreateTexture(nil, "HIGHLIGHT")
-    hlTex:SetAllPoints()
-    hlTex:SetTexture(titleBtnPath)
-    hlTex:SetTexCoord(5/64 + padding, 6/64 - padding, 3/4 + padding, 1 - padding)
-    hlTex:SetBlendMode("ADD")
-    closeBtn:SetHighlightTexture(hlTex)
-    closeBtn:SetScript("OnClick", function() frame:Hide() end)
-    frame.CloseBtn = closeBtn
-
-    -- Menu button (opens guide browser) — uses titlebuttons-thin sprite sheet, column 3 = hamburger/menu icon
+    -- Menu button (hamburger icon — FAR LEFT of title bar)
     local menuBtn = CreateFrame("Button", nil, titleBar)
-    menuBtn:SetSize(20, 20)
-    menuBtn:SetPoint("RIGHT", closeBtn, "LEFT", -4, 0)
+    menuBtn:SetSize(16, 16)
+    menuBtn:SetPoint("LEFT", titleBar, "LEFT", 6, 0)
+    local titleBtnPath = XP:SD("TitleButtons") or "Interface\\AddOns\\X-Plore\\Skins\\titlebuttons-thin"
     local menuNorm = menuBtn:CreateTexture(nil, "ARTWORK")
     menuNorm:SetSize(16, 16)
     menuNorm:SetPoint("CENTER", menuBtn, "CENTER", 0, 0)
@@ -134,6 +101,32 @@ function XP:CreateViewerFrame()
     menuBtn:SetHighlightTexture(menuHl)
     menuBtn:SetScript("OnClick", function() XP:ToggleMenu() end)
     frame.MenuBtn = menuBtn
+
+    -- Close button (using Zygor's titlebuttons-thin sprite sheet — FAR RIGHT)
+    local closeBtn = CreateFrame("Button", nil, titleBar)
+    closeBtn:SetSize(16, 16)
+    closeBtn:SetPoint("RIGHT", titleBar, "RIGHT", -6, 0)
+    local closeNorm = closeBtn:CreateTexture(nil, "ARTWORK")
+    closeNorm:SetSize(16, 16)
+    closeNorm:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
+    closeNorm:SetTexture(titleBtnPath)
+    local padding = 1/16/64
+    closeNorm:SetTexCoord(5/64 + padding, 6/64 - padding, 1/4 + padding, 1/2 - padding)
+    closeBtn:SetNormalTexture(closeNorm)
+    local closePushed = closeBtn:CreateTexture(nil, "ARTWORK")
+    closePushed:SetSize(16, 16)
+    closePushed:SetPoint("CENTER", closeBtn, "CENTER", 0, 0)
+    closePushed:SetTexture(titleBtnPath)
+    closePushed:SetTexCoord(5/64 + padding, 6/64 - padding, 2/4 + padding, 3/4 - padding)
+    closeBtn:SetPushedTexture(closePushed)
+    local hlTex = closeBtn:CreateTexture(nil, "HIGHLIGHT")
+    hlTex:SetAllPoints()
+    hlTex:SetTexture(titleBtnPath)
+    hlTex:SetTexCoord(5/64 + padding, 6/64 - padding, 3/4 + padding, 1 - padding)
+    hlTex:SetBlendMode("ADD")
+    closeBtn:SetHighlightTexture(hlTex)
+    closeBtn:SetScript("OnClick", function() frame:Hide() end)
+    frame.CloseBtn = closeBtn
 
     -- Title divider
     frame.TitleDivider = self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
@@ -356,7 +349,7 @@ function XP:CreateViewerFrame()
     emptyTitle:SetJustifyH("CENTER")
     emptyTitle:SetJustifyV("MIDDLE")
     XP:ApplyFont(emptyTitle, "normal", "text_bright")
-    emptyTitle:SetText("Welcome to Zygor Guides")
+    emptyTitle:SetText("Welcome to X-PLORE")
     emptyTitle:Hide()
     frame.EmptyTitleText = emptyTitle
 
