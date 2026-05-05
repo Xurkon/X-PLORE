@@ -537,7 +537,7 @@ local function CreateStepLine(parent, index)
     line:SetHeight(lineHeight)
 
     -- Background (set by status: active, complete, upcoming)
-    XP:ApplyBackdrop(line, "panel", "bg_medium", "border_dim")
+    XP:ApplyBackdrop(line, "step", "step_upcoming", nil)
 
     -- Left edge indicator (colored bar, 2px wide)
     local edge = line:CreateTexture(nil, "ARTWORK")
@@ -579,6 +579,14 @@ local function CreateStepLine(parent, index)
     line.Status = status
 
     line.stepIndex = index
+
+    -- Bottom separator (1px border between step lines)
+    local sep = line:CreateTexture(nil, "ARTWORK")
+    sep:SetHeight(1)
+    sep:SetPoint("BOTTOMLEFT",  line, "BOTTOMLEFT",  0, 0)
+    sep:SetPoint("BOTTOMRIGHT", line, "BOTTOMRIGHT", 0, 0)
+    XP.SetTexColor(sep, XP:ColorRGBA("border"))
+    line.Sep = sep
 
     return line
 -- DEBUG: EXIT CreateStepLine()
@@ -722,7 +730,7 @@ function XP:UpdateViewer()
         local state = step:GetCompletionState(activeStepNum)
         if state == "complete" then
             -- Completed step — all goals done
-            self:ApplyBackdrop(line, "panel", "step_complete", "border_dim")
+            self:ApplyBackdrop(line, "step", "step_complete", nil)
             XP.SetTexColor(line.Edge, XP:ColorRGBA("green"))
             line.Title:SetTextColor(XP:ColorRGBA("green"))
             line.StepNum2:SetTextColor(XP:ColorRGBA("green"))
@@ -730,14 +738,14 @@ function XP:UpdateViewer()
             line.Status:SetTextColor(XP:ColorRGBA("green"))
         elseif state == "active" then
             -- Active step (highlighted) — first non-complete step
-            self:ApplyBackdrop(line, "panel", "step_active", "cyan")
+            self:ApplyBackdrop(line, "step", "step_active", nil)
             XP.SetTexColor(line.Edge, XP:ColorRGBA("cyan"))
             line.Title:SetTextColor(XP:ColorRGBA("text_bright"))
             line.StepNum2:SetTextColor(XP:ColorRGBA("cyan"))
             line.Status:SetText("")
         else
             -- Skipped or Upcoming — not yet reached or was missed
-            self:ApplyBackdrop(line, "panel", "step_upcoming", "border_dim")
+            self:ApplyBackdrop(line, "step", "step_upcoming", nil)
             XP.SetTexColor(line.Edge, XP:ColorRGBA("text_dim"))
             line.Title:SetTextColor(XP:ColorRGBA("text_muted"))
             line.StepNum2:SetTextColor(XP:ColorRGBA("text_dim"))

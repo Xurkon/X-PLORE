@@ -990,10 +990,12 @@ InitSizes(STEALTH_GLASS)
 -- DEBUG: PARAM style = [style]
 local function InitBackdrops(style)
     style.Backdrops = {
-        main = style.MainBackdrop,
+        main  = style.MainBackdrop,
         panel = style.PanelBackdrop,
         small = style.SmallBackdrop,
-        none = style.NoEdgeBackdrop,
+        none  = style.NoEdgeBackdrop,
+        step  = style.StepBackdrop,
+        tab   = style.TabBackdrop,
     }
 -- DEBUG: EXIT InitBackdrops()
 end

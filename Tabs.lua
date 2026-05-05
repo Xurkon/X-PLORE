@@ -165,7 +165,7 @@ function Tabs:CreateTab()
     btn:EnableMouse(true)
     btn:Hide()
 
-    XP:ApplyBackdrop(btn, "panel", "bg_medium", "border_dim")
+    XP:ApplyBackdrop(btn, "tab", "bg_medium", nil)
 
     -- Tab text
     local text = btn:CreateFontString(nil, "OVERLAY")
@@ -318,14 +318,14 @@ function Tabs:SetAsCurrent()
     -- Deactivate previous
     if Tabs.ActiveTab and Tabs.ActiveTab ~= self then
         Tabs.ActiveTab.isActive = false
-        XP:ApplyBackdrop(Tabs.ActiveTab.Button, "panel", "bg_medium", "border_dim")
+        XP:ApplyBackdrop(Tabs.ActiveTab.Button, "tab", "bg_medium", nil)
         Tabs.ActiveTab.Text:SetTextColor(XP:ColorRGBA("text_muted"))
         if Tabs.ActiveTab.AccentBar then Tabs.ActiveTab.AccentBar:Hide() end
     end
 
     Tabs.ActiveTab = self
     self.isActive = true
-    XP:ApplyBackdrop(self.Button, "panel", "bg_medium", "border_bright")
+    XP:ApplyBackdrop(self.Button, "tab", "bg_light", nil)
     self.Text:SetTextColor(XP:ColorRGBA("text_bright"))
     if self.AccentBar then self.AccentBar:Show() end
 -- DEBUG: EXIT Tabs:SetAsCurrent()
