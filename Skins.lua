@@ -490,8 +490,13 @@ end
 
 -- DEBUG: ENTER XP:GetSkin()
 -- DEBUG: PARAM id = [id]
+-- When called with no arguments, returns the currently active skin/style.
+-- When called with an id string, returns the skin object for that id (or "default").
 function XP:GetSkin(id)
-    return skins[id or "default"]
+    if id == nil or id == "" then
+        return activeSkin or skins["default"]
+    end
+    return skins[id] or skins["default"]
 -- DEBUG: EXIT XP:GetSkin()
 end
 
