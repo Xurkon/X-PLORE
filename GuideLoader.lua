@@ -143,11 +143,18 @@ function Loader:InstallZygorShim()
     shim.Print = function() end
     shim.NoOp = function() end
     shim.BETASTART = function() end
+    shim.BETAEND   = function() end
     shim.InPhase = function() return false end
     shim.IMAGESDIR = ""
 
     shim.Gold = { guides_loaded = false }
     shim.Poi  = { Sets = {}, db = {} }
+    shim.ItemScore = { Items = {} }
+    shim.TalentAdvisor = { Builds = {} }
+
+    -- Localization proxy: returns the key itself as a fallback string.
+    -- Used by Gold/AH guides: ZGV.L["type_armor"], ZGV.L["subtype_..."], etc.
+    shim.L = setmetatable({}, { __index = function(_, k) return k end })
 
     shim.AllianceInstalled = true
     shim.HordeInstalled = true
@@ -160,7 +167,6 @@ function Loader:InstallZygorShim()
     shim.questsbyid = {}
     shim.completedQuests = {}
     shim.completioninterval = 1
-    shim.ItemScore = {}
 
     _G.ZygorGuidesViewer = shim
 
