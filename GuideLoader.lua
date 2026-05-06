@@ -141,6 +141,13 @@ function Loader:InstallZygorShim()
     shim.DoEmote = function() end
     shim.SetGuide = function() end
     shim.Print = function() end
+    shim.NoOp = function() end
+    shim.BETASTART = function() end
+    shim.InPhase = function() return false end
+    shim.IMAGESDIR = ""
+
+    shim.Gold = { guides_loaded = false }
+    shim.Poi  = { Sets = {}, db = {} }
 
     shim.AllianceInstalled = true
     shim.HordeInstalled = true

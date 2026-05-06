@@ -50,6 +50,21 @@ do
 	end
 end
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- DugiGuides global stubs
+-- Legacy DugiGuides files (e.g. Legacy_MoP) reference globals that only exist
+-- when the DugiGuides core addon is loaded.  Provide minimal stubs so those
+-- files can be parsed without errors.
+-- ─────────────────────────────────────────────────────────────────────────────
+if not LuaUtils then
+	LuaUtils = { DugiGuidesIsLoading = false }
+end
+
+if not DugisLocals then
+	-- Returns the key itself as a fallback string for any unknown locale entry.
+	DugisLocals = setmetatable({}, { __index = function(_, k) return tostring(k) end })
+end
+
 local ZGV = ZygorGuidesViewer
 if not ZGV then return end
 
