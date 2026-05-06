@@ -17,7 +17,7 @@ XP.Minimap = MM
 local BUTTON_SIZE   = 31          -- diameter of the minimap button
 local BUTTON_RADIUS = 80          -- orbital radius from minimap centre
 local DEFAULT_ANGLE = 45          -- default starting angle (degrees, clockwise from top)
-local ICON_PATH     = XP.TEXTURE_PATH .. "minimap_button.tga"
+local ICON_PATH     = XP.TEXTURE_PATH .. "XPIcon.tga"
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Angle ↔ Position helpers
@@ -212,7 +212,7 @@ function MM:CreateButton()
     -- Icon texture — SetNormalTexture exists on Button in ALL WoW versions.
     -- SetTexCoord selects the correct cell from the multi-cell atlas.
     btn:SetNormalTexture(ICON_PATH)
-    btn:GetNormalTexture():SetTexCoord(0, 1, 0, 1/4)  -- top quarter of atlas
+    btn:GetNormalTexture():SetTexCoord(0, 1, 0, 1)  -- full texture (single icon, no atlas)
     self._icon = btn:GetNormalTexture()
 
     -- Circular mask — implemented differently per version:
