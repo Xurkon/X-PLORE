@@ -119,24 +119,6 @@ function XP.ViewerFrame.ApplySkin(self)
             local pbarBgColor = XP:SD("ProgressBarBackdropColor") or {0, 0, 0, 0.4}
             XP.SetTexColor(f.ProgressBarBg, pbarBgColor[1], pbarBgColor[2], pbarBgColor[3], pbarBgColor[4])
         end
-        if f.ProgressPercent then
-            XP:ApplyFont(f.ProgressPercent, "small", "cyan_dark")
-        end
-    end
-
-    -- Footer
-    if f.FooterBg then
-        XP.SetTexColor(f.FooterBg, XP:ColorRGBA("bg_medium"))
-    end
-    if f.SyncDot then
-        if XP.db and XP.db.profile and XP.db.profile.autoAdvance then
-            XP.SetTexColor(f.SyncDot, XP:ColorRGBA("green"))
-        else
-            XP.SetTexColor(f.SyncDot, XP:ColorRGBA("text_dim"))
-        end
-    end
-    if f.SyncText then
-        XP:ApplyFont(f.SyncText, "small", "cyan_dark")
     end
 
     -- Re-render step lines with new skin

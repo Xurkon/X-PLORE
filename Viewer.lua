@@ -69,11 +69,22 @@ function XP:CreateViewerFrame()
     titleBar:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
     frame.TitleBar = titleBar
 
-    -- Title text (centered in title bar — no logo)
+    -- Logo image (centered in title bar)
+    local logoTex = titleBar:CreateTexture(nil, "ARTWORK")
+    local logoSize = self:SD("TitleLogoSize") or {120, 24}
+    logoTex:SetSize(logoSize[1] or 120, logoSize[2] or 24)
+    logoTex:SetPoint("CENTER", titleBar, "CENTER", 0, 0)
+    local logoPath = self:SD("TitleLogo") or ("Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\logo2")
+    logoTex:SetTexture(logoPath)
+    titleBar.Logo = logoTex
+    frame.LogoTex = logoTex
+
+    -- Fallback title text (shown only if no logo skin data)
     local titleText = titleBar:CreateFontString(nil, "OVERLAY")
     titleText:SetPoint("CENTER", titleBar, "CENTER", 0, 0)
     self:ApplyFont(titleText, "bold", "white")
     titleText:SetText("X-PLORE")
+    titleText:Hide()  -- hidden when logo is present
     frame.TitleText = titleText
 
     -- Menu button (hamburger icon — FAR LEFT of title bar)
@@ -203,8 +214,8 @@ function XP:CreateViewerFrame()
     -- adds scroll-arrow buttons that bleed outside the frame on WotLK.
     ---------------------------------------------------------------
     local scrollTop    = toolbarY - self:Size("toolbar_height") - 1
-    local progressH    = 12   -- progress bar area height (between scroll and footer)
-    local footerH      = self:Size("footer_height")
+    local progressH    = 12   -- progress bar area height (at very bottom)
+    local footerH      = 0    -- no footer (AUTO indicator removed)
     local scrollbarW    = 12  -- narrow internal scrollbar
 
     -- ScrollFrame fills the content area (no right overhang)
@@ -329,11 +340,11 @@ function XP:CreateViewerFrame()
     progressArea:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, footerH)
     frame.ProgressArea = progressArea
 
-    -- Progress bar (spans full width of progress area, vertically centered)
+    -- Progress bar (spans full width of progress area)
     local progressBar = CreateFrame("StatusBar", nil, progressArea)
     progressBar:SetHeight(4)
-    progressBar:SetPoint("LEFT", progressArea, "LEFT", 10, 0)
-    progressBar:SetPoint("RIGHT", progressArea, "RIGHT", -10, 0)
+    progressBar:SetPoint("LEFT", progressArea, "LEFT", 0, 0)
+    progressBar:SetPoint("RIGHT", progressArea, "RIGHT", 0, 0)
     progressBar:SetPoint("CENTER", progressArea, "CENTER", 0, 0)
     local pbarTex = XP:SD("ProgressBarTextureFile")
     if pbarTex then
@@ -357,39 +368,6 @@ function XP:CreateViewerFrame()
     local pbarBgColor = XP:SD("ProgressBarBackdropColor") or {0, 0, 0, 0.4}
     XP.SetTexColor(pbarBg, pbarBgColor[1], pbarBgColor[2], pbarBgColor[3], pbarBgColor[4])
     frame.ProgressBarBg = pbarBg
-
-    -- Progress percent (right side of progress area)
-    local pctText = progressArea:CreateFontString(nil, "OVERLAY")
-    pctText:SetPoint("RIGHT", progressArea, "RIGHT", -8, 0)
-    self:ApplyFont(pctText, "small", "cyan_dark")
-    pctText:SetText("0%")
-    frame.ProgressPercent = pctText
-
-    ---------------------------------------------------------------
-    -- Footer (minimal — sync indicator only)
-    ---------------------------------------------------------------
-    local footer = CreateFrame("Frame", nil, frame)
-    footer:SetHeight(footerH)
-    footer:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-    footer:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-    frame.Footer = footer
-
-    frame.FooterBg = footer:CreateTexture(nil, "BACKGROUND")
-    frame.FooterBg:SetAllPoints()
-    XP.SetTexColor(frame.FooterBg, XP:ColorRGBA("bg_medium"))
-
-    -- Auto-sync indicator (centered in footer)
-    local syncDot = footer:CreateTexture(nil, "OVERLAY")
-    syncDot:SetSize(6, 6)
-    syncDot:SetPoint("CENTER", footer, "CENTER", -16, 0)
-    XP.SetTexColor(syncDot, XP:ColorRGBA("green"))
-    frame.SyncDot = syncDot
-
-    local syncText = footer:CreateFontString(nil, "OVERLAY")
-    syncText:SetPoint("LEFT", syncDot, "RIGHT", 4, 0)
-    self:ApplyFont(syncText, "small", "cyan_dark")
-    syncText:SetText("AUTO")
-    frame.SyncText = syncText
 
     ---------------------------------------------------------------
     -- Apply saved settings
@@ -472,16 +450,7 @@ function XP:CreateViewerFrame()
             XP.SetTexColor(f.ScrollThumb, sbcc[1], sbcc[2], sbcc[3], sbcc[4])
         end
 
-        -- Footer elements
-        if f.SyncDot then
-            XP.SetTexColor(f.SyncDot, XP:ColorRGBA("green"))
-        end
-        if f.SyncText then
-            XP:ApplyFont(f.SyncText, "small", "cyan_dark")
-        end
-        if f.ProgressPercent then
-            XP:ApplyFont(f.ProgressPercent, "small", "cyan_dark")
-        end
+        -- Progress bar
         if f.ProgressBar then
             local pbarTex = XP:SD("ProgressBarTextureFile")
             if pbarTex then
@@ -641,20 +610,9 @@ function XP:UpdateViewer()
     frame.StepNum:SetText("Step " .. activeStepNum .. " / " .. numSteps .. "  (" .. completedSteps .. " done)")
     frame.GuideName:SetText(guide.titleShort or guide.title)
 
-    -- Update progress — based on actually-completed steps, not position
-    local pct = guide:GetProgressPercent(activeStepNum)
-    frame.ProgressPercent:SetText(pct .. "%")
+    -- Update progress bar
     frame.ProgressBar:SetMinMaxValues(0, numSteps)
     frame.ProgressBar:SetValue(completedSteps)
-
-    -- Auto-sync indicator color
-    if self.db.profile.autoAdvance then
-        XP.SetTexColor(frame.SyncDot, XP:ColorRGBA("green"))
-        frame.SyncText:SetText("AUTO")
-    else
-        XP.SetTexColor(frame.SyncDot, XP:ColorRGBA("text_dim"))
-        frame.SyncText:SetText("MANUAL")
-    end
 
     -- Populate step lines
     local scrollChild = frame.ScrollChild
