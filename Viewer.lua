@@ -12,7 +12,7 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 local OK_CHAR = "\228\149\157"  -- UTF-8 checkmark
 local MAX_VISIBLE_STEPS = 8
-local STEP_LINE_HEIGHT  = 22
+local STEP_LINE_HEIGHT  = 50
 
 -----------------------------------------------------------------------
 -- Step Line Pool (reusable step line frames)
@@ -481,56 +481,52 @@ end
 -- DEBUG: PARAM parent = [parent]
 -- DEBUG: PARAM index = [index]
 local function CreateStepLine(parent, index)
-    local lineHeight = STEP_LINE_HEIGHT
-
     local line = XP.CreateBackdropFrame("Frame", nil, parent)
-    line:SetHeight(lineHeight)
-
-    -- Background (set by status: active, complete, upcoming)
+    line:SetHeight(STEP_LINE_HEIGHT)
     XP:ApplyBackdrop(line, "step", "step_upcoming", nil)
 
-    -- Left edge indicator (colored bar, 2px wide)
+    -- Left accent bar (3 px wide, full height)
     local edge = line:CreateTexture(nil, "ARTWORK")
-    edge:SetWidth(2)
-    edge:SetPoint("TOPLEFT", line, "TOPLEFT", 0, 0)
+    edge:SetWidth(3)
+    edge:SetPoint("TOPLEFT",    line, "TOPLEFT",    0, 0)
     edge:SetPoint("BOTTOMLEFT", line, "BOTTOMLEFT", 0, 0)
     XP.SetTexColor(edge, XP:ColorRGBA("cyan"))
     line.Edge = edge
 
-    -- Action icon (14×14, left-aligned; LEFT anchor inherently centers vertically)
+    -- Action icon (18×18, vertically centered, after the edge bar)
     local icon = line:CreateTexture(nil, "ARTWORK")
-    icon:SetSize(14, 14)
-    icon:SetPoint("LEFT", line, "LEFT", 6, 0)
+    icon:SetSize(18, 18)
+    icon:SetPoint("LEFT", line, "LEFT", 11, 0)
     line.Icon = icon
 
-    -- Step number badge (small circle with number, left of title)
+    -- "STEP N" label — small muted text, top-left of text block
     local stepNum = line:CreateFontString(nil, "OVERLAY")
-    stepNum:SetPoint("LEFT", icon, "RIGHT", 6, 0)
-    stepNum:SetWidth(16)
-    XP:ApplyFont(stepNum, "small", "text_dim")
-    stepNum:SetJustifyH("CENTER")
+    stepNum:SetPoint("TOPLEFT", line, "TOPLEFT", 37, -8)
+    stepNum:SetPoint("RIGHT",   line, "RIGHT",  -44, 0)
+    XP:ApplyFont(stepNum, "tiny", "text_dim")
+    stepNum:SetJustifyH("LEFT")
     line.StepNum2 = stepNum
 
-    -- Step title (single line, takes remaining space)
+    -- Step title — normal text below the step label
     local title = line:CreateFontString(nil, "OVERLAY")
-    title:SetPoint("LEFT", stepNum, "RIGHT", 4, 0)
-    title:SetPoint("RIGHT", line, "RIGHT", -40, 0)
+    title:SetPoint("TOPLEFT", stepNum, "BOTTOMLEFT", 0, -3)
+    title:SetPoint("RIGHT",   line,    "RIGHT",     -44, 0)
     title:SetJustifyH("LEFT")
-    title:SetJustifyV("MIDDLE")
-    title:SetNonSpaceWrap(false)
-    if title.SetMaxLines then title:SetMaxLines(1) end  -- not available in all WoW versions
+    title:SetJustifyV("TOP")
+    title:SetNonSpaceWrap(true)
+    if title.SetMaxLines then title:SetMaxLines(2) end
     XP:ApplyFont(title, "small", "text_bright")
     line.Title = title
 
-    -- Status indicator (right side — shows check or progress)
+    -- Status indicator — right side, vertically centered (RIGHT is mid-right, y=0 = center)
     local status = line:CreateFontString(nil, "OVERLAY")
-    status:SetPoint("RIGHT", line, "RIGHT", -6, 0)
+    status:SetPoint("RIGHT", line, "RIGHT", -8, 0)
     XP:ApplyFont(status, "small", "text_dim")
     line.Status = status
 
     line.stepIndex = index
 
-    -- Bottom separator (1px border between step lines)
+    -- 1 px separator at the bottom
     local sep = line:CreateTexture(nil, "ARTWORK")
     sep:SetHeight(1)
     sep:SetPoint("BOTTOMLEFT",  line, "BOTTOMLEFT",  0, 0)
@@ -539,7 +535,6 @@ local function CreateStepLine(parent, index)
     line.Sep = sep
 
     return line
--- DEBUG: EXIT CreateStepLine()
 end
 
 -----------------------------------------------------------------------
@@ -650,7 +645,7 @@ function XP:UpdateViewer()
 
         -- Set content
         line.Title:SetText(step:GetTitle())
-        line.StepNum2:SetText(i)
+        line.StepNum2:SetText("STEP " .. i)
 
         -- Set icon from step type — GetPrimaryIcon() returns Skins file names
         -- e.g. "accept_quest", "kill", "interact" → Skins/accept_quest.tga
@@ -695,7 +690,7 @@ function XP:UpdateViewer()
         end)
 
         line:Show()
-        yOffset = yOffset + STEP_LINE_HEIGHT + 2  -- 2px gap between lines
+        yOffset = yOffset + STEP_LINE_HEIGHT
     end
 
     -- Update scroll child height

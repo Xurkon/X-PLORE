@@ -1,0 +1,79 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+	<!-- Shadowlands -->
+		<!-- Exploration -->
+		<Script file="Adventurer_of_Ardenweald.lua"/>
+		<Script file="Adventurer_of_Bastion.lua"/>
+		<Script file="Adventurer_of_Maldraxxus.lua"/>
+		<Script file="Adventurer_of_Revendreth.lua"/>
+		<Script file="Explore_Ardenweald.lua"/>
+		<Script file="Explore_Bastion.lua"/>
+		<Script file="Explore_Maldraxxus.lua"/>
+		<Script file="Explore_Revendreth.lua"/>
+		<Script file="Explore_The_Maw.lua"/>
+		<Script file="Treasures_of_Ardenweald.lua"/>
+		<Script file="Treasures_of_Bastion.lua"/>
+		<Script file="Treasures_of_Maldraxxus.lua"/>
+		<Script file="Treasures_of_Revendreth.lua"/>
+		<Script file="Shard_Labor.lua"/>
+		<Script file="Rallying_Cry_of_the_Ascended.lua"/>
+		<Script file="Hunting_Party.lua"/>
+		<Script file="Bat.lua"/>
+		<Script file="Fractured_Faerie_Tales.lua"/>
+		<Script file="Nine_Afterlives.lua"/>
+		<Script file="Ardenweald_Gourmand.lua"/>
+		<Script file="Ardenwealds_a_Stage.lua"/>
+		<Script file="Best_Bud_With_Benifits.lua"/>
+		<Script file="Bloodsport.lua"/>
+		<Script file="Count_Your_Blessings.lua"/>
+		<Script file="Crypt_Kicker.lua"/>
+		<Script file="Its_About_Sending_a_Message.lua"/>
+		<Script file="The_Afterlife_Express.lua"/>
+		<Script file="Toss_a_Seed_to_Your_Hunter.lua"/>
+		<Script file="What_is_That_Melody.lua"/>
+		<Script file="What_We_Ride_in_the_Shadows.lua"/>
+		<Script file="Wild_Hunting.lua"/>
+		<Script file="Loyal_Gorger.lua"/>
+		<Script file="Marasmius_Rep.lua"/>
+		<Script file="NightFae_Soulshapes.lua"/>
+		<Script file="Harvester_of_Sorrow.lua"/>
+
+		<!-- Quests -->
+		<Script file="Sojourner_of_Ardenweald.lua"/>
+		<Script file="Sojourner_of_Bastion.lua"/>
+		<Script file="Sojourner_of_Maldraxxus.lua"/>
+		<Script file="Sojourner_of_Revendreth.lua"/>
+		<Script file="Loremaster_of_Shadowlands.lua"/>
+		<Script file="Glimr.lua"/>
+		<Script file="Torghast.lua"/>
+		<Script file="Return_to_Lordaeron.lua"/>
+
+		<!-- Feats of Strength -->
+		<Script file="Dark_Iron_Dwarf_Heritage_Questline.lua"/>
+		<Script file="Blood_Elf_Heritage_Questline.lua"/>
+	
+	<!-- Korthia -->
+		<!-- Exploration -->
+		<Script file="Explore_Korthia.lua"/>
+	<Script file="Chains_of_Domination.lua"/>
+	<Script file="Archivists_of_Korthia_They_Could_Be_Anyone.lua"/>
+	
+	<!-- Zereth Mortis -->
+		<!-- Exploration -->
+		<Script file="Unlocking_the_Secrets.lua"/>
+		<Script file="Explore_Zereth_Mortis.lua"/>
+		<Script file="Tales_of_the_Exile.lua"/>
+		<Script file="Curious_Collections.lua"/>
+		<Script file="Adventures_in_Zereth_Mortis.lua"/>
+		<Script file="Deepstar_Polyp.lua"/>
+
+		<!-- Quests -->
+		<Script file="The_Burrowed_Bufonid.lua"/>
+		<Script file="Tazavesh_The_Veiled_Market.lua"/>
+		<Script file="Jiro_to_Hero.lua"/>
+	<Script file="Path_to_Enlightenment.lua"/>
+	<Script file="Eternitys_End.lua"/>
+	
+		<!-- Leveling -->
+	
+</Ui>

@@ -4,6 +4,48 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Viewer Parity, Tab Menu, Step Cards
+
+### Summary
+
+Fixed the Starlight skin logo override bug, implemented the full EasyFork tab context menu, fixed X-button flicker on tabs, and redesigned step lines as 50px cards with two-line layout.
+
+### Bug Fixes
+
+#### Skins/Default/Starlight/Style.lua — zygorlogo override at end of file
+
+- Lines 338-339 were overriding the correct `logo2` path (set at lines 40-41) back to `zygorlogo`, causing the Zygor logo to appear in the viewer title bar
+- Fixed: `STYLE.TitleLogo = SKINSDIR .. "logo2"` and `STYLE.TitleLogoSize = {120, 24}` now at both locations
+
+#### UiWidgets/DropDownFork.lua — full custom popup menu implementation
+
+- Was a 4-line stub (`-- TODO: Implement`), causing `EasyFork` nil crash in Tabs.lua
+- Implemented globals: `DropDownForkList1`, `UIDropDownFork_separatorInfo`, `UIDropDownFork_SetAnchor()`, `EasyFork()`, `CloseDropDownForks()`
+- Uses `XP.CreateBackdropFrame()` (Compat-safe for all WoW versions)
+- Uses `XP.SetTexColor()` instead of `SetColorTexture` (WotLK compat)
+- Popup auto-closes on click outside via full-screen catcher frame
+- Supports: separator rows, section-title rows, clickable rows with hover highlight
+
+#### Tabs.lua — `UIDropDownForkTemplate` invalid template crash
+
+- Line 161: `CreateFrame(..., "UIDropDownForkTemplate")` used a template that doesn't exist in WoW → frame created without expected sub-elements
+- Fixed: removed template arg: `CreateFrame("Frame", "XPlore_TabMenuFrame", Tabs.container)`
+
+#### Tabs.lua — X close button flicker on tab hover
+
+- Moving mouse from tab body to close button triggered `OnLeave` on the tab → `HideInteraction()` hid the close button → mouse no longer over it → `OnEnter` re-triggered → loop
+- Fixed: `HideInteraction()` now returns early if `self.Button:IsMouseOver()` is still true (mouse still within the tab's bounding rect, including the close button child)
+
+#### Viewer.lua — step lines redesigned as 50px cards
+
+- `STEP_LINE_HEIGHT` changed from `22` to `50`
+- `CreateStepLine()` redesigned: 3px left edge bar, 18×18 icon, two-line text block (`STEP N` header + step title), status on right
+- `StepNum2` now displays `"STEP " .. i` (was just the bare number)
+- `yOffset` no longer adds an extra `+2` gap (separator is included in 50px height)
+- "VCENTER" anchor corrected to "CENTER" (invalid point name in WoW)
+
+---
+
 ## [Unreleased] — Viewer Title Logo + Footer Cleanup (2026-05-06)
 
 ### Summary

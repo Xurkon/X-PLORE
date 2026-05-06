@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	
+	<Script file="71_80_The_Rookery.lua"/>
+	<Script file="73_80_The_Stonevault.lua"/>
+	<Script file="75_80_Priory_Sacred_Flame.lua"/>
+	<Script file="77_80_Ara-kara_City_of_Echoes.lua"/>
+	<Script file="80_Cinderbrew_Meadery.lua"/>
+	<Script file="80_City_of_Threads.lua"/>
+	<Script file="80_Darkflame_Cleft.lua"/>
+	<Script file="80_The_Dawnbreaker.lua"/>
+	<Script file="80_Operation_Floodgate.lua"/>
+
+</Ui>

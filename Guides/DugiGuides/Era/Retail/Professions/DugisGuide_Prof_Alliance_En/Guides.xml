@@ -1,0 +1,36 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+    <Script file="1_300_Alchemy.lua"/>
+    <Script file="1_300_Blacksmithing.lua"/>
+    <Script file="1_300_Cooking.lua"/>
+    <Script file="1_300_Cooking_Fishing.lua"/>
+    <Script file="1_300_Enchanting.lua"/>
+    <Script file="1_300_Engineering.lua"/>
+    <Script file="1_300_First_Aid.lua"/>
+    <Script file="1_300_Fishing.lua"/>
+    <Script file="1_300_Herbalism.lua"/>
+    <Script file="1_300_Leatherworking.lua"/>
+    <Script file="1_300_Lockpicking.lua"/>
+    <Script file="1_300_Mining.lua"/>
+    <Script file="1_300_Skinning.lua"/>
+    <Script file="1_300_Tailoring.lua"/>
+	
+	<!--Blacksmithing-->
+    <Script file="Blacksmithing\Armorsmith.lua"/>
+	<Script file="Blacksmithing\Weaponsmith.lua"/>
+	<Script file="Blacksmithing\Master_Axesmith.lua"/>
+	<Script file="Blacksmithing\Master_Hammersmith.lua"/>
+	<Script file="Blacksmithing\Master_Swordsmith.lua"/>
+	<Script file="Blacksmithing\How_To_Change_Blacksmithing_Spec.lua"/>
+	<!--Engineering-->
+	<Script file="Engineering\Gnome_Engineering.lua"/>
+	<Script file="Engineering\Gnome_Engineer_Membership_Card_Renewal.lua"/>
+	<Script file="Engineering\Goblin_Engineering.lua"/>
+	<Script file="Engineering\Goblin_Engineer_Membership_Card_Renewal.lua"/>
+	<Script file="Engineering\How_To_Change_Engineering_Spec.lua"/>
+	<!--Leatherworking-->
+	<Script file="Leatherworking\Dragonscale_Leatherworking.lua"/>
+	<Script file="Leatherworking\Elemental_Leatherworking.lua"/>
+	<Script file="Leatherworking\Tribal_Leatherworking.lua"/>	
+
+</Ui>

@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	
+	<Script file="50-60_The_Necrotic_Wake.lua"/>
+	<Script file="50-60_Plaguefall.lua"/>
+	<Script file="50-60_Mists_of_Tirna_Scithe.lua"/>
+	<Script file="50-60_Halls_of_Atonement.lua"/>
+	<Script file="60_De_Other_Side.lua"/>
+	<Script file="60_Sanguine_Depths.lua"/>
+	<Script file="60_Spires_of_Ascension.lua"/>
+	<Script file="60_Theater_of_Pain.lua"/>
+	<Script file="60_Tazavesh_Attunement.lua"/>
+
+</Ui>

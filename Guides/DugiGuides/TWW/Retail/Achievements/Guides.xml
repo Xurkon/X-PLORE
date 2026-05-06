@@ -1,0 +1,38 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+	<!-- TWW -->
+		<!-- Feats -->
+			<Script file="Allied_Races_Earthen.lua"/>
+			<Script file="Allied_Races_VoidElf_Demon.lua"/>
+			
+		<!-- Reputation -->
+			<Script file="Assembly_of_Deeps_Rep.lua"/>
+			<Script file="Cartels_of_Undermine_Rep.lua"/>
+			<Script file="Council_of_Dornogal_Rep.lua"/>
+			<Script file="Flames_Radiance_Rep.lua"/>
+			<Script file="Hallowfall_Arathi_Rep.lua"/>
+			<Script file="Severed_Threads_Rep.lua"/>
+			<Script file="The_General_Rep.lua"/>
+			<Script file="The_Vizier_Rep.lua"/>
+			<Script file="The_Weaver_Rep.lua"/>
+			
+		<!-- Exploration -->
+			<Script file="Explore_the_Isle_of_Dorn.lua"/>
+			<Script file="Explore_The_Raging_Deeps.lua"/>
+			<Script file="Explore_Hallowfall.lua"/>
+			<Script file="Explore_Azj-Kahet.lua"/>
+			<Script file="Lorewalking.lua"/>
+			
+		<!-- Feats -->
+			<Script file="Glyph_Hunter_Azj-Kahet.lua"/>
+			<Script file="Glyph_Hunter_Hallowfall.lua"/>
+			<Script file="Glyph_Hunter_Isle_of_Dorn.lua"/>
+			<Script file="Glyph_Hunter_The_Ringing_Deeps.lua"/>
+			
+			<Script file="Undermine_Campaign_80.lua"/>
+			<Script file="Undermine_Weekly_80.lua"/>
+			<Script file="Karesh_Campaign_80.lua"/>
+			<Script file="Ready_For_Midnight_Campaign_80.lua"/>
+			<Script file="Cult_Within.lua"/>
+			
+</Ui>

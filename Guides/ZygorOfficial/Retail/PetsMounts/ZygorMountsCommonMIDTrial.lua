@@ -1,0 +1,25 @@
+local ZygorGuidesViewer=ZygorGuidesViewer
+if not ZygorGuidesViewer then return end
+if ZGV:DoMutex("MountsCMID") then return end
+ZygorGuidesViewer.GuideMenuTier = "TRI"
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Trading Post Mounts\\Arboreal Pseudoshell")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Vendor Mounts\\Amani Blessed Bear")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Dropped Mounts\\Ancestral War Bear")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Vendor Mounts\\Blessed Amani Burrower")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Trading Post Mounts\\Cabbage Pseudoshell")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Dropped Mounts\\Cerulean Hawkstrider")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Vendor Mounts\\Fierce Grimlynx")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Dropped Mounts\\Rootstalker Grimlynx")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Dropped Mounts\\Untainted Grove Crawler")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Ground Mounts\\Achievement Mounts\\Vivacious Chloroceros")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Vendor Mounts\\Amani Sunfeather")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Vendor Mounts\\Amani Windcaller")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Vendor Mounts\\Cerulean Sporeglider")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Trading Post Mounts\\Comfy Bel'ameth Flying Quilt")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Trading Post Mounts\\Comfy Silvermoon Flying Quilt")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Dropped Mounts\\Ruddy Sporeglider")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Promotion Mounts\\Scorching Valor")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Achievement Mounts\\Tenebrous Harrower")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Dropped Mounts\\Vibrant Petalwing")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Flying Mounts\\Trading Post Mounts\\Vicious Snapvine")
+ZygorGuidesViewer:RegisterGuidePlaceholder("Pets & Mounts\\Mounts\\Aquatic Mounts\\Trading Post Mounts\\Savage Crimson Battle Turtle")

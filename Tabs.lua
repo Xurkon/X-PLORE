@@ -158,7 +158,7 @@ function XP:InitTabs()
     Tabs:ReanchorTabs()
 
     -- Create tab menu dropdown frame (like XP's Tabs.TabMenuFrame)
-    local tabMenuFrame = CreateFrame("Frame", "XPlore_TabMenuFrame", Tabs.container, "UIDropDownForkTemplate")
+    local tabMenuFrame = CreateFrame("Frame", "XPlore_TabMenuFrame", Tabs.container)
     tabMenuFrame:SetPoint("LEFT", Tabs.container, "LEFT", 100, 0)  -- Will be repositioned when shown
     tabMenuFrame:Hide()
     Tabs.TabMenuFrame = tabMenuFrame
@@ -532,6 +532,10 @@ end
 
 -- DEBUG: ENTER Tabs:HideInteraction()
 function Tabs:HideInteraction()
+    -- Guard: if mouse is still over the button area (e.g. hovering the close btn child),
+    -- keep everything visible to prevent the X flickering when moving onto it.
+    if self.Button and self.Button:IsMouseOver() then return end
+
     if self.CloseBtn then
         self.CloseBtn:Hide()
     end

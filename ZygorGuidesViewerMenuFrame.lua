@@ -1,3 +1,0 @@
--- XPViewerMenuFrame.lua
--- Menu frame stub
--- TODO: Implement

@@ -1,0 +1,11 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="Lunar_Festival_Quest.lua"/>
+	<Script file="Lunar_Festival_Elders_A.lua"/>
+	<Script file="Lunar_Festival_Elders_H.lua"/>
+	<Script file="Childrens_Week_A.lua"/>
+	<Script file="Childrens_Week_H.lua"/>		
+	<Script file="Midsummer_A.lua"/>		
+	<Script file="Midsummer_H.lua"/>		
+	<Script file="WinterVeil_Quests_A.lua"/>
+	<Script file="WinterVeil_Quests_H.lua"/>
+</Ui>

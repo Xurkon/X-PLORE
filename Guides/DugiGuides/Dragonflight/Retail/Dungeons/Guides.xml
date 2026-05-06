@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	
+	<Script file="60_70_Ruby_Life_Pools.lua"/>
+	<Script file="60_70_The_Nokhud_Offensive.lua"/>
+	<Script file="60_70_Brackenhide_Hollow.lua"/>
+	<Script file="60_70_Halls_of_Infusion.lua"/>
+	<Script file="60_70_Algethar_Academy.lua"/>
+	<Script file="60_70_Neltharus.lua"/>
+	<Script file="60_70_The_Azure_Vault.lua"/>
+	<Script file="60_70_Uldaman_Legacy_of_Tyr.lua"/>
+
+</Ui>

@@ -335,8 +335,8 @@ STYLE.GuideMenuFeaturedDropdownBackdropColor = {0, 0, 0, 1}
 STYLE.GuideMenuFeaturedDropdownBackdropBorderColor = {1, 1, 1, 1}
 STYLE.GuideMenuTinyMargin = 0
 
-STYLE.TitleLogo = STYLEDIR .. "zygorlogo"
-STYLE.TitleLogoSize = {100, 25}
+STYLE.TitleLogo = SKINSDIR .. "logo2"
+STYLE.TitleLogoSize = {120, 24}
 
 STYLE.TransparencyPrimary = 1
 STYLE.TransparencySecondary = 1

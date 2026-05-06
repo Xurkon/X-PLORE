@@ -1,0 +1,17 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">	
+
+	<Script file="Kalimdor_Vendor_Run_A.lua"/>
+	<Script file="Eastern_Kingdom_Vendor_Run_A.lua"/>
+	
+	<Script file="Darnassus_Vendor_A.lua"/>
+	<Script file="Ironforge_Vendor_A.lua"/>
+	<Script file="Stormwind_Vendor_A.lua"/>	
+	
+	<Script file="Eastern_Kingdom_Vendor_Run_H.lua"/>
+	<Script file="Kalimdor_Vendor_Run_H.lua"/>
+	<Script file="Orgrimmar_Vendor_H.lua"/>	
+	<Script file="Thunder_Bluff_Vendor_H.lua"/>
+	<Script file="Undercity_Vendor_H.lua"/>
+
+
+</Ui>
