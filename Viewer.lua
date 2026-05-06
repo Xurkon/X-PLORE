@@ -147,10 +147,14 @@ function XP:CreateViewerFrame()
     local tabY = -(self:Size("titlebar_height") + 1)
     tabContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, tabY)
     tabContainer:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, tabY)
+    -- Apply TabBackdrop style for styled borders (Midnight etc.)
+    self:ApplyBackdrop(tabContainer, "tab", nil, nil)
 
     frame.TabBg = tabContainer:CreateTexture(nil, "BACKGROUND")
     frame.TabBg:SetAllPoints()
-    local tabContainerBgColor = XP:SD("TabsContainerBackdropInactive") or XP:Color("bg_medium")
+    -- Use TabsContainerBackdropInactive (per-style) with TabBackdropColor fallback
+    local tabBgFallback = XP:SD("TabBackdropColor")
+    local tabContainerBgColor = XP:SD("TabsContainerBackdropInactive") or (tabBgFallback and {tabBgFallback[1], tabBgFallback[2], tabBgFallback[3], tabBgFallback[4]}) or XP:Color("bg_medium")
     XP.SetTexColor(frame.TabBg, tabContainerBgColor[1], tabContainerBgColor[2], tabContainerBgColor[3], tabContainerBgColor[4] or 1)
 
 
@@ -394,9 +398,13 @@ function XP:CreateViewerFrame()
             f:SetBackdropBorderColor(XP:ColorRGBA("border"))
         end
 
-        -- Tab bar background (texture, not frame — use SetTexColor)
+        -- Tab bar: apply TabBackdrop style borders, then TabsContainerBackdropInactive color
+        if f.TabContainer then
+            XP:ApplyBackdrop(f.TabContainer, "tab", nil, nil)
+        end
         if f.TabBg then
-            local tabBgColor = XP:SD("TabsContainerBackdropInactive") or XP:Color("bg_medium")
+            local tabBgFallback = XP:SD("TabBackdropColor")
+            local tabBgColor = XP:SD("TabsContainerBackdropInactive") or (tabBgFallback and {tabBgFallback[1], tabBgFallback[2], tabBgFallback[3], tabBgFallback[4]}) or XP:Color("bg_medium")
             XP.SetTexColor(f.TabBg, tabBgColor[1], tabBgColor[2], tabBgColor[3], tabBgColor[4] or 1)
         end
 
@@ -668,11 +676,11 @@ function XP:UpdateViewer()
             line.Status:SetText(OK_CHAR)
             line.Status:SetTextColor(XP:ColorRGBA("green"))
         elseif state == "active" then
-            -- Active step (highlighted) — first non-complete step
+            -- Active step (highlighted) — first non-complete step, dark-red edge bar
             self:ApplyBackdrop(line, "step", "step_active", nil)
-            XP.SetTexColor(line.Edge, XP:ColorRGBA("cyan"))
+            XP.SetTexColor(line.Edge, XP:ColorRGBA("red_dark"))
             line.Title:SetTextColor(XP:ColorRGBA("text_bright"))
-            line.StepNum2:SetTextColor(XP:ColorRGBA("cyan"))
+            line.StepNum2:SetTextColor(XP:ColorRGBA("red_dark"))
             line.Status:SetText("")
         else
             -- Skipped or Upcoming — not yet reached or was missed

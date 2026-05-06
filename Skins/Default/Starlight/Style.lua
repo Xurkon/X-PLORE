@@ -88,11 +88,10 @@ STYLE.StepBorderBackdrop = SolidBackdrop(STYLEDIR .. "border-glow", 4, 0)
 STYLE.StepBackdropColor = HTML("#202020FF")
 STYLE.StepBackdropBorderColor = HTML("#202020FF")
 STYLE.StepBackdropPersistentBorder = true
--- All step states use the same dark background (XP-matching).
--- State is indicated by edge bar/text color only, not background color.
-STYLE.StepActiveColor   = HTML("#202020FF")
+-- Active step: slightly lighter bg to distinguish from upcoming/complete
+STYLE.StepActiveColor   = HTML("#2E2E2EFF")
 STYLE.StepCompleteColor = HTML("#1A2B1AFF")
-STYLE.StepUpcomingColor = HTML("#202020FF")
+STYLE.StepUpcomingColor = HTML("#1C1C1CFF")
 STYLE.StepPaddingTop = 0
 STYLE.StepPaddingBottom = 0
 STYLE.StepPaddingWidth = 0

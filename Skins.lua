@@ -273,6 +273,7 @@ local function InitColors(style)
         green = HTML("#00CC01FF"),
         red = HTML("#FF3300FF"),
         red_light = HTML("#FF8080FF"),
+        red_dark = HTML("#8B0000FF"),
         yellow = HTML("#FFD000FF"),
         orange = style.AccentColor or HTML("#FE6100FF"),
         text_bright = {1, 1, 1, 1},
