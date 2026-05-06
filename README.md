@@ -66,6 +66,10 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
+#### 🔄 Recently Completed — DugisGuideViewer Protected Proxy
+
+**DugisGuideViewer shim hardened** (`332c826`): Fixed 50+ `GetCreateTable nil` errors and silent shim corruption caused by DugiGuides infrastructure files. `DugisGuideViewer` is now an empty proxy table backed by a private `_dgv` data table. `__newindex` silently blocks writes to `RegisterGuide` and `RegisterModule` so `Modules.common.lua`'s `PlaceUtilityStubs()` cannot overwrite them with no-ops. `RegisterModule` now returns a **MakeModule proxy** that intercepts the assignment of `Initialize` via `__newindex` and immediately calls it, then auto-calls `Load()` — matching the DugiGuides module lifecycle without needing the DugiGuides core. Also added `NoOp` and `GetCreateTable` (pool factory) stubs.
+
 #### 🔄 Recently Completed — Guide Load Error Fixes
 
 **ZGV shim completed + DugiGuides compat stubs** (`33ade5c`): Fixed 8 runtime load errors across ZygorOfficial, DugiGuides, and RXP guide sources. (1) Six missing ZGV sub-namespace fields added to shim: `IMAGESDIR`, `BETASTART`, `InPhase`, `NoOp`, `Gold`, `Poi` — unblocks Gold/Gathering/POI/Starter guide files. (2) `LuaUtils` and `DugisLocals` global stubs added in `GuidesCompat.lua` for legacy DugiGuides module files. (3) Two truncated DugiGuides files (`Keymaster_A.lua`, `Keymaster_H.lua`) had missing `end` statements appended. (4) `20th_Anniversary_Daily_Weekly.lua` unclosed `[[` long string fixed.
