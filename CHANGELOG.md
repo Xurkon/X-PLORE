@@ -4,6 +4,84 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — All 15 Tier Items Complete (2026-05-06)
+
+### Summary
+Completed all remaining implementation items from the 4-tier todo list. Cloudflare worker redeployed. All 15 items shipped across Viewer, Guide, Skins, Waypoints, Core, GuideMenu, and Foglight systems.
+
+### Changes
+
+#### Core Fixes
+- **Skins/Default/tabs.lua** — `STANDARD_TEXT_FONT` → `GameFontNormal:GetFont()` (WoW global unavailable in Classic/WotLK)
+
+#### Guide.lua — Step Conditional Logic
+- Added `|or|`, `|confirm|`, `|override|`, `|only|` parsing to Step:IsComplete()
+- Added `Step:AreRequirementsMet()` for class/race/level checks
+- Added `Step:ParseCondition()` for parsing condition modifiers
+- Modified Parser.lua to expose `MakeCondition` globally
+
+#### Core.lua — C_QuestLog Event Wiring
+- On QUEST_COMPLETE, QUEST_ACCEPTED, QUEST_TURNED_IN events: scan current step goals, update completion state
+- `XP:SaveGoalState()`, `XP:LoadGoalState()`, `XP:ClearGoalState()` for persistent goal tracking
+- Featured guide loading on PLAYER_LOGIN: checks `XP.db.profile.featuredGuide`, restores `XP.db.char.currentGuide`
+- Foglight reveal wired to NextStep/PrevStep/LoadGuide: `FoglightHideStep(prevStep)` + `FoglightRevealStep(newStep)`
+
+#### Skins.lua — Runtime Skin Switching
+- `XP:GetSkin()` now returns activeSkin when called with no argument
+- `XP:SetSkin(name)` already implemented (confirmed functional)
+
+#### Pointer.lua (NEW FILE)
+- Unified waypoint coordinator
+- Integrates TomTom when available; falls back to arrow mode
+- `XP.Pointer.AddWaypoint()`, `XP.Pointer.ClearWaypoints()`, `XP.Pointer.SetWaypoint()`
+
+#### Arrows/Arrows.lua (IMPLEMENTED)
+- Arrow skinning system with 64-sprite directional support
+- `GetAvailableSkins()`, `ApplySkin()`, `ClearSkin()`, `RotateArrow()`
+- Created Arrows/Arrows.xml
+
+#### Waypoints.lua — TomTom Integration
+- `XP.TomTom.enabled` flag for availability detection
+- `XP:InitTomTom()`, `XP:IsTomTomEnabled()`, `XP:SetTomTomWaypoint()`, `XP:AddTomTomWaypoint()`, `XP:ClearTomTomWaypoints()`
+
+#### ActionBar.lua — Quest Item Highlighting
+- Highlights action bar slots for collect/use/equip goals with itemID
+- Clears highlights on step change
+
+#### Viewer.lua — Guide Info Bar
+- New 28px info bar between title and tabs
+- Shows guide name (left), level range (center), active step name (right)
+- `XP:UpdateInfoBar()` wired to guide load flow
+
+#### GuideMenu.lua — Faction Filtering
+- Faction filter buttons: All | Alliance | Horde
+- `XP:GetPlayerFaction()` using `UnitFactionGroup("player")`
+- `XP:GuidePassesFactionFilter()` — NEUTRAL/ALL guides show for both factions
+- Faction badges on guide rows (Alliance=INV_BannerPVP_01, Horde=INV_BannerPVP_02)
+
+#### Foglight.lua — Fog of War Reveal (IMPLEMENTED)
+- `XP:FoglightReveal(mapID)` → `ShowArea(mapID)`
+- `XP:FoglightHide(mapID)` → `HideArea(mapID)`
+- `XP:FoglightRevealStep(step)`, `XP:FoglightHideStep(step)`
+- Wired into NextStep/PrevStep/LoadGuide in Core.lua
+
+#### GuideMenu-View.lua — View Separation (REFACTOR)
+- Moved 5 view-building functions from GuideMenu.lua:
+  - `XP:CreateHomeView` → `XP.GuideMenuView:RenderHome`
+  - `XP:CreateFeaturedView` → `XP.GuideMenuView:RenderFeatured`
+  - `XP:PopulateFeaturedView` → `XP.GuideMenuView:PopulateFeatured`
+  - `XP:CreateDetailPanel` → `XP.GuideMenuView:RenderDetailPanel`
+  - `XP:PopulateGuideList` → `XP.GuideMenuView:PopulateGuideList`
+- GuideMenu.lua now uses thin controller delegates
+
+### Files Changed
+- Tabs.lua, Guide.lua, Parser.lua, Core.lua, Skins.lua, Pointer.lua, Arrows/Arrows.lua, Arrows/Arrows.xml, Waypoints.lua, ActionBar.lua, Viewer.lua, GuideMenu.lua, Foglight.lua, GuideMenu-View.lua
+
+### Commits (14 new)
+4375bee, a130554, 401fa9b, 455c8f6, 7966b38, c19a47a, bfd0c69, 3cab3fa, 620c36d, 314cfa1, 1b56ac4, ac40a34, + Core.lua foglight patch, Foglight.lua
+
+---
+
 ## [Unreleased] — Viewer Parity, Tab Menu, Step Cards
 
 ### Summary

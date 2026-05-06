@@ -304,6 +304,12 @@ function XP:LoadGuide(guideID)
         XP.GoalTracker:OnStepChanged(guide, self.CurrentStep)
     end
 
+    -- Foglight: reveal initial step
+    local firstStep = self.CurrentGuide:GetStep(self.CurrentStep)
+    if firstStep then
+        self:FoglightRevealStep(firstStep)
+    end
+
     -- Update UI
     self:UpdateViewer()
 
@@ -318,8 +324,19 @@ function XP:NextStep()
     local numSteps = self.CurrentGuide.numSteps or #self.CurrentGuide.steps
     if self.CurrentStep >= numSteps then return end
 
+    local prevStep = self.CurrentGuide:GetStep(self.CurrentStep)
+
     self.CurrentStep = self.CurrentStep + 1
     self.db.char.currentStep = self.CurrentStep
+
+    -- Foglight: hide previous step, reveal new step
+    if prevStep then
+        self:FoglightHideStep(prevStep)
+    end
+    local newStep = self.CurrentGuide:GetStep(self.CurrentStep)
+    if newStep then
+        self:FoglightRevealStep(newStep)
+    end
 
     -- Notify GoalTracker
     if XP.GoalTracker then
@@ -345,8 +362,20 @@ end
 -- DEBUG: ENTER XP:PrevStep()
 function XP:PrevStep()
     if not self.CurrentGuide or self.CurrentStep <= 1 then return end
+
+    local prevStep = self.CurrentGuide:GetStep(self.CurrentStep)
+
     self.CurrentStep = self.CurrentStep - 1
     self.db.char.currentStep = self.CurrentStep
+
+    -- Foglight: hide previously-active step, reveal new step
+    if prevStep then
+        self:FoglightHideStep(prevStep)
+    end
+    local newStep = self.CurrentGuide:GetStep(self.CurrentStep)
+    if newStep then
+        self:FoglightRevealStep(newStep)
+    end
 
     -- Notify GoalTracker
     if XP.GoalTracker then
