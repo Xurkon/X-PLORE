@@ -25,6 +25,7 @@ local guideListData   = {}         -- filtered list for display
 local guideRows       = {}         -- reusable row frames
 local categoryButtons = {}         -- sidebar category buttons
 local MAX_GUIDE_ROWS  = 100
+local factionFilter   = "ALL"      -- "ALL", "ALLIANCE", or "HORDE"
 
 -- Resolve icon name to full texture path (local or WoW built-in).
 -- DEBUG: ENTER ResolveIconPath()
@@ -379,6 +380,45 @@ function XP:CreateGuideMenu()
     self:ApplyFont(guideCount, "small", "text_dim")
     guideCount:SetText("")
     frame.GuideCount = guideCount
+
+    -- Faction filter buttons (All | Alliance | Horde) — anchored to the right of guideCount
+    local filterContainer = CreateFrame("Frame", nil, sectionHeader)
+    filterContainer:SetHeight(18)
+    filterContainer:SetPoint("RIGHT", guideCount, "LEFT", -8, 0)
+    filterContainer:SetPoint("TOP", sectionHeader, "TOP", 0, 2)
+    filterContainer:Hide()  -- shown only in category/folder views
+    frame.FactionFilterContainer = filterContainer
+
+    local function MakeFilterBtn(name, label)
+        local btn = CreateFrame("Button", nil, filterContainer)
+        btn:SetSize(50, 18)
+        btn:SetNormalFontObject(GameFontNormalSmall)
+        btn:SetText(label)
+        btn:GetFontString():SetTextColor(XP:ColorRGBA("text_dim"))
+        btn:SetScript("OnClick", function()
+            XP:MenuSetFactionFilter(name)
+        end)
+        btn:SetScript("OnEnter", function(btn_)
+            btn_:GetFontString():SetTextColor(XP:ColorRGBA("cyan_light"))
+        end)
+        btn:SetScript("OnLeave", function(btn_)
+            local activeFilter = XP.GetFactionFilter and XP:GetFactionFilter() or "ALL"
+            if name ~= activeFilter then
+                btn_:GetFontString():SetTextColor(XP:ColorRGBA("text_dim"))
+            end
+        end)
+        return btn
+    end
+
+    local btnAll = MakeFilterBtn("ALL", "All")
+    btnAll:SetPoint("RIGHT", filterContainer, "RIGHT", 0, 0)
+    local btnAlliance = MakeFilterBtn("ALLIANCE", "Alliance")
+    btnAlliance:SetPoint("RIGHT", btnAll, "LEFT", -2, 0)
+    local btnHorde = MakeFilterBtn("HORDE", "Horde")
+    btnHorde:SetPoint("RIGHT", btnAlliance, "LEFT", -2, 0)
+    filterContainer.BtnAll = btnAll
+    filterContainer.BtnAlliance = btnAlliance
+    filterContainer.BtnHorde = btnHorde
 
     -- Section divider
     local sectionDiv = centerCol:CreateTexture(nil, "ARTWORK")
@@ -923,6 +963,13 @@ function XP:CreateGuideRows(parent)
         div:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 0, 0)
         div:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", 0, 0)
         XP.SetTexColor(div, XP:ColorRGBA("border_dim"))
+
+        -- Faction badge (top-right corner, shown when guide has a specific faction)
+        local factionBadge = row:CreateTexture(nil, "OVERLAY")
+        factionBadge:SetSize(14, 14)
+        factionBadge:SetPoint("TOPRIGHT", row, "TOPRIGHT", -8, -3)
+        factionBadge:Hide()
+        row.FactionBadge = factionBadge
 
         guideRows[i] = row
     end
@@ -3387,43 +3434,72 @@ function XP:PopulateFolderList(folders, bareGuides)
     -- Bare guides (no parent folder) listed after all folder rows
     for _, guide in ipairs(bareGuides or {}) do
         if rowIdx > MAX_GUIDE_ROWS then break end
-        local row = guideRows[rowIdx]
-        if not row then break end
 
-        row:ClearAllPoints()
-        row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
-        row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
-
-        local cat = self:GetCategory(guide.category)
-        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
-        row.Icon:SetTexture(iconPath)
-        row.Icon:SetTexCoord(l, r, t, b)
-        row.Icon:SetVertexColor(1, 1, 1, 1)
-
-        row.isFolder = false
-        row.guide    = guide
-        row.Title:SetText(guide.title or guide.titleShort or "Untitled")
-        self:ApplyFont(row.Title, "normal", "text_bright")
-
-        if row.LoadBtn then
-            row.LoadBtn:Hide()
-            row.LoadBtn:GetFontString():SetText("Load")
-            row.LoadBtn:SetScript("OnClick", function()
-                XP.Tabs:LoadGuideToTab(guide.id)
-                if XP.MenuFrame then XP.MenuFrame:Hide() end
-                if XP.ViewerFrame then XP.ViewerFrame:Show() end
-            end)
+        -- Faction filter: skip guides that don't match
+        if not self:GuidePassesFactionFilter(guide) then
+            -- still iterate but don't show
         end
-        if row.FavBtn then row.FavBtn:Hide() end
-        row:SetScript("OnClick", function() XP:ShowGuideDetail(guide.id) end)
 
-        row:Show()
-        yOffset = yOffset + rowHeight + 1
-        rowIdx  = rowIdx + 1
+        local showGuide = self:GuidePassesFactionFilter(guide)
+        if not showGuide then
+            -- iterate rowIdx but hide the row
+            rowIdx = rowIdx + 1
+        else
+            local row = guideRows[rowIdx]
+            if not row then break end
+
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
+            row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
+
+            local cat = self:GetCategory(guide.category)
+            local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+            row.Icon:SetTexture(iconPath)
+            row.Icon:SetTexCoord(l, r, t, b)
+            row.Icon:SetVertexColor(1, 1, 1, 1)
+
+            row.isFolder = false
+            row.guide    = guide
+            row.Title:SetText(guide.title or guide.titleShort or "Untitled")
+            self:ApplyFont(row.Title, "normal", "text_bright")
+
+            -- Faction badge
+            local badge = row.FactionBadge
+            if badge then
+                local gf = (guide.faction or ""):upper()
+                if gf == "ALLIANCE" then
+                    badge:SetTexture("Interface\\Icons\\INV_BannerPVP_01")
+                    badge:SetVertexColor(0.2, 0.4, 1.0, 1.0)
+                    badge:Show()
+                elseif gf == "HORDE" then
+                    badge:SetTexture("Interface\\Icons\\INV_BannerPVP_02")
+                    badge:SetVertexColor(0.9, 0.2, 0.2, 1.0)
+                    badge:Show()
+                else
+                    badge:Hide()
+                end
+            end
+
+            if row.LoadBtn then
+                row.LoadBtn:Show()
+                row.LoadBtn:GetFontString():SetText("Load")
+                row.LoadBtn:SetScript("OnClick", function()
+                    XP.Tabs:LoadGuideToTab(guide.id)
+                    if XP.MenuFrame then XP.MenuFrame:Hide() end
+                    if XP.ViewerFrame then XP.ViewerFrame:Show() end
+                end)
+            end
+            if row.FavBtn then row.FavBtn:Show() end
+            row:SetScript("OnClick", function() XP:ShowGuideDetail(guide.id) end)
+
+            row:Show()
+            yOffset = yOffset + rowHeight + 1
+            rowIdx  = rowIdx + 1
+        end
     end
 
     listChild:SetHeight(math.max(yOffset, 1))
-end
+-- DEBUG: EXIT XP:PopulateFolderList()
 
 -----------------------------------------------------------------------
 -- Navigation
@@ -3447,6 +3523,10 @@ function XP:MenuNavigate(view, param, param2)
             tab:GetFontString():SetTextColor(XP:ColorRGBA("text_muted"))
         end
     end
+
+    -- Update faction filter visibility and button highlights
+    self:UpdateFactionFilterVisibility()
+    self:UpdateFactionFilterButtons()
 
     -- Hide everything first
     if frame.HomeView    then frame.HomeView:Hide()    end
@@ -3537,7 +3617,12 @@ function XP:MenuNavigate(view, param, param2)
 
         local folders, bareGuides = self:GetFoldersForCategory(param)
         local totalGuides = self:GetGuidesForCategory(param)
-        frame.GuideCount:SetText(#totalGuides .. " guides")
+        -- Count guides that pass the current faction filter
+        local filteredCount = 0
+        for _, g in ipairs(bareGuides) do
+            if self:GuidePassesFactionFilter(g) then filteredCount = filteredCount + 1 end
+        end
+        frame.GuideCount:SetText(filteredCount .. " / " .. #totalGuides .. " guides")
 
         if #folders > 0 then
             -- Show folder list; guides inside each folder shown on drill-down
@@ -3575,7 +3660,12 @@ function XP:MenuNavigate(view, param, param2)
         end
 
         local folderGuides = folderData and folderData.guides or {}
-        frame.GuideCount:SetText(#folderGuides .. " guides")
+        -- Count guides that pass the current faction filter
+        local filteredCount = 0
+        for _, g in ipairs(folderGuides) do
+            if self:GuidePassesFactionFilter(g) then filteredCount = filteredCount + 1 end
+        end
+        frame.GuideCount:SetText(filteredCount .. " / " .. #folderGuides .. " guides")
         self:PopulateGuideList(folderGuides)
 
     elseif view == "current" then
@@ -3594,7 +3684,12 @@ function XP:MenuNavigate(view, param, param2)
             table.insert(guides, self.CurrentGuide)
         -- DEBUG: EXIT BreadcrumbBackFunc()
         end
-        frame.GuideCount:SetText(#guides .. " guides")
+        -- Count guides that pass the current faction filter
+        local filteredCount = 0
+        for _, g in ipairs(guides) do
+            if self:GuidePassesFactionFilter(g) then filteredCount = filteredCount + 1 end
+        end
+        frame.GuideCount:SetText(filteredCount .. " / " .. #guides .. " guides")
         self:PopulateGuideList(guides)
 
     elseif view == "recent" then
@@ -3619,7 +3714,12 @@ function XP:MenuNavigate(view, param, param2)
         frame.SectionName:SetText("Favourites")
         frame.BreadcrumbBackFunc = nil
         local guides = self:GetFavouriteGuides()
-        frame.GuideCount:SetText(#guides .. " guides")
+        -- Count guides that pass the current faction filter
+        local filteredCount = 0
+        for _, g in ipairs(guides) do
+            if self:GuidePassesFactionFilter(g) then filteredCount = filteredCount + 1 end
+        end
+        frame.GuideCount:SetText(filteredCount .. " / " .. #guides .. " guides")
         self:PopulateGuideList(guides)
 
     elseif view == "options" then
@@ -3658,66 +3758,100 @@ function XP:PopulateGuideList(guides)
 
     local yOffset = 0
     local rowHeight = 26
+    local visibleCount = 0
 
     for i, guide in ipairs(guides) do
-        if i > MAX_GUIDE_ROWS then break end
+        -- Faction filter: skip guides that don't match
+        if not self:GuidePassesFactionFilter(guide) then
+            -- Update guide count badge to reflect filtered count
+            -- (counted below after loop)
+        end
 
-        local row = guideRows[i]
+        -- Show the guide only if it passes faction filter
+        local showGuide = self:GuidePassesFactionFilter(guide)
+        if not showGuide then
+            -- Still iterate to keep row indices aligned, but hide the row
+        end
+
+        local row = guideRows[visibleCount + 1]
         if not row then break end
 
-        row:ClearAllPoints()
-        row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
-        row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
+        if showGuide then
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", listChild, "TOPLEFT", 0, -yOffset)
+            row:SetPoint("TOPRIGHT", listChild, "TOPRIGHT", 0, -yOffset)
 
-        -- Set icon
-        local cat = self:GetCategory(guide.category)
-        local iconPath, l, r, t, b = GetCategoryIconPath(cat)
-        row.Icon:SetTexture(iconPath)
-        row.Icon:SetTexCoord(l, r, t, b)
-        row.Icon:SetVertexColor(1, 1, 1, 1)  -- reset any folder tint
+            -- Set icon
+            local cat = self:GetCategory(guide.category)
+            local iconPath, l, r, t, b = GetCategoryIconPath(cat)
+            row.Icon:SetTexture(iconPath)
+            row.Icon:SetTexCoord(l, r, t, b)
+            row.Icon:SetVertexColor(1, 1, 1, 1)  -- reset any folder tint
 
-        -- Mark as guide row (not a folder row)
-        row.isFolder = false
-        row.guide = guide
+            -- Mark as guide row (not a folder row)
+            row.isFolder = false
+            row.guide = guide
 
-        -- Set title
-        row.Title:SetText(guide.title or guide.titleShort or "Untitled")
+            -- Set title
+            row.Title:SetText(guide.title or guide.titleShort or "Untitled")
 
-        -- Load button handler: route through Tabs system
-        row.LoadBtn:SetScript("OnClick", function()
-            XP.Tabs:LoadGuideToTab(guide.id)
-            XP:Print("Loaded guide: " .. (guide.title or guide.id))
-            if XP.MenuFrame then XP.MenuFrame:Hide() end
-            if XP.ViewerFrame then XP.ViewerFrame:Show() end
-        end)
-
-        -- Row click = show detail panel on the right
-        row:SetScript("OnClick", function()
-            XP:ShowGuideDetail(guide.id)
-        end)
-
-        -- Highlight current guide
-        if self.CurrentGuide and self.CurrentGuide.id == guide.id then
-            self:ApplyFont(row.Title, "normal", "cyan")
-            row.LoadBtn:GetFontString():SetText("Active")
-        else
-            self:ApplyFont(row.Title, "normal", "text_bright")
-            row.LoadBtn:GetFontString():SetText("Load")
-        end
-
-        -- Update favourite star icon
-        if row.FavBtn then
-            local isFav = guide:IsFavourite()
-            local tex = row.FavBtn:GetNormalTexture()
-            if tex then
-                tex:SetDesaturated(not isFav)
+            -- Faction badge
+            local badge = row.FactionBadge
+            if badge then
+                local gf = (guide.faction or ""):upper()
+                if gf == "ALLIANCE" then
+                    badge:SetTexture("Interface\\Icons\\INV_BannerPVP_01")  -- Alliance banner icon
+                    badge:SetVertexColor(0.2, 0.4, 1.0, 1.0)  -- blue tint
+                    badge:Show()
+                elseif gf == "HORDE" then
+                    badge:SetTexture("Interface\\Icons\\INV_BannerPVP_02")  -- Horde banner icon
+                    badge:SetVertexColor(0.9, 0.2, 0.2, 1.0)  -- red tint
+                    badge:Show()
+                else
+                    badge:Hide()
+                end
             end
+
+            -- Load button handler: route through Tabs system
+            row.LoadBtn:SetScript("OnClick", function()
+                XP.Tabs:LoadGuideToTab(guide.id)
+                XP:Print("Loaded guide: " .. (guide.title or guide.id))
+                if XP.MenuFrame then XP.MenuFrame:Hide() end
+                if XP.ViewerFrame then XP.ViewerFrame:Show() end
+            end)
+
+            -- Row click = show detail panel on the right
+            row:SetScript("OnClick", function()
+                XP:ShowGuideDetail(guide.id)
+            end)
+
+            -- Highlight current guide
+            if self.CurrentGuide and self.CurrentGuide.id == guide.id then
+                self:ApplyFont(row.Title, "normal", "cyan")
+                row.LoadBtn:GetFontString():SetText("Active")
+            else
+                self:ApplyFont(row.Title, "normal", "text_bright")
+                row.LoadBtn:GetFontString():SetText("Load")
+            end
+
+            -- Update favourite star icon
+            if row.FavBtn then
+                local isFav = guide:IsFavourite()
+                local tex = row.FavBtn:GetNormalTexture()
+                if tex then
+                    tex:SetDesaturated(not isFav)
+                end
+            end
+
+            row:Show()
+            yOffset = yOffset + rowHeight + 1
+            visibleCount = visibleCount + 1
+        else
+            row:Hide()
+            row:ClearAllPoints()
+            row.isFolder = false
+            row.guide = nil
         end
-
-        -- Store guide ref on row so favBtn callback can access it (already set above)
-
-        row:Show()
-        yOffset = yOffset + rowHeight + 1
     end
 
     -- Update scroll child height
@@ -3786,4 +3920,103 @@ function XP:UpdateMenu()
         self:MenuNavigate("category", currentCategory)
     end
 -- DEBUG: EXIT XP:UpdateMenu()
+end
+
+-----------------------------------------------------------------------
+-- Faction Filtering
+-----------------------------------------------------------------------
+
+-- Returns the player's current faction group ("Alliance", "Horde", or nil).
+function XP:GetPlayerFaction()
+    return UnitFactionGroup("player")
+end
+
+-- Returns the active faction filter ("ALL", "ALLIANCE", or "HORDE").
+function XP:GetFactionFilter()
+    return factionFilter
+end
+
+-- Set the active faction filter and refresh the current view.
+-- DEBUG: ENTER XP:MenuSetFactionFilter()
+-- DEBUG: PARAM filter = [filter]
+function XP:MenuSetFactionFilter(filter)
+    factionFilter = filter or "ALL"
+    XP:UpdateFactionFilterButtons()
+    XP:RefreshCurrentViewWithFilter()
+-- DEBUG: EXIT XP:MenuSetFactionFilter()
+end
+
+-- Update faction filter button colors to reflect the active filter.
+function XP:UpdateFactionFilterButtons()
+    local frame = self.MenuFrame
+    if not frame or not frame.FactionFilterContainer then return end
+    local c = frame.FactionFilterContainer
+    local active = factionFilter
+
+    local function SetBtnColor(btn, name)
+        if name == active then
+            btn:GetFontString():SetTextColor(XP:ColorRGBA("cyan"))
+        else
+            btn:GetFontString():SetTextColor(XP:ColorRGBA("text_dim"))
+        end
+    end
+    SetBtnColor(c.BtnAll, "ALL")
+    SetBtnColor(c.BtnAlliance, "ALLIANCE")
+    SetBtnColor(c.BtnHorde, "HORDE")
+end
+
+-- Refresh the current view, re-applying the faction filter.
+function XP:RefreshCurrentViewWithFilter()
+    if currentView == "category" and currentCategory then
+        self:MenuNavigate("category", currentCategory)
+    elseif currentView == "folder" and currentCategory then
+        self:MenuNavigate("folder", currentCategory, currentFolder)
+    elseif currentView == "favourites" then
+        self:MenuNavigate("favourites")
+    elseif currentView == "current" then
+        self:MenuNavigate("current")
+    elseif currentView == "recent" then
+        self:MenuNavigate("recent")
+    end
+end
+
+-- Returns true if a guide passes the current faction filter.
+-- guide.faction: "ALLIANCE", "HORDE", or "NEUTRAL"/"ALL"/""
+function XP:GuidePassesFactionFilter(guide)
+    local filter = factionFilter
+    if filter == "ALL" then return true end
+
+    local gf = (guide.faction or ""):upper()
+    if gf == "ALLIANCE" then
+        return filter == "ALLIANCE"
+    elseif gf == "HORDE" then
+        return filter == "HORDE"
+    else
+        -- NEUTRAL or empty = visible to all
+        return true
+    end
+end
+
+-- Show/hide faction filter buttons based on view type.
+function XP:UpdateFactionFilterVisibility()
+    local frame = self.MenuFrame
+    if not frame or not frame.FactionFilterContainer then return end
+    local show = (currentView == "category" or currentView == "folder" or
+                  currentView == "favourites" or currentView == "current" or
+                  currentView == "recent")
+    if show then
+        frame.FactionFilterContainer:Show()
+    else
+        frame.FactionFilterContainer:Hide()
+    end
+end
+
+-----------------------------------------------------------------------
+-- Apply skin to menu frame
+-----------------------------------------------------------------------
+-- DEBUG: ENTER XP:ApplySkinToGuideMenu()
+function XP:ApplySkinToGuideMenu(f)
+    if not f then return end
+    XP.UpdateFactionFilterButtons(XP)
+-- DEBUG: EXIT XP:ApplySkinToGuideMenu()
 end
