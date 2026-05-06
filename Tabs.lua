@@ -936,6 +936,11 @@ function Tabs:LoadGuideToTab(guideID, step)
     -- Not open: get a free tab
     local tab = Tabs:GetTabFromPool()
     tab:AssignGuide(guideID, step or 1)
+
+    -- Restore persisted goal completions for this guide (Item 10)
+    XP.CurrentGuide = XP.Guides[guideID]
+    XP:LoadGoalState(guideID)
+
     tab:ActivateGuide()
 -- DEBUG: EXIT Tabs:LoadGuideToTab()
 end

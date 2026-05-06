@@ -387,9 +387,44 @@ function XP:GoToStep(n)
 -- DEBUG: EXIT XP:GoToStep()
 end
 
------------------------------------------------------------------------
+---------------------------------------------------------------------
+-- Persistent Goal State Management (Item 10)
+---------------------------------------------------------------------
+-- DEBUG: ENTER XP:SaveGoalState()
+function XP:SaveGoalState(guideID, stepIdx, goalIdx)
+    if not guideID or not stepIdx or not goalIdx then return end
+    self.db.char.goalStates[guideID] = self.db.char.goalStates[guideID] or {}
+    self.db.char.goalStates[guideID][stepIdx] = self.db.char.goalStates[guideID][stepIdx] or {}
+    self.db.char.goalStates[guideID][stepIdx][goalIdx] = true
+end
+
+-- DEBUG: ENTER XP:LoadGoalState()
+function XP:LoadGoalState(guideID)
+    if not guideID or not self.CurrentGuide then return end
+    local stored = self.db.char.goalStates[guideID]
+    if not stored then return end
+    local guide = self.CurrentGuide
+    for stepIdx, goals in pairs(stored) do
+        local step = guide:GetStep(stepIdx)
+        if step and step.goals then
+            for goalIdx in pairs(goals) do
+                if step.goals[goalIdx] then
+                    step.goals[goalIdx].complete = true
+                end
+            end
+        end
+    end
+end
+
+-- DEBUG: ENTER XP:ClearGoalState()
+function XP:ClearGoalState(guideID)
+    if not guideID then return end
+    self.db.char.goalStates[guideID] = nil
+end
+
+---------------------------------------------------------------------
 -- Event Handlers
------------------------------------------------------------------------
+---------------------------------------------------------------------
 -- DEBUG: ENTER XP:OnQuestEvent()
 -- DEBUG: PARAM event = [event]
 function XP:OnQuestEvent(event, ...)
@@ -406,7 +441,7 @@ function XP:OnQuestEvent(event, ...)
         local step = self.CurrentGuide:GetStep(self.CurrentStep)
         if step and step.goals then
             local changed = false
-            for _, goal in ipairs(step.goals) do
+            for goalIdx, goal in ipairs(step.goals) do
                 if not goal.complete and not goal.noComplete then
                     local action = (goal.action or ""):lower()
                     if (action == "accept" or action == "accept_quest") and goal.questID then
@@ -414,18 +449,21 @@ function XP:OnQuestEvent(event, ...)
                             goal.complete = true
                             goal.current = goal.count or 1
                             changed = true
+                            self:SaveGoalState(self.CurrentGuide.id, self.CurrentStep, goalIdx)
                         end
                     elseif (action == "turnin" or action == "turnin_quest") and goal.questID then
                         if self:IsQuestCompleted(goal.questID) then
                             goal.complete = true
                             goal.current = goal.count or 1
                             changed = true
+                            self:SaveGoalState(self.CurrentGuide.id, self.CurrentStep, goalIdx)
                         end
                     elseif goal.questID and goal.questObjective then
                         if self:IsQuestObjectiveComplete(goal.questID, goal.questObjective) then
                             goal.complete = true
                             goal.current = goal.count or 1
                             changed = true
+                            self:SaveGoalState(self.CurrentGuide.id, self.CurrentStep, goalIdx)
                         end
                     end
                 end
