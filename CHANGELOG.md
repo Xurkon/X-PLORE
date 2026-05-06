@@ -4,6 +4,47 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Guide Load Error Fixes (2026-05-05)
+
+### Summary
+
+Fixed 8 runtime errors from ZygorOfficial, DugiGuides, and RXP guide files failing to load. Root causes were missing ZGV shim sub-namespaces, missing DugiGuides global stubs, and syntax errors in two DugiGuides source files.
+
+### Bug Fixes
+
+#### GuideLoader.lua — ZGV shim missing sub-namespace fields (commit `33ade5c`)
+
+ZygorOfficial guide files reference several ZGV sub-tables and fields that were absent from the compatibility shim, causing load-time index/call errors:
+
+- `ZGV.IMAGESDIR = ""` — string prefix for guide image paths (e.g. `ZGV.IMAGESDIR .. "BfAIntro"`)
+- `ZGV.BETASTART = function() end` — no-op; called between guide registrations in `ZygorLevelingCommonMID.lua`
+- `ZGV.InPhase = function() return false end` — no-op; used in guide condition functions
+- `ZGV.NoOp = function() end` — standard no-op reference used by DugiGuides
+- `ZGV.Gold = { guides_loaded = false }` — sub-namespace for gold/gathering guides; `.guides_loaded` set by those files
+- `ZGV.Poi = { Sets = {}, db = {} }` — sub-namespace for POI data; Rare spawn guides store `ZGV.Poi.Sets.SetName = {...}`
+
+Affected files: `ZygorGatheringAllianceWODTrial.lua`, `StartersAlliance.lua`, `ZygorLevelingCommonMID.lua`, `BFA_A_Rares.lua`.
+
+#### GuidesCompat.lua — DugiGuides global stubs (commit `33ade5c`)
+
+Legacy DugiGuides files (especially `Legacy_MoP/Leveling/Modules.common.lua`) reference two globals that only exist when the full DugiGuides addon core is loaded. Added minimal stubs before guide files execute:
+
+- `LuaUtils = { DugiGuidesIsLoading = false }` — utility table; `Modules.common.lua` accesses `LuaUtils.DugiGuidesIsLoading`
+- `DugisLocals = setmetatable({}, {__index = function(_, k) return tostring(k) end })` — localization table; returns key as fallback string for any unknown entry
+
+#### DugiGuides — Syntax errors in truncated source files (commit `33ade5c`)
+
+Two DugiGuides files were truncated, missing their closing `end` statements:
+
+- `Era/Legacy_MoP/Achievements/Alliance/Keymaster_A.lua` — Appended `\n    end\nend` to close `Guide:Load()` and `Guide:Initialize()` (file ended at `end)` which only closed the step function and `RegisterGuide` call)
+- `Era/Legacy_MoP/Achievements/Horde/Keymaster_H.lua` — Same fix applied
+
+#### DugiGuides — Unclosed long string (commit `33ade5c`)
+
+- `TWW/Retail/Events/20th_Anniversary_Daily_Weekly.lua` line 67: `{description = [[...quests]})` had only one `]` before `})`, leaving the `[[` long string open through the rest of the file. Fixed: `]})` → `]]})`
+
+---
+
 ## [Unreleased] — Guide Infrastructure Rebuild
 
 ### Summary

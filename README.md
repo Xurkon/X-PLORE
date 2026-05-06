@@ -66,6 +66,10 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
+#### 🔄 Recently Completed — Guide Load Error Fixes
+
+**ZGV shim completed + DugiGuides compat stubs** (`33ade5c`): Fixed 8 runtime load errors across ZygorOfficial, DugiGuides, and RXP guide sources. (1) Six missing ZGV sub-namespace fields added to shim: `IMAGESDIR`, `BETASTART`, `InPhase`, `NoOp`, `Gold`, `Poi` — unblocks Gold/Gathering/POI/Starter guide files. (2) `LuaUtils` and `DugisLocals` global stubs added in `GuidesCompat.lua` for legacy DugiGuides module files. (3) Two truncated DugiGuides files (`Keymaster_A.lua`, `Keymaster_H.lua`) had missing `end` statements appended. (4) `20th_Anniversary_Daily_Weekly.lua` unclosed `[[` long string fixed.
+
 #### 🔄 Recently Completed — Guide Infrastructure Rebuild
 
 **Multi-source guide support + API bug fixes**: (1) `SetColorTexture` crash on WotLK/Vanilla fixed — replaced with universal `SetTexture(r,g,b,a)`. (2) Minimap button invisible — wrong icon path (`minimap_button.tga` → `XPIcon.tga`) and wrong `SetTexCoord` crop fixed. (3) `Guides/` folder restructured into 6 source groups: `ZygorOfficial/`, `CoreysGuides/`, `Epoch/`, `Ding80Guides/`, `DugiGuides/`, `RXP/`. (4) `Autoload.xml` fully regenerated — 3,704 entries, `DugiGuides/Legacy_Core_5.15/` excluded. (5) New `GuidesCompat.lua` with full runtime shims: DugisGuideViewer (old + new API variants) and RXPGuides → ZygorGuidesViewer translation. All Lua 5.0–5.4 compatible.
