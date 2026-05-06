@@ -28,7 +28,7 @@
 
 ## ⚠️ Disclaimer
 
-**X-PLORE is in active development.** This repository hosts the in-progress codebase. The addon is loadable in-game with partial functionality: the guide menu, skin system, options panel, and guide loading are functional, but core features like waypoints and goal tracking are still being implemented.
+**X-PLORE is in active development.** This repository hosts the in-progress codebase. The addon is loadable in-game with functional guide menu, skin system, options panel, guide loading, waypoint navigation, and goal tracking.
 
 For a working reference implementation, see [ZygorGuidesViewer](https://github.com/Xurkon/ZygorGuidesViewer).
 
@@ -58,8 +58,19 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Waypoint arrow | ✅ Functional | Arrow frame, rotation, distance, ETA, cycling, turn audio cues |
 | Arrow themes | ✅ Complete | 5 themes wired; UI selector dropdown in Options panel |
 | Ant trail | ✅ Functional | Dot fallback wired for WotLK/Classic (915407d); world line for Retail |
-| Goal tracker | ⚙️ Partial | Step/goal structures defined; display rendering in progress |
-| Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
+| Step conditionals (`|or|`, `|confirm|`, `|override|`, `|only|`) | ✅ Implemented | Guide.lua Parser.lua |
+| Goal event tracking | ✅ C_QuestLog events wired | Core.lua QUEST_COMPLETE/ACCEPTED/TURNED_IN |
+| Persistent goal state | ✅ Save/Load wired via AceDB | XP:SaveGoalState/LoadGoalState/ClearGoalState |
+| Featured guide on startup | ✅ Implemented | XP.db.profile.featuredGuide restore on PLAYER_LOGIN |
+| Guide Info Bar | ✅ Implemented | guide name, level range, active step name |
+| ActionBar quest highlighting | ✅ Implemented | slot highlight for collect/use/equip goals |
+| Faction/reputation filtering | ✅ Alliance/Horde filter + badges | GuideMenu.lua + faction badges |
+| Foglight reveal | ✅ ShowArea/HideArea wired | Foglight.lua + Core.lua NextStep/PrevStep |
+| Pointer.lua | ✅ Unified waypoint coordinator | TomTom + arrow fallback |
+| TomTom integration | ✅ Waypoints.lua wired | XP.TomTom.enabled + set/add/clear |
+| Arrow skinning | ✅ Arrows/Arrows.lua implemented | 64-sprite directional, GetAvailableSkins, ApplySkin |
+| GuideMenu-View separation | ✅ View functions extracted | XP.GuideMenuView:RenderHome/Featured/DetailPanel |
+| Goal tracker | ✅ Functional | Goal:IsComplete() chain for all goal types |
 | Zygor guide parsing | ✅ Functional | Guides load and appear in Guide Menu (Session 54) |
 | Guide folder hierarchy | ✅ Functional | Category → Folder → Guide drill-down; correct path grouping + Zygor-style hover (Session 55) |
 | Multi-source guide support | ✅ Functional | 6 guide sources: ZygorOfficial, CoreysGuides, Epoch, Ding80, DugiGuides, RXP; format shims in GuidesCompat.lua |
