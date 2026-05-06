@@ -184,6 +184,29 @@ local function HighlightGoal(goal)
                 ActionBar:HighlightSlot(slot)
             end
         end
+
+    elseif gtype == "quest" or gtype == "turnin" then
+        -- Quest item highlighting: highlight items that match quest objectives
+        local itemID = goal.itemID
+        if itemID then
+            for _, slot in ipairs(FindSlotsForItem(itemID)) do
+                ActionBar:HighlightSlot(slot)
+            end
+        end
+        -- Also try to match by item name if provided
+        if goal.itemName then
+            for i = 1, 120 do
+                if HasAction(i) then
+                    local atype, aid = GetActionInfo(i)
+                    if atype == "item" then
+                        local itemName = GetItemInfo(aid)
+                        if itemName and itemName == goal.itemName then
+                            ActionBar:HighlightSlot(i)
+                        end
+                    end
+                end
+            end
+        end
     end
 -- DEBUG: EXIT HighlightGoal()
 end
