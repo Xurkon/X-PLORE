@@ -62,8 +62,13 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Guide Info Bar | ⚙️ Partial | Info bar frame present; content wiring in progress |
 | Zygor guide parsing | ✅ Functional | Guides load and appear in Guide Menu (Session 54) |
 | Guide folder hierarchy | ✅ Functional | Category → Folder → Guide drill-down; correct path grouping + Zygor-style hover (Session 55) |
+| Multi-source guide support | ✅ Functional | 6 guide sources: ZygorOfficial, CoreysGuides, Epoch, Ding80, DugiGuides, RXP; format shims in GuidesCompat.lua |
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
+
+#### 🔄 Recently Completed — Guide Infrastructure Rebuild
+
+**Multi-source guide support + API bug fixes**: (1) `SetColorTexture` crash on WotLK/Vanilla fixed — replaced with universal `SetTexture(r,g,b,a)`. (2) Minimap button invisible — wrong icon path (`minimap_button.tga` → `XPIcon.tga`) and wrong `SetTexCoord` crop fixed. (3) `Guides/` folder restructured into 6 source groups: `ZygorOfficial/`, `CoreysGuides/`, `Epoch/`, `Ding80Guides/`, `DugiGuides/`, `RXP/`. (4) `Autoload.xml` fully regenerated — 3,704 entries, `DugiGuides/Legacy_Core_5.15/` excluded. (5) New `GuidesCompat.lua` with full runtime shims: DugisGuideViewer (old + new API variants) and RXPGuides → ZygorGuidesViewer translation. All Lua 5.0–5.4 compatible.
 
 #### 🔄 Recently Completed — Session 55
 

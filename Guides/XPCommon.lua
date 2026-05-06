@@ -18,3 +18,5 @@ ZygorGuidesViewer:RegisterGuideSorting({
 	"Macros",
 })
 
+-- DugisGuideViewer and RXPGuides shims are now in GuidesCompat.lua.
+-- That file is loaded immediately after this one by Autoload.xml.

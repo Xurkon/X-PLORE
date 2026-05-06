@@ -4,9 +4,49 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-# X-PLORE Changelog
+## [Unreleased] — Guide Infrastructure Rebuild
 
-All notable changes to X-PLORE are documented here.
+### Summary
+
+Full multi-source guide infrastructure implemented. Three bug fixes applied, Autoload.xml rebuilt from disk, and a runtime guide format conversion layer added.
+
+### Bug Fixes
+
+#### GuideMenu.lua — SetColorTexture API crash (commit `463b384`)
+- `SetColorTexture` is a Legion+ API not present in WotLK/Vanilla.
+- Replaced `SetColorTexture(1,1,1,0.08)` with `SetTexture(1,1,1,0.08)` which works universally across all WoW versions.
+
+#### Minimap.lua — Invisible minimap button (commit `a01c721`)
+- `ICON_PATH` pointed to `minimap_button.tga` (doesn't exist). Fixed to `Skins/XPIcon.tga`.
+- `SetTexCoord(0,1, 0,1/4)` was cropping the icon assuming a 4-row sprite sheet. Fixed to `SetTexCoord(0,1, 0,1)` for a single-frame icon.
+
+### Guide Infrastructure
+
+#### Guides/ — Directory restructured into 6 source groups
+- `ZygorOfficial/` — official Zygor guides organized by expansion
+- `CoreysGuides/` — Corey's WotLK leveling guides
+- `Epoch/` — Epoch server-specific guides (ZygorGuidesViewer fork)
+- `Ding80Guides/` — Ding80 leveling guides
+- `DugiGuides/` — Dugi's Guide Viewer format guides (`Legacy_Core_5.15/` addon core excluded)
+- `RXP/` — RestedXP format guides
+
+#### Guides/Autoload.xml — Fully regenerated
+- Previous flat root-level `<Script>` entries replaced by 3,704 entries covering all 6 source groups.
+- `XPCommon.lua` and new `GuidesCompat.lua` load first; `DugiGuides/Legacy_Core_5.15/` (273 conflicting core files) excluded.
+
+#### Guides/GuidesCompat.lua — New file: runtime format conversion shims
+- **DugisGuideViewer shim** — translates both old (string title) and new (category array) API variants to `ZygorGuidesViewer:RegisterGuide()`. Handles faction filtering, step prefix commands (`A/T/C/K/R/h`), and all pipe-delimited tags (`|QID|`, `|N|`, `|NPC|`, `|Z|`, `|OBJ|`, `|ITEM|`).
+- **RXPGuides shim** — parses `#group`/`#subgroup` directives for guide path, `<< Alliance/Horde` faction filters, and translates `.goto/.accept/.turnin/.kill/.collect/.use/.hs/.train` step commands to ZygorGuidesViewer format.
+- Both shims: universal Lua 5.0–5.4, no `goto`, no `table.unpack`.
+
+#### Guides/XPCommon.lua — Removed no-op stubs
+- Previous no-op `DugisGuideViewer` and `RXPGuides` stubs removed; replaced by comment pointing to `GuidesCompat.lua`.
+
+### Documentation
+
+#### CHANGELOG.md — Updated with all changes above
+
+#### README.md — Updated guide sources table and status
 
 ---
 
