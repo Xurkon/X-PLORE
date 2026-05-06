@@ -10,6 +10,42 @@ All notable changes to X-PLORE are documented here.
 
 Fixed the Starlight skin logo override bug, implemented the full EasyFork tab context menu, fixed X-button flicker on tabs, and redesigned step lines as 50px cards with two-line layout.
 
+---
+
+## [Unreleased] — Skin Audit: Tab Backdrop, Step Highlighting, Colors (2026-05-06)
+
+### Summary
+
+Resolved all 6 remaining skin audit items from Session 46: tab backdrop styling, step highlighting, color fixes, and verified scrollbar/footer/syncdot status.
+
+### Changes
+
+#### Viewer.lua — Tab backdrop ApplyBackdrop + step edge color
+
+- Applied `TabBackdrop` FrameStyle to `tabContainer` in `CreateViewerFrame()` for styled tab borders (Midnight skin)
+- Added `TabBackdropColor` fallback chain when `TabsContainerBackdropInactive` is absent (color-only skins: Starlight, Stealth)
+- Active step edge bar: cyan → dark red (`red_dark` = `#8B0000`)
+- Step number text: cyan → `red_dark`
+
+#### Skins/Default/Starlight/Style.lua — Step color differentiation
+
+- Step backdrop colors differentiated: active `#2E2E2E`, upcoming `#1C1C1C`, complete `#1A2B1A` (was all `#202020`)
+
+#### Skins.lua — New color added
+
+- Added `red_dark = HTML("#8B0000FF")` to base Colors table (line 276)
+
+### Resolutions
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Tab backdrop | ✅ Applied `TabBackdrop` + `TabBackdropColor` fallback |
+| 2 | Footer bg | ✅ N/A — footer frame removed (`footerH = 0`) |
+| 3 | SyncDot | ✅ N/A — intentionally removed per prior changelog |
+| 4 | Scrollbar TGA | ✅ Verified correct (Starlight: `scroll-bar.tga`, Stealth: plain color) |
+| 5 | Step highlighting | ✅ Active edge: cyan → `red_dark` (#8B0000), colors differentiated |
+| 6 | Content gradient | ✅ `gradient_v.tga` is decorative tiling texture, not a gradient |
+
 ### Bug Fixes
 
 #### Skins/Default/Starlight/Style.lua — zygorlogo override at end of file
