@@ -66,6 +66,10 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
+#### 🔄 Recently Completed — Session 52 (Skin Audit)
+
+**6 remaining skin audit items resolved** (`9bc098a`, `db35786`): (1) Tab backdrop styled with `TabBackdrop` FrameStyle + `TabBackdropColor` fallback. (2) Footer/SyncDot verified intentional removals. (3) Scrollbar textures verified correct (Starlight uses `scroll-bar.tga`, Stealth uses plain color). (4) Active step edge changed cyan → dark red (`#8B0000`). (5) Step backdrop colors differentiated (active `#2E2E2E`, upcoming `#1C1C1C`, complete `#1A2B1A`). (6) `gradient_v.tga` is a decorative tiling texture, not a vertical gradient — limitation documented.
+
 #### 🔄 Recently Completed — Tab Context Menu + Guide List + Viewer Step Icons
 
 **Tab right-click crash fixed + guide rows visible + step icons now show** (this session): Three UI bugs resolved. (1) `Tabs.lua` `ShowTabMenu()` crashed with `table index is nil` when any `tabGuides` entry lacked a `.title` field — all three `active[v.title]` sites now nil-guarded; the already-complete context menu (Recent Guides → history entries → Suggested → Open New Guide) now renders on right-click. (2) Guide list rows were invisible: `ApplyBackdrop(row, "none")` applied `{bgFile = WHITE_TEX}` with no color override → white background behind white text; fixed by clearing backdrop entirely (`SetBackdrop(nil)`). (3) Viewer step icons now resolve correctly — `GetPrimaryIcon()` returns names like `"accept_quest"`, `"kill"`, `"interact"` which are actual TGA files in `Skins/`; previous code tried `Interface\Icons\<name>` (non-existent WoW built-ins); fixed to `Interface\AddOns\X-Plore\Skins\<name>`.
