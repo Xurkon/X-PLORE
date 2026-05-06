@@ -66,6 +66,10 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
+#### 🔄 Recently Completed — Shim Missing Fields + TalentAdvisor Guard
+
+**4 more ZGV shim fields added + TalentAdvisor Retail guard** (`8f5e0ce`): Fixed 7 runtime errors. (1) `BETAEND = function() end` — 4 Classic/Anniversary guide files call `BETAEND()` between guide blocks; was missing while `BETASTART` existed. (2) `ItemScore = { Items = {} }` — gear guides write `ItemScore.Items["Dungeon\\Name"]`; old `ItemScore = {}` had no `.Items`. (3) `TalentAdvisor = { Builds = {} }` — defensive stub for TalentAdvisor-Builds.lua. (4) `L = setmetatable proxy` — AH/Gold guides use `ZGV.L["type_armor"]` etc. for item type strings. TalentAdvisor-Builds.lua now has a `GetBuildInfo() < 100000 → return` guard so Retail Hero-Talent builds don't load on Classic/WotLK/Era.
+
 #### 🔄 Recently Completed — DugisGuideViewer Protected Proxy
 
 **DugisGuideViewer shim hardened** (`332c826`): Fixed 50+ `GetCreateTable nil` errors and silent shim corruption caused by DugiGuides infrastructure files. `DugisGuideViewer` is now an empty proxy table backed by a private `_dgv` data table. `__newindex` silently blocks writes to `RegisterGuide` and `RegisterModule` so `Modules.common.lua`'s `PlaceUtilityStubs()` cannot overwrite them with no-ops. `RegisterModule` now returns a **MakeModule proxy** that intercepts the assignment of `Initialize` via `__newindex` and immediately calls it, then auto-calls `Load()` — matching the DugiGuides module lifecycle without needing the DugiGuides core. Also added `NoOp` and `GetCreateTable` (pool factory) stubs.

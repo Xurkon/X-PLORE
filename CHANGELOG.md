@@ -4,6 +4,30 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Shim Missing Fields + TalentAdvisor Guard (2026-05-06)
+
+### Summary
+
+Fixed 7 runtime errors from missing ZGV shim fields and a Retail-only guide loading on all WoW versions.
+
+### Bug Fixes
+
+#### GuideLoader.lua — 4 missing shim fields (commit `8f5e0ce`)
+
+- `shim.BETAEND = function() end` — `BETASTART` existed but `BETAEND` was absent; 4 guides call it between guide blocks (`ZygorDungeonAllianceCLASSIC.lua:9687`, `ZygorProfessionsAllianceCLASSIC.lua:6`, `ZygorAchievementsAllianceCATA.lua:15724`, `ZygorPetsCommonSHADOW.lua:3704`)
+- `shim.ItemScore = { Items = {} }` — `ZygorGearAllianceCLASSIC.lua` indexes `ZygorGuidesViewer.ItemScore.Items[...]`; old shim had `ItemScore = {}` with no `.Items` sub-table. Also removed duplicate `shim.ItemScore = {}` assignment that was overwriting the fix.
+- `shim.TalentAdvisor = { Builds = {} }` — defensive stub so TalentAdvisor-Builds.lua can safely write `ZGV.TalentAdvisor.Builds = {...}`
+- `shim.L = setmetatable({}, {__index = function(_, k) return k end})` — localization proxy; `AHItemStatus.lua` uses `ZGV.L["type_armor"]`, `ZGV.L["subtype_..."]` etc. to key its item flag table
+
+#### TalentAdvisor-Builds.lua — Retail-only expansion guard (commit `8f5e0ce`)
+
+`TalentAdvisor-Builds.lua` contains Hero-Talent builds for The War Within (Retail-only feature). It was loading on all versions, crashing because `ZGV.TalentAdvisor` is not set up on Classic/WotLK/Era clients. Fix:
+- Added `do ... end` block at top: `if tonumber(toc) < 100000 then return end` — exits immediately on non-Retail clients
+- Added `if not ZGV or not ZGV.TalentAdvisor then return end` secondary guard
+- Per-expansion TalentAdvisor files will be created separately for each expansion
+
+---
+
 ## [Unreleased] — DugisGuideViewer Protected Proxy (2026-05-06)
 
 ### Summary
