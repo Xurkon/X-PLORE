@@ -826,7 +826,7 @@ function XP:CreateGuideRows(parent)
         -- Selection/hover highlight texture
         local selHl = row:CreateTexture(nil, "OVERLAY")
         selHl:SetAllPoints()
-        selHl:SetColorTexture(1, 1, 1, 0.08)  -- subtle light-grey hover, matches Zygor
+        selHl:SetTexture(1, 1, 1, 0.08)  -- subtle light-grey hover, matches Zygor (SetTexture r,g,b,a is universal)
         selHl:Hide()
         row.SelectionHighlight = selHl
 
