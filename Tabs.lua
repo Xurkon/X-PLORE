@@ -36,7 +36,7 @@ end
 
 local function ApplyZygorTabFont(fontString)
     if not fontString then return end
-    fontString:SetFont(STANDARD_TEXT_FONT, 9, "")
+    fontString:SetFont(GameFontNormal:GetFont(), 9, "")
     fontString:SetTextColor(1, 1, 1, 1)
 end
 
