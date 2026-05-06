@@ -379,6 +379,44 @@ function XP:OnQuestEvent(event, ...)
     if self.db.profile.autoAdvance and self.CurrentGuide then
         self:CheckAutoAdvance()
     end
+
+    -- Scan active guide goals and refresh the viewer when quest milestones are hit.
+    -- This catches goals that were not auto-completed by CheckAutoAdvance but whose
+    -- quest state changed externally (e.g. manual quest completion, Ziel-Quest挂钩, etc.).
+    if (event == "QUEST_COMPLETE" or event == "QUEST_ACCEPTED" or event == "QUEST_TURNED_IN")
+       and self.CurrentGuide then
+        local step = self.CurrentGuide:GetStep(self.CurrentStep)
+        if step and step.goals then
+            local changed = false
+            for _, goal in ipairs(step.goals) do
+                if not goal.complete and not goal.noComplete then
+                    local action = (goal.action or ""):lower()
+                    if (action == "accept" or action == "accept_quest") and goal.questID then
+                        if self:IsQuestInLog(goal.questID) then
+                            goal.complete = true
+                            goal.current = goal.count or 1
+                            changed = true
+                        end
+                    elseif (action == "turnin" or action == "turnin_quest") and goal.questID then
+                        if self:IsQuestCompleted(goal.questID) then
+                            goal.complete = true
+                            goal.current = goal.count or 1
+                            changed = true
+                        end
+                    elseif goal.questID and goal.questObjective then
+                        if self:IsQuestObjectiveComplete(goal.questID, goal.questObjective) then
+                            goal.complete = true
+                            goal.current = goal.count or 1
+                            changed = true
+                        end
+                    end
+                end
+            end
+            if changed then
+                self:UpdateViewer()
+            end
+        end
+    end
 -- DEBUG: EXIT XP:OnQuestEvent()
 end
 
