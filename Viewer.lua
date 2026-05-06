@@ -10,7 +10,7 @@ local XP = ADDON_TABLE.XP
 -----------------------------------------------------------------------
 -- Constants
 -----------------------------------------------------------------------
-local OK_CHAR = "\228\149\157"  -- UTF-8 checkmark
+local OK_CHAR = "\229\133\163"  -- UTF-8 checkmark
 local MAX_VISIBLE_STEPS = 8
 local STEP_LINE_HEIGHT  = 50
 
@@ -138,13 +138,59 @@ function XP:CreateViewerFrame()
     frame.TitleDivider = self:CreateDivider(frame, -self:Size("titlebar_height"), "border")
 
     ---------------------------------------------------------------
-    -- Tab Container (no InfoBar — XP has no info bar between title and tabs)
-    -- The tab bar fills the space directly below the title divider.
+    -- Guide Info Bar (28px between title divider and tab container)
+    -- Shows guide name, level range, and current step index.
+    ---------------------------------------------------------------
+    local infoBarHeight = 28
+    local infoBar = CreateFrame("Frame", nil, frame)
+    infoBar:SetHeight(infoBarHeight)
+    local infoBarY = -(self:Size("titlebar_height") + 1)
+    infoBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, infoBarY)
+    infoBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, infoBarY)
+    frame.InfoBar = infoBar
+
+    -- InfoBar background texture
+    local infoBarBg = infoBar:CreateTexture(nil, "BACKGROUND")
+    infoBarBg:SetAllPoints()
+    XP.SetTexColor(infoBarBg, XP:ColorRGBA("bg_medium"))
+    infoBar.Bg = infoBarBg
+
+    -- Guide name (left side)
+    local infoGuideName = infoBar:CreateFontString(nil, "OVERLAY")
+    infoGuideName:SetPoint("LEFT", infoBar, "LEFT", 10, 0)
+    infoGuideName:SetPoint("RIGHT", infoBar, "RIGHT", -60, 0)
+    infoGuideName:SetJustifyH("LEFT")
+    self:ApplyFont(infoGuideName, "small", "text_bright")
+    infoGuideName:SetText("")
+    infoGuideName:SetTruncate(true)
+    frame.InfoGuideName = infoGuideName
+
+    -- Level range (right side, before the step indicator)
+    local infoLevel = infoBar:CreateFontString(nil, "OVERLAY")
+    infoLevel:SetPoint("RIGHT", infoBar, "RIGHT", -60, 0)
+    infoLevel:SetJustifyH("RIGHT")
+    self:ApplyFont(infoLevel, "tiny", "cyan")
+    infoLevel:SetText("")
+    frame.InfoLevel = infoLevel
+
+    -- Current step index (far right)
+    local infoStep = infoBar:CreateFontString(nil, "OVERLAY")
+    infoStep:SetPoint("RIGHT", infoBar, "RIGHT", -10, 0)
+    infoStep:SetJustifyH("RIGHT")
+    self:ApplyFont(infoStep, "tiny", "text_muted")
+    infoStep:SetText("")
+    frame.InfoStep = infoStep
+
+    -- InfoBar divider (thin line below the bar)
+    frame.InfoBarDivider = self:CreateDivider(frame, infoBarY - infoBarHeight, "border_dim")
+
+    ---------------------------------------------------------------
+    -- Tab Container
     ---------------------------------------------------------------
     local tabContainer = CreateFrame("Frame", nil, frame)
     tabContainer:SetHeight(self:Size("tab_height"))
-    -- Tab bar starts immediately after title bar (no gap, no info bar)
-    local tabY = -(self:Size("titlebar_height") + 1)
+    -- Tab bar starts after title bar + info bar
+    local tabY = infoBarY - infoBarHeight - 1
     tabContainer:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, tabY)
     tabContainer:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, tabY)
     -- Apply TabBackdrop style for styled borders (Midnight etc.)
@@ -161,8 +207,8 @@ function XP:CreateViewerFrame()
     frame.TabContainer = tabContainer
 
     -- No tab divider — tab bar flows directly into toolbar (XP style)
-    -- Toolbar starts immediately after tab bar bottom
-    local toolbarY = -(self:Size("titlebar_height") + self:Size("tab_height") + 1)
+    -- Toolbar starts after title bar + info bar + tab bar
+    local toolbarY = infoBarY - infoBarHeight - self:Size("tab_height") - 1
     local toolbar = CreateFrame("Frame", nil, frame)
     toolbar:SetHeight(self:Size("toolbar_height"))
     toolbar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, toolbarY)
@@ -214,8 +260,6 @@ function XP:CreateViewerFrame()
 
     ---------------------------------------------------------------
     -- Step Scroll Area
-    -- Use a plain ScrollFrame + mousewheel — UIPanelScrollFrameTemplate
-    -- adds scroll-arrow buttons that bleed outside the frame on WotLK.
     ---------------------------------------------------------------
     local scrollTop    = toolbarY - self:Size("toolbar_height") - 1
     local progressH    = 12   -- progress bar area height (at very bottom)
@@ -302,6 +346,7 @@ function XP:CreateViewerFrame()
     frame._scrollbarW = scrollbarW + 2
     frame._footerH    = footerH + progressH
     frame._titleH     = self:Size("titlebar_height")
+    frame._infoBarH   = infoBarHeight
 
     -- Empty-state "Welcome to X-PLORE" + "Click here" (centered in viewport, not scrollChild)
     -- Parented to scrollFrame so they're positioned relative to the visible viewport and not clipped
@@ -408,6 +453,16 @@ function XP:CreateViewerFrame()
             XP.SetTexColor(f.TabBg, tabBgColor[1], tabBgColor[2], tabBgColor[3], tabBgColor[4] or 1)
         end
 
+        -- InfoBar background
+        if f.InfoBar and f.InfoBar.Bg then
+            XP.SetTexColor(f.InfoBar.Bg, XP:ColorRGBA("bg_medium"))
+        end
+        -- InfoBar font elements
+        if f.InfoGuideName then XP:ApplyFont(f.InfoGuideName, "small", "text_bright") end
+        if f.InfoLevel then XP:ApplyFont(f.InfoLevel, "tiny", "cyan") end
+        if f.InfoStep then XP:ApplyFont(f.InfoStep, "tiny", "text_muted") end
+        -- InfoBar divider
+        if f.InfoBarDivider then XP.SetTexColor(f.InfoBarDivider, XP:ColorRGBA("border_dim")) end
 
         -- Toolbar background
         if f.ToolbarBg then
@@ -545,9 +600,47 @@ local function CreateStepLine(parent, index)
     return line
 end
 
------------------------------------------------------------------------
+---------------------------------------------------------------------
+-- Update Info Bar: populate guide name, level range, and step index
+---------------------------------------------------------------------
+-- DEBUG: ENTER XP:UpdateInfoBar()
+-- DEBUG: PARAM frame = [frame]
+function XP:UpdateInfoBar(frame)
+    if not frame then return end
+    local guide = self.CurrentGuide
+    if not guide then
+        -- Clear all fields when no guide is active
+        if frame.InfoGuideName then frame.InfoGuideName:SetText("") end
+        if frame.InfoLevel then frame.InfoLevel:SetText("") end
+        if frame.InfoStep then frame.InfoStep:SetText("") end
+        return
+    end
+    -- Guide name
+    if frame.InfoGuideName then
+        frame.InfoGuideName:SetText(guide.titleShort or guide.title or "")
+    end
+    -- Level range
+    if frame.InfoLevel then
+        local minLevel = guide.minLevel
+        local maxLevel = guide.maxLevel
+        if minLevel or maxLevel then
+            frame.InfoLevel:SetText("Lv " .. (minLevel or "?") .. " - " .. (maxLevel or "?"))
+        else
+            frame.InfoLevel:SetText("")
+        end
+    end
+    -- Step index (current / total)
+    if frame.InfoStep then
+        local step = self.CurrentStep or 1
+        local numSteps = guide:GetNumSteps() or 1
+        frame.InfoStep:SetText("Step " .. step .. "/" .. numSteps)
+    end
+-- DEBUG: EXIT XP:UpdateInfoBar()
+end
+
+---------------------------------------------------------------------
 -- Update Viewer: refresh all step lines from current guide
------------------------------------------------------------------------
+---------------------------------------------------------------------
 -- DEBUG: ENTER XP:UpdateViewer()
 function XP:UpdateViewer()
     if not self.ViewerFrame then return end
@@ -556,16 +649,18 @@ function XP:UpdateViewer()
     local guide = self.CurrentGuide
     if not guide then
         -- No guide: hide all chrome, extend scroll area to fill full height, show welcome text
+        if frame.InfoBar then frame.InfoBar:Hide() end
+        if frame.InfoBarDivider then frame.InfoBarDivider:Hide() end
         if frame.TabContainer then frame.TabContainer:Hide() end
         if frame.Toolbar then frame.Toolbar:Hide() end
         if frame.ToolbarDivider then frame.ToolbarDivider:Hide() end
         if frame.ProgressArea then frame.ProgressArea:Hide() end
         if frame.Footer then frame.Footer:Hide() end
         if frame.ScrollBar then frame.ScrollBar:Hide() end
-        -- Extend scroll frame to fill the whole viewer below the title bar
-        if frame.ScrollFrame and frame._titleH then
+        -- Extend scroll frame to fill the whole viewer below the title bar + info bar
+        if frame.ScrollFrame and frame._titleH and frame._infoBarH then
             frame.ScrollFrame:ClearAllPoints()
-            frame.ScrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -frame._titleH)
+            frame.ScrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -(frame._titleH + frame._infoBarH))
             frame.ScrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
         end
         -- Show empty state, hide step lines
@@ -579,6 +674,8 @@ function XP:UpdateViewer()
     end
 
     -- Guide is loaded — restore chrome, restore scroll frame anchors, hide empty state
+    if frame.InfoBar then frame.InfoBar:Show() end
+    if frame.InfoBarDivider then frame.InfoBarDivider:Show() end
     if frame.TabContainer then frame.TabContainer:Show() end
     if frame.Toolbar then frame.Toolbar:Show() end
     if frame.ToolbarDivider then frame.ToolbarDivider:Show() end
@@ -592,6 +689,9 @@ function XP:UpdateViewer()
     if frame.EmptyTitleText then frame.EmptyTitleText:Hide() end
     if frame.EmptyStateText then frame.EmptyStateText:Hide() end
     if frame.EmptyStateClickArea then frame.EmptyStateClickArea:Hide() end
+
+    -- Update the info bar
+    XP:UpdateInfoBar(frame)
 
     local currentStep = self.CurrentStep or 1
     local numSteps = guide:GetNumSteps()  -- triggers Parse() if not yet parsed
