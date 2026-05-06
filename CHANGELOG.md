@@ -4,6 +4,24 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — Viewer Title Logo + Footer Cleanup (2026-05-06)
+
+### Summary
+
+Replaced centered "X-PLORE" title text with `logo2.tga` image. Removed the AUTO sync indicator and progress % text that cluttered the bottom of the viewer.
+
+### Changes
+
+#### Viewer.lua — Logo, footer removal, progress bar cleanup
+
+- Title bar now displays `Skins/logo2.tga` as a centered texture instead of plain text
+- `TitleLogo` / `TitleLogoSize` skin data keys added to Stealth and Starlight styles
+- Footer frame removed entirely (`footerH = 0`); AUTO sync dot + text are gone
+- Progress % label removed from progress area; progress bar now spans full width
+- Cleaned all dead `SyncDot` / `SyncText` / `ProgressPercent` refs from `UpdateViewer()`, inline skin subscriber, and `Skins/Default/ViewerFrame.lua`
+
+---
+
 ## [Unreleased] — Tab Context Menu Fix + Guide List Visibility + Viewer Icons (2026-05-06)
 
 ### Summary
