@@ -88,9 +88,13 @@ local DB_DEFAULTS = {
         currentGuide = nil,
         currentStep  = 1,
         tabGuides    = {},  -- saved tab state
+        goalStates   = {},  -- persisted goal completion: goalStates[guideID][stepIdx][goalIdx] = true
+    },
+    profile = {
+        featuredGuide = nil,  -- guide ID to auto-load on startup
     },
 }
-
+-- 96|-- OnInitialize: runs once when ADDON_LOADED fires for us
 -----------------------------------------------------------------------
 -- OnInitialize: runs once when ADDON_LOADED fires for us
 -----------------------------------------------------------------------
@@ -216,6 +220,20 @@ function XP:OnEnable()
     else
         -- No saved guide: force viewer to show "No Guide" state
         self:UpdateViewer()
+    end
+
+    -- Featured guide loading on startup (Item 9)
+    local featuredGuide = self.db.profile.featuredGuide
+    if featuredGuide and self.Guides[featuredGuide] then
+        XP.Tabs:LoadGuideToTab(featuredGuide)
+        if XP.ViewerFrame then
+            XP.ViewerFrame:Show()
+        end
+    elseif not featuredGuide and not lastGuide then
+        -- Neither featured nor last guide: ensure viewer is visible
+        if XP.ViewerFrame then
+            XP.ViewerFrame:Show()
+        end
     end
 
     self:Print("v" .. self.version .. " loaded. Type |cff00e5ff/xp|r to open.")
