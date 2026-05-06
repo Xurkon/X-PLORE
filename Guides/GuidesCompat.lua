@@ -106,7 +106,53 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 
 if not DugisGuideViewer then
-    DugisGuideViewer = {}
+    -- All shim data lives here; DugisGuideViewer is a proxy that reads from _dgv.
+    local _dgv = {}
+    -- Keys that infrastructure files (Modules.common.lua etc.) must never overwrite.
+    local _locked = { RegisterGuide = true, RegisterModule = true }
+
+    -- ── Auto-init module proxy ────────────────────────────────────────────────────
+    -- DugiGuides guide files follow this pattern:
+    --   local Guide = DugisGuideViewer:RegisterModule("Name")
+    --   function Guide:Initialize()   -- assigned AFTER RegisterModule returns
+    --     function Guide:Load() DugisGuideViewer:RegisterGuide(...) end
+    --   end
+    -- We intercept the Initialize assignment via __newindex and immediately call it,
+    -- then call Load() so RegisterGuide is reached without needing the DugiGuides core.
+    local function MakeModule()
+        local data = {}
+        return setmetatable({}, {
+            __index = data,
+            __newindex = function(t, k, v)
+                data[k] = v
+                if k == "Initialize" and type(v) == "function" then
+                    local ok = pcall(v, t)
+                    if ok and type(data.Load) == "function" then
+                        pcall(data.Load, t)
+                    end
+                end
+            end,
+        })
+    end
+
+    -- ── Stubs used by DugiGuides infrastructure files ─────────────────────────────
+    _dgv.NoOp    = function() end
+    _dgv.Modules = {}
+
+    -- Pool factory called inside Modules.common.lua's RegisterModule body.
+    _dgv.GetCreateTable = function()
+        local items = {}
+        local obj = {}
+        function obj:Insert(v) items[#items + 1] = v end
+        function obj:Pool() local out = items; items = {}; return out end
+        return obj
+    end
+
+    _dgv.RegisterModule = function(self, name, ...)
+        return MakeModule()
+    end
+
+    -- ── Parsing helpers ───────────────────────────────────────────────────────────
 
     -- Extract |TAG|value| from a DugiGuides step line
     local function DTag(line, tag)
@@ -145,7 +191,6 @@ if not DugisGuideViewer then
         local objId  = DTag(line, "OBJ")
         local itemId = DTag(line, "ITEM")
 
-        -- Compose reference strings
         local npcRef = ""
         if npcName and npcId then
             npcRef = npcName .. "##" .. npcId
@@ -209,16 +254,9 @@ if not DugisGuideViewer then
         return table.concat(out, "\n")
     end
 
-    function DugisGuideViewer:RegisterModule(name)
-        local mod = {}
-        function mod:Initialize() end
-        function mod:Load() end
-        function mod:Unload() end
-        return mod
-    end
-
+    -- ── RegisterGuide shim ────────────────────────────────────────────────────────
     -- Both API variants share the same handler; arg1 type disambiguates.
-    function DugisGuideViewer:RegisterGuide(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    _dgv.RegisterGuide = function(self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
         if not ZGV then return end
 
         local path, faction, stepFn
@@ -255,6 +293,19 @@ if not DugisGuideViewer then
 
         ZGV:RegisterGuide(path, stepText)
     end
+
+    -- ── Protected proxy ───────────────────────────────────────────────────────────
+    -- DugisGuideViewer is an empty proxy table. All reads go through __index → _dgv.
+    -- Writes to _locked keys are silently ignored so infrastructure files (e.g.
+    -- Modules.common.lua's PlaceUtilityStubs) cannot overwrite RegisterGuide or
+    -- RegisterModule with no-ops.
+    DugisGuideViewer = setmetatable({}, {
+        __index = _dgv,
+        __newindex = function(t, k, v)
+            if _locked[k] then return end
+            _dgv[k] = v
+        end,
+    })
 end
 
 

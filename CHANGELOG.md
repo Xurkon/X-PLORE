@@ -4,6 +4,31 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
+## [Unreleased] — DugisGuideViewer Protected Proxy (2026-05-06)
+
+### Summary
+
+Rewrote the `DugisGuideViewer` shim in `GuidesCompat.lua` to fix 50+ `GetCreateTable` nil errors and prevent DugiGuides infrastructure files from silently overwriting our `RegisterGuide` shim.
+
+### Bug Fixes
+
+#### GuidesCompat.lua — DugisGuideViewer shim overwrite + 50+ GetCreateTable nil errors
+
+**Root cause (three compounding issues):**
+
+1. `DugiGuides/Era/Legacy_MoP/Leveling/Modules.common.lua` runs on load and calls `PlaceUtilityStubs()`, which does `DGV.RegisterGuide = DGV.NoOp` — silently destroying our guide translation shim.
+2. The same file redefines `DGV.RegisterModule` using `DGV.GetCreateTable()`, which was nil, causing the 50+ crashes.
+3. The old `RegisterModule` returned a plain stub table — `Initialize()` and `Load()` were never called, so `RegisterGuide` was never reached even when the shim was intact.
+
+**Fix — Protected proxy + auto-init `RegisterModule`:**
+
+- `DugisGuideViewer` is now an empty proxy table backed by a private `_dgv` data table.
+- `__index` reads all fields from `_dgv`; `__newindex` silently ignores writes to `RegisterGuide` and `RegisterModule` so infrastructure files cannot overwrite them.
+- `RegisterModule` now returns a **MakeModule proxy**: a table whose `__newindex` intercepts the assignment of `Initialize` and immediately calls it via `pcall`, then auto-calls `Load()` if it was defined inside `Initialize` — matching the DugiGuides module lifecycle without requiring the DugiGuides core.
+- Added `NoOp` (empty function) and `GetCreateTable` (pool factory with `:Insert()` / `:Pool()`) to `_dgv` so infrastructure files that use them do not crash.
+
+---
+
 ## [Unreleased] — Guide Load Error Fixes (2026-05-05)
 
 ### Summary
