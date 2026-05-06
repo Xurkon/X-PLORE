@@ -8,6 +8,48 @@
 -- Universal: Lua 5.0 – 5.4 / WoW Vanilla through Retail.
 -- No goto, no table.unpack, no modern-only APIs.
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Addon table: populate fields that RXP guide files read via `local _,addon=...`
+--
+-- RXP guide files begin with guards like:
+--   if addon.gameVersion < 40000 then return end   (expansion filter)
+--   if addon.player.faction == 'Horde' then return end
+--   if addon.GetSeason() ~= 2 then return end      (SoD filter)
+--
+-- Every <Script> file loaded by the same TOC shares the same addonTable
+-- as its second vararg.  Populating it here (first file to load) makes
+-- all these fields available to every guide file that follows.
+-- ─────────────────────────────────────────────────────────────────────────────
+do
+	local _, addonTable = ...
+	if addonTable then
+		-- Interface version number: 30300=WotLK, 40300=Cata, 50400=MoP, etc.
+		local tocVersion = 30300
+		if GetBuildInfo then
+			local _1, _2, _3, v = GetBuildInfo()
+			tocVersion = tonumber(v) or tocVersion
+		end
+		addonTable.gameVersion = tocVersion
+
+		-- Player faction / race / class (available at load time in all WoW clients)
+		local faction = (UnitFactionGroup and UnitFactionGroup("player")) or ""
+		local engRace = ""
+		if UnitRace then
+			local _lr, r = UnitRace("player")
+			engRace = r or ""
+		end
+		local engClass = ""
+		if UnitClass then
+			local _lc, c = UnitClass("player")
+			engClass = c or ""
+		end
+		addonTable.player = { faction = faction, race = engRace, class = engClass }
+
+		-- GetSeason: 0 = no active season; SoD guides guard with ~= 2 and skip.
+		function addonTable.GetSeason() return 0 end
+	end
+end
+
 local ZGV = ZygorGuidesViewer
 if not ZGV then return end
 
