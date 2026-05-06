@@ -24,6 +24,7 @@ local XP = ADDON_TABLE.XP
 local HBD = LibStub and LibStub("HereBeDragons-2.0", true)
 local HBDPins = LibStub and LibStub("HereBeDragons-Pins-2.0", true)
 local LibRover = LibStub and LibStub("LibRover-1.0", true)
+local TomTom = LibStub and LibStub("TomTom", true)
 
 -----------------------------------------------------------------------
 -- Local state
@@ -1314,4 +1315,78 @@ function XP:SetArrowTheme(themeID)
         XP.db.profile.arrow.theme = themeID
     end
 -- DEBUG: EXIT XP:SetArrowTheme()
+end
+
+------------------------------------------------------------------------------------------------------------------------------------
+-- TomTom Integration
+-- Provides optional TomTom integration when available.
+-- TomTom provides an alternative waypoint system with built-in tomtom waypoint arrow.
+------------------------------------------------------------------------------------------------------------------------------------
+XP.TomTom = {
+    enabled = false,
+}
+
+-- DEBUG: ENTER XP:InitTomTom()
+function XP:InitTomTom()
+    if TomTom then
+        XP.TomTom.enabled = true
+    end
+-- DEBUG: EXIT XP:InitTomTom()
+end
+
+-- DEBUG: ENTER XP:IsTomTomEnabled()
+function XP:IsTomTomEnabled()
+    return XP.TomTom.enabled and TomTom ~= nil
+-- DEBUG: EXIT XP:IsTomTomEnabled()
+end
+
+-- DEBUG: ENTER XP:SetTomTomWaypoint()
+-- DEBUG: PARAM mapID = [mapID]
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
+-- DEBUG: PARAM options = [options]
+function XP:SetTomTomWaypoint(mapID, x, y, options)
+    if not TomTom then return end
+
+    options = options or {}
+    local title = options.title or "Waypoint"
+
+    -- Clear existing TomTom waypoints
+    TomTom:ClearWaypoints()
+
+    -- Add new waypoint
+    TomTom:SetWaypoint(mapID, x, y, {
+        title = title,
+        persistent = false,
+        minimap = true,
+        worldmap = true,
+    })
+-- DEBUG: EXIT XP:SetTomTomWaypoint()
+end
+
+-- DEBUG: ENTER XP:AddTomTomWaypoint()
+-- DEBUG: PARAM mapID = [mapID]
+-- DEBUG: PARAM x = [x]
+-- DEBUG: PARAM y = [y]
+-- DEBUG: PARAM options = [options]
+function XP:AddTomTomWaypoint(mapID, x, y, options)
+    if not TomTom then return end
+
+    options = options or {}
+    local title = options.title or ("Waypoint %d")
+
+    TomTom:AddWaypoint(mapID, x, y, {
+        title = title,
+        persistent = false,
+        minimap = true,
+        worldmap = true,
+    })
+-- DEBUG: EXIT XP:AddTomTomWaypoint()
+end
+
+-- DEBUG: ENTER XP:ClearTomTomWaypoints()
+function XP:ClearTomTomWaypoints()
+    if not TomTom then return end
+    TomTom:ClearWaypoints()
+-- DEBUG: EXIT XP:ClearTomTomWaypoints()
 end
