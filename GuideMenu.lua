@@ -821,12 +821,13 @@ function XP:CreateGuideRows(parent)
         row:SetHeight(26)
         row:Hide()
 
-        self:ApplyBackdrop(row, "none")  -- transparent; background comes from parent frame
+        -- Guide rows are fully transparent — clear any default backdrop
+        if row.SetBackdrop then row:SetBackdrop(nil) end
 
         -- Selection/hover highlight texture
         local selHl = row:CreateTexture(nil, "OVERLAY")
         selHl:SetAllPoints()
-        selHl:SetTexture(1, 1, 1, 0.08)  -- subtle light-grey hover, matches Zygor (SetTexture r,g,b,a is universal)
+        XP.SetTexColor(selHl, 1, 1, 1, 0.08)  -- subtle light-grey hover (cross-version safe)
         selHl:Hide()
         row.SelectionHighlight = selHl
 

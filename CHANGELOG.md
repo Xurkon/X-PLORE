@@ -4,7 +4,40 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — Shim Missing Fields + TalentAdvisor Guard (2026-05-06)
+## [Unreleased] — Tab Context Menu Fix + Guide List Visibility + Viewer Icons (2026-05-06)
+
+### Summary
+
+Fixed three UI bugs: right-click tab crash (nil table key), guide list white-on-white invisible rows, and step icons in viewer now resolve to correct Skins paths.
+
+### Bug Fixes
+
+#### Tabs.lua — `table index is nil` on right-click (ShowTabMenu)
+
+- All three places where `active[v.title] = true` was written now guard against nil: `if v and v.title then active[v.title] = true end`
+- History loop condition also guarded: `if v.title and not active[v.title] and used < 3 then ...`
+- Root cause: `tabGuides` entries saved without a `title` field (only `guideID`) caused nil key on the `active` table
+- Right-click context menu was already fully implemented (Recent Guides, Suggested, Open New Guide) — it just crashed before rendering; this fix lets it show correctly
+
+#### GuideMenu.lua — Guide rows invisible (white text on white background)
+
+- `CreateGuideRows()` was calling `ApplyBackdrop(row, "none")` on every guide row, which applies `{bgFile = WHITE_TEX}` — a solid white texture with no color override → white background
+- Fixed by clearing the backdrop entirely: `if row.SetBackdrop then row:SetBackdrop(nil) end`
+- Guide rows are now fully transparent; `text_bright` (white text) is visible against the dark `CenterBg` panel
+
+#### GuideMenu.lua — `selHl:SetTexture(1,1,1,0.08)` non-universal API
+
+- Replaced with `XP.SetTexColor(selHl, 1, 1, 1, 0.08)` — the existing Compat helper that routes to `SetColorTexture` on Retail or `SetTexture(r,g,b,a)` on WotLK/Classic
+
+#### Viewer.lua — Step icons not displaying
+
+- `GetPrimaryIcon()` returns action icon names (`"accept_quest"`, `"kill"`, `"interact"`, etc.)
+- Previous code incorrectly tried `Interface\Icons\accept_quest` (WoW built-in icons that don't exist)
+- Fixed: now builds path as `Interface\AddOns\X-Plore\Skins\<iconName>` — matching actual TGA files (e.g. `Skins/accept_quest.tga`, `Skins/kill.tga`, `Skins/interact.tga`)
+
+---
+
+
 
 ### Summary
 

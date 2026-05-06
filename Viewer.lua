@@ -694,17 +694,14 @@ function XP:UpdateViewer()
         line.Title:SetText(step:GetTitle())
         line.StepNum2:SetText(i)
 
-        -- Set icon (iconName may be a full WoW path or a bare name)
+        -- Set icon from step type — GetPrimaryIcon() returns Skins file names
+        -- e.g. "accept_quest", "kill", "interact" → Skins/accept_quest.tga
         local iconName = step:GetPrimaryIcon()
-        local iconPath
-        if iconName and (iconName:find("^Interface") or iconName:find("^interface")) then
-            iconPath = iconName
-        elseif iconName and iconName ~= "" then
-            -- Bare names are WoW built-in spell/ability icons — use Interface\Icons
-            iconPath = "Interface\\Icons\\" .. iconName
+        if iconName and iconName ~= "" and iconName ~= "default" then
+            line.Icon:SetTexture("Interface\\AddOns\\" .. ADDON_NAME .. "\\Skins\\" .. iconName)
+        else
+            line.Icon:SetTexture("")
         end
-        -- Explicitly clear texture when no icon to avoid white placeholder squares
-        line.Icon:SetTexture(iconPath or "")
 
         -- Style based on ACTUAL goal completion (event-driven), not position
         local stepComplete = step:IsComplete()

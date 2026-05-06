@@ -66,6 +66,10 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Options panel | ⚙️ Partial | Arrow options wired; remaining sections in progress |
 | Tabs system | ✅ Complete | STEPS + LEVELING GUIDES static tabs; dynamic multi-guide tabs with overflow |
 
+#### 🔄 Recently Completed — Tab Context Menu + Guide List + Viewer Step Icons
+
+**Tab right-click crash fixed + guide rows visible + step icons now show** (this session): Three UI bugs resolved. (1) `Tabs.lua` `ShowTabMenu()` crashed with `table index is nil` when any `tabGuides` entry lacked a `.title` field — all three `active[v.title]` sites now nil-guarded; the already-complete context menu (Recent Guides → history entries → Suggested → Open New Guide) now renders on right-click. (2) Guide list rows were invisible: `ApplyBackdrop(row, "none")` applied `{bgFile = WHITE_TEX}` with no color override → white background behind white text; fixed by clearing backdrop entirely (`SetBackdrop(nil)`). (3) Viewer step icons now resolve correctly — `GetPrimaryIcon()` returns names like `"accept_quest"`, `"kill"`, `"interact"` which are actual TGA files in `Skins/`; previous code tried `Interface\Icons\<name>` (non-existent WoW built-ins); fixed to `Interface\AddOns\X-Plore\Skins\<name>`.
+
 #### 🔄 Recently Completed — Shim Missing Fields + TalentAdvisor Guard
 
 **4 more ZGV shim fields added + TalentAdvisor Retail guard** (`8f5e0ce`): Fixed 7 runtime errors. (1) `BETAEND = function() end` — 4 Classic/Anniversary guide files call `BETAEND()` between guide blocks; was missing while `BETASTART` existed. (2) `ItemScore = { Items = {} }` — gear guides write `ItemScore.Items["Dungeon\\Name"]`; old `ItemScore = {}` had no `.Items`. (3) `TalentAdvisor = { Builds = {} }` — defensive stub for TalentAdvisor-Builds.lua. (4) `L = setmetatable proxy` — AH/Gold guides use `ZGV.L["type_armor"]` etc. for item type strings. TalentAdvisor-Builds.lua now has a `GetBuildInfo() < 100000 → return` guard so Retail Hero-Talent builds don't load on Classic/WotLK/Era.

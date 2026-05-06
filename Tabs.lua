@@ -391,7 +391,7 @@ function Tabs:ShowTabMenu()
     local menu = {}
     local active = {}
     for i, v in ipairs(XP.db and XP.db.char and XP.db.char.tabGuides or {}) do
-        active[v.title] = true
+        if v and v.title then active[v.title] = true end
     end
 
     -- Recent guides section
@@ -403,7 +403,7 @@ function Tabs:ShowTabMenu()
     local used = 0
     local history = XP.db and XP.db.char and XP.db.char.guides_history or {}
     for i, v in ipairs(history) do
-        if not active[v.title] and used < 3 then
+        if v.title and not active[v.title] and used < 3 then
             local guide = XP.Guides[v.title]
             if guide then
                 table.insert(menu, {
@@ -418,7 +418,7 @@ function Tabs:ShowTabMenu()
                 used = used + 1
             end
         end
-        active[v.title] = true
+        if v and v.title then active[v.title] = true end
     end
 
     table.insert(menu, UIDropDownFork_separatorInfo)
