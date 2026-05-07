@@ -1,0 +1,9 @@
+<Ui xmlns="http://www.blizzard.com/wiki/blizzard-xml-ui/">
+    <Script file="ThemeDefines.lua"/>
+    <Script file="ThemeRegistry.lua"/>
+    <Script file="ThemeLoader.lua"/>
+    <Script file="ThemeExporter.lua"/>
+    <Script file="ThemeContext.lua"/>
+    <Script file="SkinBridge.lua"/>
+    <Script file="ThemeEngine.lua"/>
+</Ui>

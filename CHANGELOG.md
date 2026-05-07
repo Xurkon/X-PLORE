@@ -4,7 +4,39 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — All 15 Tier Items Complete (2026-05-06)
+## [Unreleased] — All 15 Tier Items + Theme Designer Phase 5 Complete (2026-05-07)
+
+### Summary
+Completed all Phase 5 Theme Designer wiring: `CommitChanges` → `loader:Save`, export button → code generation with clipboard instruction, import button with colored error feedback. Fixed 4 critical broken flows discovered during full-system audit: circular `ApplyTheme` call, missing `ClonePreset`, `ApplyPreset` not seeding default values, and AceDB never persisting saves. All 6 editor panels fully wired to context and each other. Zero selene errors across all 8 modified files.
+
+### Changes
+
+#### ThemeEngine — Phase 5: Exporter/Loader Wiring
+##### Critical Bug Fixes
+- **ThemeContext:ApplyTheme** — Fixed circular call: was calling `XP.ThemeEngine:ApplyTheme(uid)` then engine called context back. Now calls `LoadTheme(uid) + _RefreshEditor()` only.
+- **ThemeContext:ClonePreset** (NEW) — Clones a built-in preset into a new user theme, seeds it with full schema defaults, loads it into the editor context, and refreshes the UI.
+- **ThemeContext:ApplyPreset** — Now seeds `theme.values = ThemeDefines:GetDefault()` so user themes start with real color/font/layout values instead of empty tables.
+- **ThemeLoader:Save** — Added `self.db.dirty = true` so AceDB actually persists saved themes.
+- **ThemeEngine:OnMessage** — Replaced TODO stub with real implementation: on `XPLORE_THEME_APPLIED`, refreshes live preview and current tab so editor stays in sync.
+
+##### UI/UX Fixes
+- **ThemeContext:_RefreshEditor** (NEW) — Central sync point called after every context mutation: updates theme name label, re-renders current tab, syncs dirty indicator and Apply/Revert button enabled states.
+- **ThemeContext:LoadTheme / NewTheme / ImportTheme** — All now call `_RefreshEditor()` so Revert, New Theme, and Import all refresh the editor immediately.
+- **ThemeContext:Save** — Refresh moved out (happens in `ApplyChanges` after the apply fires) to avoid double-refresh.
+- **UI.lua:ApplyChanges / RevertChanges** — Removed redundant state updates now handled by `_RefreshEditor`. Reduced from ~15 lines each to 4 lines each.
+- **Export.lua** — Complete rewrite: "Copy Code" generates + highlights code + focuses editbox + instructs user to Ctrl+A/C. Import shows green success + tab refresh, red error message, amber "paste code first".
+- **Presets.lua** — Apply button now calls `context:LoadTheme(uid)` (was calling non-existent `context:ApplyTheme`). Clone button wired: calls `ClonePreset` + `SwitchTab` to show the new clone.
+- **Layout.lua / Fonts.lua** — `Render` signatures updated to `Render(parent, context, frame)` for forward compatibility with `SwitchTab`.
+
+##### Files Changed
+- `ThemeEngine/Core/ThemeContext.lua` — ApplyPreset, ClonePreset (new), ApplyTheme, _RefreshEditor (new), LoadTheme, NewTheme, ImportTheme, Save
+- `ThemeEngine/Core/ThemeLoader.lua` — Save
+- `ThemeEngine/Core/ThemeEngine.lua` — OnMessage
+- `ThemeEngine/UI/UI.lua` — ApplyChanges, RevertChanges
+- `ThemeEngine/UI/Panels/Export.lua` — Complete rewrite
+- `ThemeEngine/UI/Panels/Presets.lua` — Apply button, Clone button
+- `ThemeEngine/UI/Panels/Layout.lua` — Render signature
+- `ThemeEngine/UI/Panels/Fonts.lua` — Render signature
 
 ### Summary
 Completed all remaining implementation items from the 4-tier todo list. Cloudflare worker redeployed. All 15 items shipped across Viewer, Guide, Skins, Waypoints, Core, GuideMenu, and Foglight systems.

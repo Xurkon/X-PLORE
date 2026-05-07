@@ -116,6 +116,9 @@ StaticPopups.lua
 NotificationCenter.lua
 
 # ── Settings & Options ─────────────────────────────────────────────────────────
+# ── Theme Engine ─────────────────────────────────────────────────────────────
+ThemeEngine\SkinAssets.xml
+ThemeEngine\ThemeEngine.toc
 
 # ── Multiplayer / Sync ─────────────────────────────────────────────────────────
 Sync.lua

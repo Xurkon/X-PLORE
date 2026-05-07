@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wiki/blizzard-xml-ui/">
+    <Script file="Themes/Starlight/Style.lua"/>
+    <Script file="Themes/Midnight/Style.lua"/>
+    <Script file="Themes/Stealth/Style.lua"/>
+</Ui>

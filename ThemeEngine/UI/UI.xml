@@ -1,0 +1,9 @@
+<Ui xmlns="http://www.blizzard.com/wiki/blizzard-xml-ui/">
+    <Script file="Panels/Colors.lua"/>
+    <Script file="Panels/Fonts.lua"/>
+    <Script file="Panels/Layout.lua"/>
+    <Script file="Panels/Presets.lua"/>
+    <Script file="Panels/Preview.lua"/>
+    <Script file="Panels/Export.lua"/>
+    <Script file="UI.lua"/>
+</Ui>

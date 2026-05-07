@@ -1,0 +1,9 @@
+# ThemeEngine — loads before any skin or guide
+# Structure:
+#   Core/        — Engine, context, defines, skin bridge
+#   Assets/       — Textures, icons, fonts, XML templates
+#   UI/          — Editor panels and preview
+
+@Core/ThemeRegistry.lua
+@Core/Core.xml
+@UI/UI.xml

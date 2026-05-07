@@ -1,0 +1,39 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!--
+        X-Plore UI Templates
+        Minimal XML; most styling is done in Lua via the Skin system.
+        These templates provide structural skeletons only.
+    -->
+
+    <!-- Basic styled button: dark background, cyan border, hover glow -->
+    <Button name="XPlore_ButtonTemplate" virtual="true">
+        <Size x="80" y="28"/>
+        <NormalFont inherits="GameFontNormalSmall"/>
+        <HighlightFont inherits="GameFontHighlightSmall"/>
+        <ButtonText>
+            <Anchors><Anchor point="CENTER"/></Anchors>
+        </ButtonText>
+    </Button>
+
+    <!-- Sidebar category button: full-width, left-aligned text, icon slot -->
+    <Button name="XPlore_CategoryButtonTemplate" virtual="true">
+        <Size x="200" y="28"/>
+        <NormalFont inherits="GameFontNormalSmall"/>
+        <HighlightFont inherits="GameFontHighlightSmall"/>
+        <ButtonText>
+            <Anchors><Anchor point="LEFT" x="32" y="0"/></Anchors>
+        </ButtonText>
+    </Button>
+
+    <!-- Tab button for the viewer -->
+    <Button name="XPlore_TabButtonTemplate" virtual="true">
+        <Size x="120" y="24"/>
+        <NormalFont inherits="GameFontNormalSmall"/>
+        <HighlightFont inherits="GameFontHighlightSmall"/>
+        <ButtonText>
+            <Anchors><Anchor point="LEFT" x="6" y="0"/></Anchors>
+        </ButtonText>
+    </Button>
+
+</Ui>
