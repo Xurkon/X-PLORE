@@ -4,10 +4,12 @@
 ## Author: X-Plore Team
 ## Version: 2.0.0
 ## Dependencies: !X-Libs
+## OptionalDeps: LibSharedMedia-3.0
 ## SavedVariables: XPloreDB
 ## X-Category: Quest
 
 # ── Initialization ─────────────────────────────────────────────────────────────
+Libs.xml
 Init.lua
 
 # ── Compatibility (version detection, API shims) ───────────────────────────────

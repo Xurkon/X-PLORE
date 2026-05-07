@@ -58,6 +58,8 @@ X-PLORE is a universal guide viewer and navigation engine targeting full parity 
 | Waypoint arrow | ✅ Functional | Arrow frame, rotation, distance, ETA, cycling, turn audio cues |
 | Arrow themes | ✅ Complete | 5 themes wired; UI selector dropdown in Options panel |
 | Ant trail | ✅ Functional | Dot fallback wired for WotLK/Classic (915407d); world line for Retail |
+| Theme Engine | ✅ Functional | Full visual editor with Color, Font, Layout, Texture, Preview, Export panels |
+| LibMasque integration | ✅ Wired | Action button highlight theming via Masque:Group("X-PLORE", "Guide Highlights") |
 | Step conditionals (`|or|`, `|confirm|`, `|override|`, `|only|`) | ✅ Implemented | Guide.lua Parser.lua |
 | Goal event tracking | ✅ C_QuestLog events wired | Core.lua QUEST_COMPLETE/ACCEPTED/TURNED_IN |
 | Persistent goal state | ✅ Save/Load wired via AceDB | XP:SaveGoalState/LoadGoalState/ClearGoalState |

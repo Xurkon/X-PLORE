@@ -4,7 +4,94 @@ All notable changes to X-PLORE are documented here.
 
 ---
 
-## [Unreleased] — All 15 Tier Items + Theme Designer Phase 5 Complete (2026-05-07)
+## [Unreleased] — Theme Designer Phase 6 Complete (2026-05-07)
+
+### Summary
+Completed all Phase 6 polish items for the Theme Designer. Added font and texture pickers with live previews, integrated the designer into the minimap context menu, wired unsaved-changes protection, locked built-in presets behind clone-first editing, added delete confirmation for user themes, and wired LibMasque for action button skinning. Also integrated LibSharedMedia-3.0 as an embedded library.
+
+### Changes
+
+#### ThemeEngine — Phase 6: Polish & Integration
+
+##### Color Picker Popout (p1) ✅
+- **Colors.lua** — Added `-- @GLOBALS ColorPickerFrame` declaration (AceGUI pattern) + `local ColorPickerFrame = _G.ColorPickerFrame` upvalue to satisfy selene wow_classic std
+- Selene result: **0 errors, 1 warning** (exit 0, `--allow-warnings`)
+
+##### Font Picker Popout (p2) ✅
+- **Fonts.lua** — Complete rewrite with `OpenFontPickerPopout()`:
+  - 25-font table: WoW GameFonts (GameFontNormal/Bold/Highlight/Header/DarkGray) + X-PLORE custom fonts (opensans.ttf, opensansb.ttf, MORPHEUS.TTF, CharterBD.ttf, Inconsolata.ttf, NunitoSans.ttf, Roboto.ttf)
+  - Search EditBox with live filtering
+  - Scrollable popout (UIPanelScrollFrameTemplate) with preview text "Aa Bb 123" per font
+  - Current selection highlighted with ✓ checkmark
+  - Fixed `GameFontNormal` via `local GameFontNormal = GameFontNormal` upvalue
+  - Fixed forward-reference to `RefreshList` with nil-assignment before SetScript + proper function definition below
+- Selene result: **0 errors, 9 warnings**
+
+##### Texture Asset Browser (p3) ✅
+- **Layout.lua** — Added `AddTextureRow()` (Change + Reset buttons) and `OpenTexturePickerPopout()`:
+  - 15 common WoW texture paths: WHITE_TEX, ChatFrame background, Dialog borders, Tooltip backdrop, various button textures, Auction House textures
+  - Search filter + click-to-select in scrollable popout
+  - Fixed row spacing: `return y - 24`
+- **Selene result: 0 errors, 15 warnings**
+
+##### Minimap Context Menu → Theme Designer (p4) ✅
+- **Minimap.lua** — Added "Theme Designer" menu item to right-click context menu
+- **ThemeEngine.lua** — Fixed broken `Toggle()`: was using undefined `themeEngine` variable instead of `self`. Now properly chains `Toggle() → Show() / Hide()` using `self`
+- Result: clicking "Theme Designer" in the minimap menu opens the Theme Designer frame
+
+##### Unsaved Changes Warning (p5) ✅
+- **UI.lua** — Close button now checks `f.dirty` flag before closing
+  - If dirty: shows `StaticPopup_Show("XPLORE_THEME_DIRTY")` with "Discard" / "Cancel"
+  - Added `_CloseEditor()` helper shared by close button and dialog OnAccept
+  - Added `StaticPopupDialogs["XPLORE_THEME_DIRTY"]` registration
+- **Selene result: 0 errors**
+
+##### Built-in Theme Lock (p6) ✅
+- **Presets.lua** — Added `LOCKED_PRESETS` table (midnight, starlight, stealth)
+  - Built-in presets show 🔒 **Built-in** badge (top-right, muted blue)
+  - "Edit Copy" button replaces "Apply" + "Clone": clones preset → loads clone into editor → refreshes UI
+  - Regular user themes have no lock badge
+- **Selene result: 0 errors**
+
+##### Delete Confirmation Dialog (p7) ✅
+- **Presets.lua** — Each user theme row has a red "Delete" button
+  - Clicking triggers `StaticPopup_Show("XPLORE_THEME_DELETE", themeName)`
+  - Popup: *"Delete theme "X"? This cannot be undone."* with Delete / Cancel buttons
+  - OnAccept: calls `context:DeleteTheme(uid)` → refreshes Presets panel
+  - Added `StaticPopupDialogs["XPLORE_THEME_DELETE"]` registration
+- **Selene result: 0 errors**
+
+##### LibMasque Integration (p8) ✅
+- **SkinBridge.lua** — Added LibMasque integration:
+  - `Masque:Group("X-PLORE", "Guide Highlights")` — registers 60 action bar buttons (ActionButton1-12, MultiBarBottomLeft/Right, MultiBarRight/Left)
+  - `RegisterActionButtonsWithMasque()` — uses Masque `AddButton()` with icon/flash/border/pushed/normal/highlight regions
+  - `RefreshMasqueSkin()` — re-registers all buttons on `XP_SKIN_UPDATED` event
+  - Subscribes to `XP_SKIN_UPDATED` via `XP:RegisterMessage()`
+  - 5-second `C_Timer.After` fallback registration for startup
+- **Selene result: 0 errors**
+
+#### Library Integration
+- **Libs/** (NEW) — Embedded `LibSharedMedia-3.0` from mMediaTag distribution (latest build):
+  - `LibSharedMedia-3.0/LibSharedMedia-3.0.lua` — Media type registry (fonts, sounds, textures, borders, backgrounds)
+  - `LibSharedMedia-3.0/lib.xml` — Load-on-demand script entry
+  - `LibSharedMedia-3.0-mmt_backup/` — Full mMediaTag LibSharedMedia distribution (as extracted from mBlinkii/mMediaTag v1.42, for reference)
+  - `Libs.xml` — Top-level library loader
+- **X-Plore.toc** — Added `## OptionalDeps: LibSharedMedia-3.0` and `# Libs.xml` load entry
+- **SkinBridge.lua** — `SkinBridge:RegisterActionButtonsWithMasque()` and `RefreshMasqueSkin()` can be extended to register custom textures with LibSharedMedia for user themes
+
+#### Files Changed
+- `X-Plore.toc` — OptionalDeps, Libs.xml load entry
+- `Libs.xml` (new) — Library loader
+- `Libs/LibSharedMedia-3.0/` (new) — LibSharedMedia library
+- `Libs/LibSharedMedia-3.0-mmt_backup/` (new) — mMediaTag LibSharedMedia backup
+- `ThemeEngine/UI/Panels/Colors.lua` — ColorPicker global declaration
+- `ThemeEngine/UI/Panels/Fonts.lua` — Complete font picker rewrite
+- `ThemeEngine/UI/Panels/Layout.lua` — Texture asset browser
+- `ThemeEngine/UI/Panels/Presets.lua` — Theme lock, delete dialog, Edit Copy
+- `ThemeEngine/UI/UI.lua` — Unsaved-changes warning, close editor helper
+- `ThemeEngine/Core/ThemeEngine.lua` — Toggle/Show/Hide fix, Show method
+- `ThemeEngine/Core/SkinBridge.lua` — LibMasque integration
+- `Minimap.lua` — "Theme Designer" menu item
 
 ### Summary
 Completed all Phase 5 Theme Designer wiring: `CommitChanges` → `loader:Save`, export button → code generation with clipboard instruction, import button with colored error feedback. Fixed 4 critical broken flows discovered during full-system audit: circular `ApplyTheme` call, missing `ClonePreset`, `ApplyPreset` not seeding default values, and AceDB never persisting saves. All 6 editor panels fully wired to context and each other. Zero selene errors across all 8 modified files.
